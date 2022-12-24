@@ -1,4 +1,4 @@
-package site.alex_xu.dev.game.party_physics.game.render;
+package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import java.awt.*;
 
@@ -25,6 +25,20 @@ public class PartyPhysicsWindow {
         renderer.rotate(getCurrentTime() * 0.1);
         renderer.setColor(Color.WHITE);
         renderer.rect(-100, -100, 200, 200);
+
+        renderer.setColor(Color.RED);
+        renderer.line(0, 0, 100, 100);
+
+        renderer.circle(100, 100, 100);
+        renderer.circle(100, -100, 100);
+        renderer.circle(-100, -100, 100);
+
+        renderer.popState();
+
+        renderer.pushState();
+
+        renderer.setColor(Color.GREEN);
+        renderer.text("Made by Alex", 0, 0);
 
         renderer.popState();
 

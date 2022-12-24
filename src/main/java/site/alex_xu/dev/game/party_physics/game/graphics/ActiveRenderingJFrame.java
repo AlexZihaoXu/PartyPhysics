@@ -1,4 +1,4 @@
-package site.alex_xu.dev.game.party_physics.game.render;
+package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 

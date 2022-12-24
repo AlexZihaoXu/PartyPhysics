@@ -1,6 +1,5 @@
-package site.alex_xu.dev.game.party_physics.game.render;
+package site.alex_xu.dev.game.party_physics.game.graphics;
 
-import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 
 import java.awt.*;
@@ -13,9 +12,12 @@ public class Renderer {
     private static final class State {
         Color color;
         AffineTransform trans;
-        Stroke stroke;
         RenderingHints hints;
         Composite composite;
+
+        Font font;
+
+        double lineWidth = 1;
 
     }
 
@@ -24,10 +26,17 @@ public class Renderer {
 
     private final int width, height;
 
+    private double lineWidth = 1;
+
+    private Font font = Font.DEFAULT;
+
+    private int textSize = 16;
+
     public Renderer(Graphics g, int width, int height) {
         this.g = (Graphics2D) g;
         this.width = width;
         this.height = height;
+        this.g.setFont(font.getAwt(textSize));
 
         setRenderHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
     }
@@ -56,9 +65,6 @@ public class Renderer {
         setColor(brightness, brightness, brightness, 255);
     }
 
-    public void setStroke(Stroke stroke) {
-        g.setStroke(stroke);
-    }
 
     public void setComposite(Composite composite) {
         g.setComposite(composite);
@@ -66,6 +72,20 @@ public class Renderer {
 
     public void setRenderHint(RenderingHints.Key hint, Object value) {
         g.setRenderingHint(hint, value);
+    }
+
+    public void setLineWidth(double lineWidth) {
+        this.lineWidth = lineWidth;
+    }
+
+    public void setFont(Font font) {
+        this.font = font;
+        g.setFont(font.getAwt(textSize));
+    }
+
+    public void setTextSize(int textSize) {
+        this.textSize = textSize;
+        g.setFont(font.getAwt(textSize));
     }
 
     // Others
@@ -76,6 +96,24 @@ public class Renderer {
 
     public void disableTextAA() {
         setRenderHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+    }
+
+    // Getters
+
+    public double getLineWidth() {
+        return lineWidth;
+    }
+
+    public int getTextSize() {
+        return textSize;
+    }
+
+    public double getTextHeight() {
+        return g.getFontMetrics().getHeight();
+    }
+
+    public double getTextWidth(String text) {
+        return g.getFontMetrics().stringWidth(text);
     }
 
     // Render
@@ -96,6 +134,31 @@ public class Renderer {
 
     public void circle(double x, double y, double r) {
         g.fillOval((int) (x - r), (int) (y - r), (int) (r * 2), (int) (r * 2));
+    }
+
+    public void line(double x1, double y1, double x2, double y2) {
+        pushState();
+
+        double angle = Math.atan2(y2 - y1, x2 - x1);
+        double dis = Math.sqrt((x2 - x1) * (x2 - x1) + (y1 - y2) * (y1 - y2));
+
+        translate(x1, y1);
+        rotate(angle);
+        rect(-lineWidth, -lineWidth, dis, lineWidth * 2);
+
+        popState();
+    }
+
+    public void line(Point p1, Point p2) {
+        line(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    public void line(Vector2 p1, Vector2 p2) {
+        line(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    public void text(String text, double x, double y) {
+        g.drawString(text, (float) x, (float) y + textSize);
     }
 
     // transformations
@@ -146,9 +209,10 @@ public class Renderer {
 
         state.color = g.getColor();
         state.composite = g.getComposite();
+        state.font = font;
         state.hints = (RenderingHints) g.getRenderingHints().clone();
-        state.stroke = g.getStroke();
         state.trans = (AffineTransform) g.getTransform().clone();
+        state.lineWidth = lineWidth;
     }
 
     public void popState() {
@@ -157,8 +221,9 @@ public class Renderer {
         g.setColor(state.color);
         g.setComposite(state.composite);
         g.setRenderingHints(state.hints);
-        g.setStroke(state.stroke);
         g.setTransform(state.trans);
+        this.font = state.font;
+        this.lineWidth = state.lineWidth;
 
     }
 
