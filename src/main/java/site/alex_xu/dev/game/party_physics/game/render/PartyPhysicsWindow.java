@@ -34,6 +34,14 @@ public class PartyPhysicsWindow {
 
     }
 
+    // Setters
+
+    public void setMSAALevel(int level) {
+        activeRenderingFrame.msaaLevel = level;
+    }
+
+    // Getters
+
     public int getWidth() {
         return activeRenderingFrame.width;
     }
@@ -49,4 +57,9 @@ public class PartyPhysicsWindow {
     public double getCurrentTime() {
         return activeRenderingFrame.now;
     }
+
+    public int getMSAALevel() {
+        return activeRenderingFrame.msaaLevel;
+    }
+
 }

@@ -7,7 +7,6 @@ import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 
 class ActiveRenderingJFrame extends JFrame implements WindowListener {
@@ -24,7 +23,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
 
     double now;
 
-    int msaaScale = 2;
+    int msaaLevel = 2;
 
     PartyPhysicsWindow partyPhysicsWindow;
 
@@ -61,9 +60,9 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
 
         double lastTickTime = clock.elapsedTime();
 
+        VolatileImage[] msaaBuffers = null;
 
-        VolatileImage msaaBuffer = null;
-
+        int renderScale = 1;
         while (running) {
             now = clock.elapsedTime();
             dt = now - lastTickTime;
@@ -74,30 +73,42 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
 
             partyPhysicsWindow.onTick();
 
-            if (msaaBuffer != null) {
-                int result = msaaBuffer.validate(getGraphicsConfiguration());
-                if (result == VolatileImage.IMAGE_INCOMPATIBLE) {
-                    msaaBuffer = null;
-                }
-            }
-
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
-            if (msaaScale == 1) {
+            if (msaaLevel == 0) {
+                renderScale = 1;
                 Renderer renderer = new Renderer(g, width, height);
                 partyPhysicsWindow.onRender(renderer);
             } else {
-                if (msaaBuffer == null || msaaBuffer.getWidth() != width * msaaScale || msaaBuffer.getHeight() != height * msaaScale) {
-                    msaaBuffer = getGraphicsConfiguration().createCompatibleVolatileImage(width * msaaScale, height * msaaScale);
-                    msaaBuffer.setAccelerationPriority(1);
+                if (msaaBuffers == null || msaaBuffers.length != msaaLevel || msaaBuffers[0].validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE || msaaBuffers[0].getWidth() / 2 != width || msaaBuffers[0].getHeight() / 2 != height) {
+                    renderScale = 2;
+                    msaaBuffers = new VolatileImage[msaaLevel];
+                    msaaBuffers[0] = getGraphicsConfiguration().createCompatibleVolatileImage(width * 2, height * 2);
+                    for (int i = 1; i < msaaLevel; i++) {
+                        msaaBuffers[i] = getGraphicsConfiguration().createCompatibleVolatileImage(msaaBuffers[i - 1].getWidth() * 2, msaaBuffers[i - 1].getHeight() * 2);
+                        msaaBuffers[i].setAccelerationPriority(1);
+                        renderScale *= 2;
+                    }
                 }
-                Graphics2D g2 = msaaBuffer.createGraphics();
-                Renderer renderer = new Renderer(g2, msaaBuffer.getWidth(), msaaBuffer.getHeight());
-                renderer.scale(msaaScale);
-                partyPhysicsWindow.onRender(renderer);
-                g2.dispose();
 
+                VolatileImage lastBuffer = msaaBuffers[msaaBuffers.length - 1];
+                Graphics2D g2 = lastBuffer.createGraphics();
+                Renderer renderer = new Renderer(g2, lastBuffer.getWidth(), lastBuffer.getHeight());
+                renderer.scale(renderScale);
+                partyPhysicsWindow.onRender(renderer);
+
+                for (int i = msaaBuffers.length - 1; i > 0; i--) {
+                    VolatileImage bufferSmall = msaaBuffers[i - 1];
+                    VolatileImage bufferLarge = msaaBuffers[i];
+
+                    Graphics2D g3 = bufferSmall.createGraphics();
+                    g3.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    g3.drawImage(bufferLarge, 0, 0, bufferSmall.getWidth(), bufferSmall.getHeight(), this);
+                    g3.dispose();
+                }
                 g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                g.drawImage(msaaBuffer, 0, 0, width, height, this);
+                g.drawImage(msaaBuffers[0], 0, 0, width, height, this);
+
+                g2.dispose();
 
             }
 
