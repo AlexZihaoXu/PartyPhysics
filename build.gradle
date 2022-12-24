@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'site.alex_xu.dev.game.party_physics'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.dyn4j', name: 'dyn4j', version: '4.2.0'
+}
+
+test {
+    useJUnitPlatform()
+}
