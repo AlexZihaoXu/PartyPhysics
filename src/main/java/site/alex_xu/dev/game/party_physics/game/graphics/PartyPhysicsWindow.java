@@ -1,11 +1,20 @@
 package site.alex_xu.dev.game.party_physics.game.graphics;
 
-import java.awt.*;
-import java.io.IOException;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 
 public class PartyPhysicsWindow {
+    private static PartyPhysicsWindow INSTANCE = null;
     final ActiveRenderingJFrame activeRenderingFrame;
-    public PartyPhysicsWindow() {
+
+    private Stage stage = new Stage();
+    private Stage switchingStage = null;
+
+    public static PartyPhysicsWindow getInstance() {
+        if (INSTANCE == null) INSTANCE = new PartyPhysicsWindow();
+        return INSTANCE;
+    }
+
+    private PartyPhysicsWindow() {
         activeRenderingFrame = new ActiveRenderingJFrame("Party Physics!", this);
     }
 
@@ -14,82 +23,40 @@ public class PartyPhysicsWindow {
             onSetup();
             activeRenderingFrame.mainLoop();
             activeRenderingFrame.running = false;
+        } catch (IllegalStateException ignored) {
         } finally {
             onDestroy();
         }
     }
 
     public void onSetup() {
-
+        stage.onLoad();
     }
 
     public void onDestroy() {
-
+        stage.onOffload();
     }
 
     public void onRender(Renderer renderer) {
-
-        setMSAALevel(2);
-
-
-        renderer.setColor(new Color(50, 50, 50));
-        renderer.clear();
-        renderer.setColor(Color.WHITE);
-
-        renderer.pushState();
-
-        renderer.translate(200, getHeight() / 2);
-
-        renderer.pushState();
-        renderer.rotate(getCurrentTime());
-        renderer.rect(-50, -50, 100, 100);
-        renderer.setColor(Color.RED);
-        renderer.line(-50, -50, 0, 0);
-        renderer.popState();
-
-        renderer.translate(200, 0);
-
-        renderer.pushState();
-        renderer.rotate(getCurrentTime() / 2);
-        renderer.rect(-50, -50, 100, 100);
-        renderer.setColor(Color.RED);
-        renderer.line(-50, -50, 0, 0);
-        renderer.popState();
-
-        renderer.translate(200, 0);
-
-        renderer.pushState();
-        renderer.rotate(getCurrentTime() / 5);
-        renderer.rect(-50, -50, 100, 100);
-        renderer.setColor(Color.RED);
-        renderer.line(-50, -50, 0, 0);
-        renderer.popState();
-
-        renderer.translate(200, 0);
-
-        renderer.pushState();
-        renderer.rotate(getCurrentTime() / 10);
-        renderer.rect(-50, -50, 100, 100);
-        renderer.setColor(Color.RED);
-        renderer.line(-50, -50, 0, 0);
-        renderer.popState();
-
-        renderer.popState();
-
-        renderer.pushState();
-
-        renderer.enableTextAA();
-        renderer.setColor(0, 100, 0);
-
-        renderer.scale(3 + Math.abs(getCurrentTime() % 5 - 2.5) / 2);
-        renderer.popState();
-
-        System.out.println(getDeltaTime());
-
+        stage.onRender(renderer);
     }
 
     public void onTick() {
 
+        if (switchingStage != null && switchingStage != stage) {
+            if (stage != null) {
+                stage.onOffload();
+            }
+            stage = switchingStage;
+            switchingStage = null;
+            stage.onLoad();
+        }
+
+        stage.onTick();
+    }
+
+    public void changeStage(Stage newStage) {
+        switchingStage = newStage;
     }
 
     // Setters

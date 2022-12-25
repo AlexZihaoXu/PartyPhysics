@@ -1,5 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.graphics;
 
+import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 
 import java.awt.*;
@@ -120,9 +121,10 @@ public class Renderer {
     // Render
 
     public void clear() {
-        pushState();
+        AffineTransform trans = g.getTransform();
+        g.setTransform(new AffineTransform());
         g.fillRect(0, 0, width, height);
-        popState();
+        g.setTransform(trans);
     }
 
     public void rect(Rectangle2D.Double rect) {
@@ -130,11 +132,24 @@ public class Renderer {
     }
 
     public void rect(double x, double y, double w, double h) {
-        rect(new Rectangle2D.Double(x, y, w, h));
+        AffineTransform trans = g.getTransform();
+
+        g.translate(x, y);
+        g.scale(w, h);
+        g.fillRect(0, 0, 1, 1);
+
+        g.setTransform(trans);
     }
 
     public void circle(double x, double y, double r) {
-        g.fillOval((int) (x - r), (int) (y - r), (int) (r * 2), (int) (r * 2));
+        AffineTransform trans = g.getTransform();
+
+        g.translate(x, y);
+        g.scale(r, r);
+        g.fillOval(-1, -1, 2, 2);
+
+
+        g.setTransform(trans);
     }
 
     public void line(double x1, double y1, double x2, double y2) {
@@ -159,7 +174,7 @@ public class Renderer {
     }
 
     public void text(String text, double x, double y) {
-        g.drawString(text, (float) x, (float) y + textSize);
+        g.drawString(text, (float) x, (float) y + g.getFontMetrics().getAscent());
     }
 
     // transformations
