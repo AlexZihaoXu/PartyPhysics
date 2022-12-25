@@ -3,7 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.graphics;
 import java.awt.*;
 
 public class PartyPhysicsWindow {
-    private final ActiveRenderingJFrame activeRenderingFrame;
+    final ActiveRenderingJFrame activeRenderingFrame;
 
     public PartyPhysicsWindow() {
         activeRenderingFrame = new ActiveRenderingJFrame("Party Physics!", this);
@@ -11,36 +11,83 @@ public class PartyPhysicsWindow {
     }
 
     public void start() {
-        activeRenderingFrame.mainLoop();
+        try {
+            onSetup();
+            activeRenderingFrame.mainLoop();
+            activeRenderingFrame.running = false;
+        } finally {
+            onDestroy();
+        }
     }
 
+    public void onSetup() {
+
+    }
+
+    public void onDestroy() {
+
+    }
 
     public void onRender(Renderer renderer) {
-        renderer.setColor(0);
+
+        setMSAALevel(0);
+
+        renderer.setColor(new Color(50, 50, 50));
         renderer.clear();
-
-        renderer.pushState();
-
-        renderer.translate(getWidth() / 2, getHeight() / 2);
-        renderer.rotate(getCurrentTime() * 0.1);
         renderer.setColor(Color.WHITE);
-        renderer.rect(-100, -100, 200, 200);
 
+        renderer.pushState();
+
+        renderer.translate(200, getHeight() / 2);
+
+        renderer.pushState();
+        renderer.rotate(getCurrentTime());
+        renderer.rect(-50, -50, 100, 100);
         renderer.setColor(Color.RED);
-        renderer.line(0, 0, 100, 100);
+        renderer.line(-50, -50, 0, 0);
+        renderer.popState();
 
-        renderer.circle(100, 100, 100);
-        renderer.circle(100, -100, 100);
-        renderer.circle(-100, -100, 100);
+        renderer.translate(200, 0);
+
+        renderer.pushState();
+        renderer.rotate(getCurrentTime() / 2);
+        renderer.rect(-50, -50, 100, 100);
+        renderer.setColor(Color.RED);
+        renderer.line(-50, -50, 0, 0);
+        renderer.popState();
+
+        renderer.translate(200, 0);
+
+        renderer.pushState();
+        renderer.rotate(getCurrentTime() / 5);
+        renderer.rect(-50, -50, 100, 100);
+        renderer.setColor(Color.RED);
+        renderer.line(-50, -50, 0, 0);
+        renderer.popState();
+
+        renderer.translate(200, 0);
+
+        renderer.pushState();
+        renderer.rotate(getCurrentTime() / 10);
+        renderer.rect(-50, -50, 100, 100);
+        renderer.setColor(Color.RED);
+        renderer.line(-50, -50, 0, 0);
+        renderer.popState();
 
         renderer.popState();
 
         renderer.pushState();
 
-        renderer.setColor(Color.GREEN);
-        renderer.text("Made by Alex", 0, 0);
+//        renderer.enableTextAA();
+        renderer.setColor(0, 100, 0);
+
+        for (int i = 0; i < 10; i++) {
+            renderer.text("Hello", 0, 0);
+        }
 
         renderer.popState();
+
+        System.out.println(getDeltaTime());
 
     }
 
