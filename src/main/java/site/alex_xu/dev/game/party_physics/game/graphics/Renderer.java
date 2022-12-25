@@ -1,59 +1,53 @@
 package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import org.dyn4j.geometry.Vector2;
-import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.VolatileImage;
 import java.util.LinkedList;
 
 public class Renderer {
 
     private static final class State {
-
         Color color;
-
         AffineTransform trans;
         RenderingHints hints;
         Composite composite;
+
         Font font;
+
         double lineWidth = 1;
 
-
-
     }
-    private final Graphics2D g;
 
+    private final Graphics2D g;
     private final LinkedList<State> states = new LinkedList<>();
 
     private final int width, height;
+
     private double lineWidth = 1;
 
-    private final Font font = Font.DEFAULT;
+    private Font font = Font.DEFAULT;
 
-    private final int textSize = 16;
+    private int textSize = 16;
 
-    private PartyPhysicsWindow window;
-
-    public Renderer(PartyPhysicsWindow window, Graphics g, int width, int height) {
+    public Renderer(Graphics g, int width, int height) {
         this.g = (Graphics2D) g;
-        this.window = window;
         this.width = width;
         this.height = height;
-        setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        this.g.setFont(font.getAwt(textSize));
 
+        setRenderHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        setRenderHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     }
-
 
     // Setters
 
     public void setColor(Color color) {
         g.setColor(color);
     }
+
     public void setColor(int red, int green, int blue, int alpha) {
 
         red = Math.min(255, Math.max(0, red));
@@ -77,7 +71,7 @@ public class Renderer {
         g.setComposite(composite);
     }
 
-    public void setRenderingHint(RenderingHints.Key hint, Object value) {
+    public void setRenderHint(RenderingHints.Key hint, Object value) {
         g.setRenderingHint(hint, value);
     }
 
@@ -85,25 +79,27 @@ public class Renderer {
         this.lineWidth = lineWidth;
     }
 
+    public void setFont(Font font) {
+        this.font = font;
+        g.setFont(font.getAwt(textSize));
+    }
+
+    public void setTextSize(int textSize) {
+        this.textSize = textSize;
+        g.setFont(font.getAwt(textSize));
+    }
 
     // Others
 
     public void enableTextAA() {
-        setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
-    }
-    public void disableTextAA() {
-        setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+        setRenderHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
     }
 
+    public void disableTextAA() {
+        setRenderHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+    }
 
     // Getters
-
-    public Font getFont() {
-        return font;
-    }
-    Graphics2D getGraphics() {
-        return g;
-    }
 
     public double getLineWidth() {
         return lineWidth;
@@ -124,9 +120,9 @@ public class Renderer {
     // Render
 
     public void clear() {
-        AffineTransform trans = (AffineTransform) g.getTransform().clone();
+        pushState();
         g.fillRect(0, 0, width, height);
-        g.setTransform(trans);
+        popState();
     }
 
     public void rect(Rectangle2D.Double rect) {
@@ -138,11 +134,7 @@ public class Renderer {
     }
 
     public void circle(double x, double y, double r) {
-        oval(x, y, r, r);
-    }
-
-    public void oval(double x, double y, double rx, double ry) {
-        g.fillOval((int) (x - rx), (int) (y - ry), (int) (rx * 2), (int) (ry * 2));
+        g.fillOval((int) (x - r), (int) (y - r), (int) (r * 2), (int) (r * 2));
     }
 
     public void line(double x1, double y1, double x2, double y2) {
@@ -153,7 +145,7 @@ public class Renderer {
 
         translate(x1, y1);
         rotate(angle);
-        rect(-lineWidth / 2, -lineWidth / 2, dis, lineWidth);
+        rect(-lineWidth, -lineWidth, dis, lineWidth * 2);
 
         popState();
     }
@@ -167,37 +159,7 @@ public class Renderer {
     }
 
     public void text(String text, double x, double y) {
-        int offset = 0;
-        pushState();
-
-        VolatileImage buffer = window.activeRenderingFrame.tempRenderBuffer;
-        Graphics2D g = buffer.createGraphics();
-
-
-
-        Composite composite = g.getComposite();
-        g.setComposite(AlphaComposite.Clear);
-        g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
-        g.setComposite(composite);
-
-        int red = 255;
-        int green = 0;
-        int blue = 0;
-        int alpha = 100;
-
-        g.setXORMode(new Color(255 - red, 255 - green, 255 - blue, 255 - alpha));
-
-        for (int i = 0; i < text.length(); i++) {
-            offset += font.render(g, text.charAt(i), offset, 0);
-        }
-
-        g.dispose();
-
-        this.g.drawImage(
-                buffer, (int) x, (int) y, this.window.activeRenderingFrame
-        );
-
-        popState();
+        g.drawString(text, (float) x, (float) y + textSize);
     }
 
     // transformations
@@ -248,6 +210,7 @@ public class Renderer {
 
         state.color = g.getColor();
         state.composite = g.getComposite();
+        state.font = font;
         state.hints = (RenderingHints) g.getRenderingHints().clone();
         state.trans = (AffineTransform) g.getTransform().clone();
         state.lineWidth = lineWidth;
@@ -260,6 +223,7 @@ public class Renderer {
         g.setComposite(state.composite);
         g.setRenderingHints(state.hints);
         g.setTransform(state.trans);
+        this.font = state.font;
         this.lineWidth = state.lineWidth;
 
     }

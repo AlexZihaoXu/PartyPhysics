@@ -1,13 +1,12 @@
 package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import java.awt.*;
+import java.io.IOException;
 
 public class PartyPhysicsWindow {
     final ActiveRenderingJFrame activeRenderingFrame;
-
     public PartyPhysicsWindow() {
         activeRenderingFrame = new ActiveRenderingJFrame("Party Physics!", this);
-
     }
 
     public void start() {
@@ -30,7 +29,8 @@ public class PartyPhysicsWindow {
 
     public void onRender(Renderer renderer) {
 
-        setMSAALevel(0);
+        setMSAALevel(2);
+
 
         renderer.setColor(new Color(50, 50, 50));
         renderer.clear();
@@ -78,13 +78,10 @@ public class PartyPhysicsWindow {
 
         renderer.pushState();
 
-//        renderer.enableTextAA();
+        renderer.enableTextAA();
         renderer.setColor(0, 100, 0);
 
-        for (int i = 0; i < 10; i++) {
-            renderer.text("Hello", 0, 0);
-        }
-
+        renderer.scale(3 + Math.abs(getCurrentTime() % 5 - 2.5) / 2);
         renderer.popState();
 
         System.out.println(getDeltaTime());

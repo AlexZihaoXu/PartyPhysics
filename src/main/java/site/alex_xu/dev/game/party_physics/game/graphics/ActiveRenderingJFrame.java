@@ -84,7 +84,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
             if (msaaLevel == 0) {
                 renderScale = 1;
-                Renderer renderer = new Renderer(this.partyPhysicsWindow, g, width, height);
+                Renderer renderer = new Renderer(g, width, height);
                 partyPhysicsWindow.onRender(renderer);
             } else {
                 if (msaaBuffers == null || msaaBuffers.length != msaaLevel || msaaBuffers[0].validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE || msaaBuffers[0].getWidth() / 2 != width || msaaBuffers[0].getHeight() / 2 != height) {
@@ -100,7 +100,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
 
                 VolatileImage lastBuffer = msaaBuffers[msaaBuffers.length - 1];
                 Graphics2D g2 = lastBuffer.createGraphics();
-                Renderer renderer = new Renderer(this.partyPhysicsWindow, g2, lastBuffer.getWidth(), lastBuffer.getHeight());
+                Renderer renderer = new Renderer(g2, lastBuffer.getWidth(), lastBuffer.getHeight());
                 renderer.scale(renderScale);
                 partyPhysicsWindow.onRender(renderer);
 
