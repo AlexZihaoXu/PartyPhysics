@@ -12,8 +12,6 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     final Canvas canvas;
     final BufferStrategy bufferStrategy;
-    VolatileImage tempRenderBuffer = null;
-
     public boolean running;
 
     int RENDER_BUFFER_SIZE = 2;
@@ -40,7 +38,8 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
         canvas = new Canvas();
         canvas.setIgnoreRepaint(true);
-        canvas.setSize(600, 400);
+        canvas.setSize(900, 650);
+        setAlwaysOnTop(true);
         add(canvas);
         pack();
 
@@ -64,6 +63,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
         running = true;
         setVisible(true);
+        setLocationRelativeTo(null);
 
         Clock clock = new Clock();
 
@@ -81,11 +81,6 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
             height = canvas.getHeight();
 
             partyPhysicsWindow.onTick();
-
-            if (tempRenderBuffer == null || tempRenderBuffer.validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE) {
-                tempRenderBuffer = getGraphicsConfiguration().createCompatibleVolatileImage(1024 * RENDER_BUFFER_SIZE, 1024 * RENDER_BUFFER_SIZE, VolatileImage.TRANSLUCENT);
-                tempRenderBuffer.setAccelerationPriority(1);
-            }
 
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
             if (msaaLevel == 0) {

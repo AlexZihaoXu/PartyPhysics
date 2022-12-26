@@ -160,7 +160,7 @@ public class Renderer {
 
         translate(x1, y1);
         rotate(angle);
-        rect(-lineWidth, -lineWidth, dis, lineWidth * 2);
+        rect(-lineWidth, -lineWidth, dis + lineWidth * 2, lineWidth * 2);
 
         popState();
     }

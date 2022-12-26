@@ -40,7 +40,8 @@ public class PartyPhysicsWindow {
     }
 
     public void onRender(Renderer renderer) {
-        stage.onRender(renderer);
+        if (switchingStage == null)
+            stage.onRender(renderer);
     }
 
     public void onTick() {
