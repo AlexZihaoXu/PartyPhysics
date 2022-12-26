@@ -1,8 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.World;
-import site.alex_xu.dev.game.party_physics.game.content.level.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
@@ -13,6 +13,8 @@ public class GameWorld {
 
     World<GameObject> world;
     HashSet<GameObject> objects = new HashSet<>();
+
+    private final Body staticBody = new Body();
     long updateCount = 0;
 
     public GameWorld() {
@@ -23,6 +25,13 @@ public class GameWorld {
         System.out.println(updateCount);
         world = new World<>();
         world.setGravity(0, 9.8);
+
+        staticBody.setMass(MassType.INFINITE);
+
+    }
+
+    public Body getStaticBody() {
+        return staticBody;
     }
 
     public PartyPhysicsWindow getWindow() {
@@ -39,6 +48,10 @@ public class GameWorld {
 
     public World<GameObject> getSimulatedWorld() {
         return world;
+    }
+
+    public int getObjectsCount() {
+        return objects.size();
     }
 
     public void onRender(Renderer renderer) {

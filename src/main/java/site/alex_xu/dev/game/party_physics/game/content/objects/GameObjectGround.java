@@ -1,7 +1,6 @@
-package site.alex_xu.dev.game.party_physics.game.content.level;
+package site.alex_xu.dev.game.party_physics.game.content.objects;
 
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
