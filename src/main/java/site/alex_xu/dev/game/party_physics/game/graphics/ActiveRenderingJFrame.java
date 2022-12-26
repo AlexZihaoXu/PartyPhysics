@@ -4,12 +4,11 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.VolatileImage;
 
-class ActiveRenderingJFrame extends JFrame implements WindowListener {
+class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListener, MouseListener, MouseMotionListener {
 
     final Canvas canvas;
     final BufferStrategy bufferStrategy;
@@ -27,6 +26,10 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
     double now;
 
     int msaaLevel = 0;
+
+    double mouseX = 0, mouseY = 0;
+
+    boolean[] keyStatus = new boolean[256];
 
     PartyPhysicsWindow partyPhysicsWindow;
 
@@ -48,6 +51,9 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
         height = canvas.getHeight();
 
         addWindowListener(this);
+        canvas.addKeyListener(this);
+        canvas.addMouseListener(this);
+        canvas.addMouseMotionListener(this);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
     }
@@ -161,5 +167,71 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener {
     @Override
     public void windowDeactivated(WindowEvent e) {
 
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int code = e.getKeyCode();
+        if (0 <= code && code < 256) {
+            keyStatus[code] = true;
+            partyPhysicsWindow.getStage().onKeyPressed(code);
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        int code = e.getKeyCode();
+        if (0 <= code && code < 256) {
+            keyStatus[code] = false;
+            partyPhysicsWindow.getStage().onKeyReleased(code);
+
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        partyPhysicsWindow.getStage().onMousePressed(e.getX(), e.getY(), e.getButton());
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        partyPhysicsWindow.getStage().onMouseReleased(e.getX(), e.getY(), e.getButton());
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        partyPhysicsWindow.getStage().onMouseMove(e.getX(), e.getY());
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 }

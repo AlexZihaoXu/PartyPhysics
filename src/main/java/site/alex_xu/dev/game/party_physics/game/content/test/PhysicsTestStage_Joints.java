@@ -13,6 +13,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class PhysicsTestStage_Joints extends Stage {
     @Override
@@ -23,7 +24,7 @@ public class PhysicsTestStage_Joints extends Stage {
 
     int updateCount = 0;
 
-    Body infMass = new Body()   ;
+    Body infMass = new Body();
     World<Body> world = new World<>();
 
     // Bodies
@@ -97,17 +98,27 @@ public class PhysicsTestStage_Joints extends Stage {
 
         super.onTick();
 
-        if (joint != null) {
-            if (getCurrentTime() > 10) {
-                world.removeJoint(joint);
-                joint = null;
-            }
-        }
 
         int targetUpdateCount = (int) (getCurrentTime() / (1d / PhysicsSettings.TICKS_PER_SECOND));
         while (updateCount < targetUpdateCount) {
             world.updatev(1d / PhysicsSettings.TICKS_PER_SECOND);
             updateCount++;
         }
+    }
+
+    @Override
+    public void onKeyPressed(int keyCode) {
+        super.onKeyPressed(keyCode);
+        if (keyCode == KeyEvent.VK_SPACE) {
+            if (joint != null) {
+                world.removeJoint(joint);
+                joint = null;
+            }
+        }
+    }
+
+    @Override
+    public void onMouseMove(double x, double y) {
+
     }
 }

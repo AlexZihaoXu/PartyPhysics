@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.graphics;
 
-import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
+import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.*;
 
 public class PartyPhysicsWindow {
     private static PartyPhysicsWindow INSTANCE = null;
@@ -8,6 +9,7 @@ public class PartyPhysicsWindow {
 
     private Stage stage = new Stage();
     private Stage switchingStage = null;
+
 
     public static PartyPhysicsWindow getInstance() {
         if (INSTANCE == null) INSTANCE = new PartyPhysicsWindow();
@@ -67,12 +69,30 @@ public class PartyPhysicsWindow {
 
     // Getters
 
+    public boolean isKeyPressed(int keyCode) {
+        if (0 <= keyCode && keyCode < 256)
+            return this.activeRenderingFrame.keyStatus[keyCode];
+        return false;
+    }
+
     public int getWidth() {
         return activeRenderingFrame.width;
     }
 
     public int getHeight() {
         return activeRenderingFrame.height;
+    }
+
+    public double getMouseX() {
+        return activeRenderingFrame.mouseX;
+    }
+
+    public double getMouseY() {
+        return activeRenderingFrame.mouseY;
+    }
+
+    public Vector2 getMousePos() {
+        return new Vector2(getMouseX(), getMouseY());
     }
 
     public double getDeltaTime() {
@@ -87,4 +107,7 @@ public class PartyPhysicsWindow {
         return activeRenderingFrame.msaaLevel;
     }
 
+    public Stage getStage() {
+        return stage;
+    }
 }
