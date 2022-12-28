@@ -47,8 +47,8 @@ public class Player {
 
     private final Vector2 reachDirection = new Vector2(0, 0);
 
-    public void setTouchGround(double now, GameObject gameObject) {
-        if (gameObject == legLeftEnd || gameObject == legRightEnd) {
+    public void setTouchGround(double now, GameObject gameObject, GameObject standObject) {
+        if ((gameObject == legLeftEnd || gameObject == legRightEnd) && standObject != grabbingObject) {
             lastTouchGroundTime = now;
             touchGround = true;
         }
