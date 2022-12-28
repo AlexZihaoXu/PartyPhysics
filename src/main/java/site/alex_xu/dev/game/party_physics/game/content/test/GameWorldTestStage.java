@@ -17,7 +17,7 @@ public class GameWorldTestStage extends Stage {
     @Override
     public void onLoad() {
         super.onLoad();
-        getWindow().setMSAALevel(2);
+        getWindow().setAALevel(2);
         world.init();
         world.addObject(new GameObjectGround(-20, 2, 40, 1));
         world.addObject(new GameObjectBox(0.5, -20));
@@ -52,6 +52,7 @@ public class GameWorldTestStage extends Stage {
         world.onRender(renderer);
 
         renderer.popState();
+
 
         renderer.pushState();
         renderer.setColor(new Color(0, 150, 0));

@@ -32,12 +32,6 @@ public class GameObjectWoodPlank extends GameObject {
         setMass(new Mass(new Vector2(0, 0), 1, 0.5));
         translate(x + w / 2, y + h / 2);
     }
-
-    @Override
-    public void onTick() {
-
-    }
-
     @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();

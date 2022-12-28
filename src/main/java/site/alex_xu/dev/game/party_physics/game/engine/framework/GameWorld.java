@@ -3,31 +3,42 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.World;
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class GameWorld {
 
+    PlayerCollisionHandler playerCollisionHandler = new PlayerCollisionHandler(this);
     World<GameObject> world;
     HashSet<GameObject> objects = new HashSet<>();
 
     private final Body staticBody = new Body();
     long updateCount = 0;
 
+    ArrayList<Player> players = new ArrayList<>();
+
     public GameWorld() {
     }
 
     public void init() {
         updateCount = (long) (getCurrentTime() / (1d / PhysicsSettings.TICKS_PER_SECOND));
-        System.out.println(updateCount);
         world = new World<>();
-        world.setGravity(0, 9.8);
+        world.setGravity(0, 9.8 * 3);
+        world.addContactListener(playerCollisionHandler);
 
         staticBody.setMass(MassType.INFINITE);
 
+    }
+
+    public void addPlayer(Player player) {
+        players.add(player);
+        player.initPhysics(this);
     }
 
     public Body getStaticBody() {
@@ -62,15 +73,24 @@ public class GameWorld {
 
     public void onTick() {
 
-        long expectedUpdateCount = (long) (getCurrentTime() / (1d / PhysicsSettings.TICKS_PER_SECOND));
+        double dt = 1d / PhysicsSettings.TICKS_PER_SECOND;
+        long expectedUpdateCount = (long) (getCurrentTime() / dt);
         while (updateCount < expectedUpdateCount) {
-            world.updatev(1d / PhysicsSettings.TICKS_PER_SECOND);
+            playerCollisionHandler.now = updateCount * dt;
+            world.updatev(dt);
+            for (GameObject object : objects) {
+                object.onPhysicsTick(dt);
+            }
+            for (Player player : players) {
+                player.onPhysicsTick(dt, updateCount * dt);
+            }
             updateCount++;
         }
 
         for (GameObject object : objects) {
             object.onTick();
         }
+
     }
 
     public void addObject(GameObject object) {

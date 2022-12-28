@@ -10,7 +10,7 @@ import java.awt.*;
 
 public class GameObjectBox extends GameObject {
     private final Color color = new Color(197, 161, 65);
-    private final double size = 1;
+    public static final double size = 1;
 
     public GameObjectBox(double x, double y) {
         super();
@@ -19,14 +19,10 @@ public class GameObjectBox extends GameObject {
         Rectangle rectangle = new Rectangle(size, size);
         BodyFixture fixture = new BodyFixture(rectangle);
         fixture.setFriction(0.2);
+//        fixture.setRestitutionVelocity(1);
         addFixture(fixture);
-        setMass(new Mass(new Vector2(0, 0), 2, 0.3));
+        setMass(new Mass(new Vector2(0, 0), 1, 0.3));
         translate(x + size / 2, y + size / 2);
-    }
-
-    @Override
-    public void onTick() {
-
     }
 
     @Override

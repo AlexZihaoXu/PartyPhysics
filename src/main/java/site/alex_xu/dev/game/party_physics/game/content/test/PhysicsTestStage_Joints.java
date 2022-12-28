@@ -1,9 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
 import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.joint.PinJoint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
@@ -65,7 +63,7 @@ public class PhysicsTestStage_Joints extends Stage {
     @Override
     public void onRender(Renderer renderer) {
         super.onRender(renderer);
-        getWindow().setMSAALevel(2);
+        getWindow().setAALevel(2);
 
         renderer.pushState();
 

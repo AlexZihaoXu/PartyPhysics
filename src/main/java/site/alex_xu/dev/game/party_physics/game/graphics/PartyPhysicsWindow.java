@@ -64,7 +64,7 @@ public class PartyPhysicsWindow {
 
     // Setters
 
-    public void setMSAALevel(int level) {
+    public void setAALevel(int level) {
         activeRenderingFrame.msaaLevel = level;
     }
 

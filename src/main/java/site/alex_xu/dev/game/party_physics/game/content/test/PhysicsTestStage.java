@@ -1,6 +1,5 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
-import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.*;
@@ -31,7 +30,7 @@ public class PhysicsTestStage extends Stage {
     public void onLoad() {
         super.onLoad();
         System.out.println(getClass().getSimpleName() + " loaded!");
-        getWindow().setMSAALevel(2);
+        getWindow().setAALevel(2);
 
         world.setGravity(0, 98);
 

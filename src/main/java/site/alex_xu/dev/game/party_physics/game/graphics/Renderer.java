@@ -5,7 +5,9 @@ import org.dyn4j.geometry.Vector2;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.util.LinkedList;
 
 public class Renderer {
@@ -148,8 +150,15 @@ public class Renderer {
         g.scale(r, r);
         g.fillOval(-1, -1, 2, 2);
 
-
         g.setTransform(trans);
+    }
+
+    public void circle(Vector2 center, double r) {
+        circle(center.x, center.y, r);
+    }
+
+    public void rect(double x, double y, double w, double h, double r) {
+        g.fill(new RoundRectangle2D.Double(x, y, w, h, r, r));
     }
 
     public void line(double x1, double y1, double x2, double y2) {
@@ -163,6 +172,15 @@ public class Renderer {
         rect(-lineWidth, -lineWidth, dis + lineWidth * 2, lineWidth * 2);
 
         popState();
+    }
+
+    public void triangle(double x1, double y1, double x2, double y2, double x3, double y3) {
+        Path2D path = new Path2D.Double();
+        path.moveTo(x1, y1);
+        path.lineTo(x2, y2);
+        path.lineTo(x3, y3);
+        path.closePath();
+        g.fill(path);
     }
 
     public void line(Point p1, Point p2) {

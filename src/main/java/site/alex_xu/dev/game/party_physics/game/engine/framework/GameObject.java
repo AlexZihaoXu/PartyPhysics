@@ -24,7 +24,13 @@ public abstract class GameObject extends Body {
         return PartyPhysicsWindow.getInstance();
     }
 
-    abstract public void onTick();
+    public void onTick() {
+
+    }
+
+    public void onPhysicsTick(double dt) {
+
+    }
 
     abstract public void onRender(Renderer renderer);
 }

@@ -29,10 +29,6 @@ public class GameObjectGround extends GameObject {
     }
 
     @Override
-    public void onTick() {
-    }
-
-    @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
         renderer.translate(getWorldCenter());

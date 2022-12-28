@@ -5,7 +5,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 
 public class PartyPhysicsGame {
     public static void main(String[] args) {
-        PartyPhysicsWindow.getInstance().changeStage(new GameWorldTestStage());
+        PartyPhysicsWindow.getInstance().changeStage(new PlayerModelTestStage());
         PartyPhysicsWindow.getInstance().start();
     }
 }
