@@ -11,7 +11,6 @@ import java.awt.*;
 
 public class GameObjectPlayerBody extends GameObjectPlayerPart {
 
-    Color color = new Color(99, 194, 42, 255);
     static final double w = 0.2, h = 0.82;
 
     public GameObjectPlayerBody(double x, double y) {

@@ -41,7 +41,7 @@ public class PlayerModelTestStage extends Stage {
             world.addObject(new GameObjectBox(-5, 5 - GameObjectBox.size - 0.6 - i));
         }
 
-        player = new Player(-3, -10);
+        player = new Player(new Color(99, 194, 42, 255), -3, -10);
         world.addPlayer(player);
 
     }

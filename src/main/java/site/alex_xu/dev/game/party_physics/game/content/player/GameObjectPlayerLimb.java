@@ -14,7 +14,6 @@ import java.awt.*;
 
 public class GameObjectPlayerLimb extends GameObjectPlayerPart {
 
-    Color color = new Color(99, 194, 42, 255);
     static double r = 0.05;
     double length;
 

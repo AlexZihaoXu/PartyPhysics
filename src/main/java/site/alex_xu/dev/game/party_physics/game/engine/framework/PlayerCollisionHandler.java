@@ -47,8 +47,9 @@ class PlayerCollisionHandler implements ContactListener<GameObject> {
         GameObject body2 = (GameObject) collision.getBody2();
         if (isPlayerPart(body1) && !isPlayerPart(body2)) {
             ((GameObjectPlayerPart) body1).getPlayer().setTouchGround(now, body1);
+            ((GameObjectPlayerPart) body1).getPlayer().tryGrabItem(body2, body1);
         } else if (isPlayerPart(body2) && !isPlayerPart(body1)) {
-            ((GameObjectPlayerPart) body2).getPlayer().setTouchGround(now, body2);
+            ((GameObjectPlayerPart) body2).getPlayer().tryGrabItem(body1, body2);
         }
     }
 

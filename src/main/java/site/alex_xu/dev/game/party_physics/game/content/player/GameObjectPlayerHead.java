@@ -12,7 +12,6 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import java.awt.*;
 
 public class GameObjectPlayerHead extends GameObjectPlayerPart {
-    Color color = new Color(99, 194, 42, 255);
     static final double r = 0.22;
     public GameObjectPlayerHead(double x, double y) {
         super();

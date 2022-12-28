@@ -1,15 +1,13 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
 import org.dyn4j.dynamics.Force;
-import org.dyn4j.dynamics.joint.DistanceJoint;
-import org.dyn4j.dynamics.joint.Joint;
-import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.dynamics.joint.WeldJoint;
+import org.dyn4j.dynamics.joint.*;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Player {
@@ -27,15 +25,22 @@ public class Player {
     RevoluteJoint<GameObject> rightArmBodyJoint, rightArmJoint, leftArmBodyJoint, leftArmJoint;
     RevoluteJoint<GameObject> rightLegBodyJoint, rightLegJoint, leftLegBodyJoint, leftLegJoint;
 
+    MotorJoint<GameObject> armMotor1, armMotor2;
+
     WeldJoint<GameObject> footLeftJoint, footRightJoint;
 
     ArrayList<Joint<GameObject>> joints = new ArrayList<>();
     ArrayList<GameObjectPlayerPart> bodyParts = new ArrayList<>();
 
+
     double lastTouchGroundTime = 0;
     int moveDx = 0;
     boolean touchGround = false;
-    public Player(double x, double y) {
+
+    Color color;
+
+    public Player(Color color, double x, double y) {
+        this.color = color;
         this.x = x;
         this.y = y;
     }
@@ -46,6 +51,19 @@ public class Player {
         if (gameObject == legLeftEnd || gameObject == legRightEnd) {
             lastTouchGroundTime = now;
             touchGround = true;
+        }
+    }
+
+    private GameObject grabbingObject = null;
+    private WeldJoint<GameObject> grabbingJoint = null;
+
+    public void tryGrabItem(GameObject grabbed, GameObject bodyPart) {
+        if (grabbingJoint == null && reachDirection.distanceSquared(0, 0) > 0.1) {
+            if (bodyPart == this.armRightEnd) {
+                grabbingObject = grabbed;
+                grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, armRightEnd.getWorldCenter());
+                head.getWorld().getSimulatedWorld().addJoint(grabbingJoint);
+            }
         }
     }
 
@@ -76,6 +94,9 @@ public class Player {
 
         footLeft = new GameObjectPlayerFoot(lowerCenter.x - legGap, lowerCenter.y + 0.35 + 0.15);
         footRight = new GameObjectPlayerFoot(lowerCenter.x + legGap, lowerCenter.y + 0.35 + 0.15);
+
+        armMotor1 = new MotorJoint<>(body, armRightStart);
+        armMotor2 = new MotorJoint<>(armRightStart, armRightEnd);
 
         bodyParts.add(head);
         bodyParts.add(body);
@@ -117,6 +138,12 @@ public class Player {
         joints.add(rightLegJoint);
         joints.add(footLeftJoint);
         joints.add(footRightJoint);
+        joints.add(armMotor1);
+        joints.add(armMotor2);
+        armMotor1.setMaximumForce(25);
+        armMotor2.setMaximumForce(25);
+        armMotor1.setCollisionAllowed(false);
+        armMotor2.setCollisionAllowed(false);
 
         for (Joint<GameObject> joint : joints) {
             world.getSimulatedWorld().addJoint(joint);
@@ -129,6 +156,10 @@ public class Player {
 
         headBodyJoint.setLimitEnabled(true);
         headBodyJoint.setLimits(-2, 2);
+
+        for (GameObjectPlayerPart bodyPart : bodyParts) {
+            bodyPart.color = this.color;
+        }
     }
 
     public void jump() {
@@ -236,16 +267,29 @@ public class Player {
         double armDamping = 5;
 
         if (reachDirection.distanceSquared(0, 0) > 0.1) {
-            double scale = 20;
-            double scale2 = 0.95;
-            Vector2 v = new Vector2(reachDirection.x * scale, reachDirection.y * scale);
-            Vector2 v2 = new Vector2(reachDirection.x * scale, reachDirection.y * scale - 0.1);
-            armLeftEnd.applyForce(v);
-            armRightEnd.applyForce(v2);
-            armLeftStart.applyForce(new Vector2(-v.x * scale2, -v.y * scale2));
-            armRightStart.applyForce(new Vector2(-v2.x * scale2, -v2.y * scale2));
-            armDamping = 0.01;
+            body.applyForce(new Vector2(reachDirection.x * 0.3, reachDirection.y));
+            double angle = -reachDirection.getAngleBetween(new Vector2(0, 0));
+            armMotor1.setMaximumForce(5);
+            armMotor2.setMaximumForce(5);
+            armMotor1.setMaximumTorque(20);
+            armMotor2.setMaximumTorque(20);
+
+            double a = 0.5 * (reachDirection.x > 0 ? 1 : -1);
+            armMotor1.setAngularTarget(angle + a / 2);
+            armMotor2.setAngularTarget(-a / 2);
+        } else {
+            armMotor1.setMaximumForce(0);
+            armMotor2.setMaximumForce(0);
+            armMotor1.setMaximumTorque(0);
+            armMotor2.setMaximumTorque(0);
+            if (grabbingJoint != null) {
+                head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
+                grabbingJoint = null;
+                grabbingObject = null;
+            }
         }
+
+
         armLeftStart.setAngularDamping(armDamping);
         armRightStart.setAngularDamping(armDamping);
         armLeftEnd.setAngularDamping(armDamping * 1.5);
