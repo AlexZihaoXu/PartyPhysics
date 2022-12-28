@@ -36,7 +36,10 @@ public class Player {
 
     double lastTouchGroundTime = 0;
     int moveDx = 0;
+
+    GameObject groundObject = null;
     boolean touchGround = false;
+    boolean sneak = false;
 
     Color color;
 
@@ -48,10 +51,14 @@ public class Player {
 
     private final Vector2 reachDirection = new Vector2(0, 0);
 
-    public void setTouchGround(double now, GameObject gameObject, GameObject standObject) {
+    Vector2 jumpPoint = null;
+
+    public void setTouchGround(double now, GameObject gameObject, GameObject standObject, Vector2 jumpPoint) {
         if ((gameObject == legLeftEnd || gameObject == legRightEnd) && standObject != grabbingObject) {
             lastTouchGroundTime = now;
             touchGround = true;
+            groundObject = standObject;
+            this.jumpPoint = jumpPoint;
         }
     }
 
@@ -170,7 +177,12 @@ public class Player {
                 Vector2 vel = bodyPart.getLinearVelocity();
                 bodyPart.setLinearVelocity(vel.x, vel.y - 12);
             }
+            groundObject.applyImpulse(new Vector2(0, 10), jumpPoint);
         }
+    }
+
+    public void setSneak(boolean sneak) {
+        this.sneak = sneak;
     }
 
     public void setMoveDirection(int dx) {
@@ -203,17 +215,42 @@ public class Player {
                 footRight.applyImpulse(new Vector2(0.2, -0.5));
             }
         } else {
-            head.applyForce(Vector2.create(-20, body.getTransform().getRotationAngle() + Math.PI / 2));
+            head.applyForce(Vector2.create(-30, body.getTransform().getRotationAngle() + Math.PI / 2));
             armLeftEnd.applyForce(Vector2.create(-5, body.getTransform().getRotationAngle()));
             armRightEnd.applyForce(Vector2.create(5, body.getTransform().getRotationAngle()));
-            footLeft.applyForce(Vector2.create(10, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.2));
-            footRight.applyForce(Vector2.create(10, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.2));
+            footLeft.applyForce(Vector2.create(15, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.4));
+            footRight.applyForce(Vector2.create(15, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.4));
         }
 
-        Vector2 vel = body.getLinearVelocity();
-        if (isTouchingGround())
-            head.applyForce(new Vector2(-moveDx * 10, -1));
-        body.setLinearVelocity(vel.x + (moveDx * 10 - vel.x) * dt * 35, vel.y);
+
+        if (isTouchingGround()) {
+            double maximumSpeed = 6;
+            if (Math.abs(body.getLinearVelocity().x) < maximumSpeed) {
+                head.applyForce(new Vector2(-moveDx * 10, -1));
+                body.applyForce(new Vector2(50 * moveDx, 0));
+            }
+            double angle = body.getTransform().getRotationAngle();
+            head.applyForce(Vector2.create(-angle * 40, angle));
+
+            if (moveDx == 0) {
+                Vector2 bodyPos = body.getWorldCenter();
+                Vector2 leftLegPos = legLeftEnd.getWorldCenter();
+                Vector2 rightLegPos = legRightEnd.getWorldCenter();
+                double centerX = (leftLegPos.x + rightLegPos.x) / 2;
+
+                double rate = Math.min(1, Math.abs(body.getTransform().getRotationAngle() / 0.07));
+                if (centerX > bodyPos.x) {
+                    legLeftStart.applyTorque(4 * rate);
+                    legRightStart.applyTorque(6 * rate);
+                } else {
+                    legLeftStart.applyTorque(-6 * rate);
+                    legRightStart.applyTorque(-4 * rate);
+                }
+            }
+        } else {
+            body.applyForce(new Vector2(10 * moveDx, 0));
+        }
+
 
         if (moveDx != 0) {
             rightLegJoint.setLimitEnabled(true);
@@ -270,10 +307,10 @@ public class Player {
         if (reachDirection.distanceSquared(0, 0) > 0.1) {
             body.applyForce(new Vector2(reachDirection.x * 0.3, reachDirection.y));
             double angle = -reachDirection.getAngleBetween(new Vector2(0, 0));
-            armMotor1.setMaximumForce(5);
-            armMotor2.setMaximumForce(5);
-            armMotor1.setMaximumTorque(20);
-            armMotor2.setMaximumTorque(20);
+            armMotor1.setMaximumForce(10);
+            armMotor2.setMaximumForce(10);
+            armMotor1.setMaximumTorque(10);
+            armMotor2.setMaximumTorque(10);
 
             double a = 0.5 * (reachDirection.x > 0 ? 1 : -1);
             armMotor1.setAngularTarget(angle + a / 2);
@@ -289,7 +326,6 @@ public class Player {
                 grabbingObject = null;
             }
         }
-
 
         armLeftStart.setAngularDamping(armDamping);
         armRightStart.setAngularDamping(armDamping);

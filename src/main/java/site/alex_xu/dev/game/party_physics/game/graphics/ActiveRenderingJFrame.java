@@ -14,12 +14,12 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     final BufferStrategy bufferStrategy;
     public boolean running;
 
-    int RENDER_BUFFER_SIZE = 2;
-
     int width;
     int height;
 
     double dt;
+
+    double videoDt;
 
     double now;
 
@@ -37,6 +37,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     public void setAutoSwitchAALevelEnabled(boolean enabled) {
         autoSwitchAALevel = enabled;
     }
+
 
     ActiveRenderingJFrame(String title, PartyPhysicsWindow window) {
         super(title);
@@ -78,17 +79,18 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         VolatileImage[] msaaBuffers = null;
 
         int renderScale = 1;
-        double videoDt = 0.001;
+        videoDt = 0.01;
+        double lastSwitch = now;
         while (running) {
 
-            double higher = videoDt * 64;
-
-            if (higher < 1d / 16) {
-                aaLevel++;
-            }
-            if (videoDt > 1d / 16) {
-                if (aaLevel > 0)
+            if (now - lastSwitch > 0.25) {
+                if (videoDt > 1d / 60) {
+                    lastSwitch = now;
                     aaLevel--;
+                } else if (videoDt * 8 < 1d / 120) {
+                    lastSwitch = now;
+                    aaLevel++;
+                }
             }
             aaLevel = Math.max(0, Math.min(3, aaLevel));
 
@@ -101,6 +103,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
             partyPhysicsWindow.onTick();
 
+            Clock videoDtClock = new Clock();
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
             if (aaLevel == 0) {
                 renderScale = 1;
@@ -117,8 +120,8 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
                         renderScale *= 2;
                     }
                 }
+                renderScale = (int) Math.pow(2, aaLevel);
 
-                Clock videoDtClock = new Clock();
                 VolatileImage lastBuffer = msaaBuffers[msaaBuffers.length - 1];
                 Graphics2D g2 = lastBuffer.createGraphics();
                 Renderer renderer = new Renderer(g2, lastBuffer.getWidth(), lastBuffer.getHeight());
@@ -138,12 +141,12 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
                 g.drawImage(msaaBuffers[0], 0, 0, width, height, this);
 
                 g2.dispose();
-                videoDt = videoDtClock.elapsedTime();
 
             }
 
             if (!this.bufferStrategy.contentsLost()) {
                 this.bufferStrategy.show();
+                videoDt = videoDtClock.elapsedTime();
             }
             Thread.yield();
         }

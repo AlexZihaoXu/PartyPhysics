@@ -115,4 +115,8 @@ public class PartyPhysicsWindow {
     public Stage getStage() {
         return stage;
     }
+
+    public double getVideoDt() {
+        return activeRenderingFrame.videoDt;
+    }
 }
