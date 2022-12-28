@@ -41,6 +41,9 @@ public class Stage {
         return getWindow().getMousePos();
     }
 
+    public boolean getMouseButton(int button) {
+        return getWindow().getMouseButton(button);
+    }
     public boolean isKeyPressed(int keyCode) {
         return getWindow().isKeyPressed(keyCode);
     }

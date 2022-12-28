@@ -1,9 +1,11 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
+import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectWoodPlank;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
@@ -14,7 +16,7 @@ import java.awt.event.KeyEvent;
 public class PlayerModelTestStage extends Stage {
     GameWorld world = new GameWorld();
     Player player;
-    double cameraX = 0;
+    Camera camera = new Camera();
 
     @Override
     public void onLoad() {
@@ -48,23 +50,31 @@ public class PlayerModelTestStage extends Stage {
     public void onTick() {
         super.onTick();
         world.onTick();
-        cameraX += (player.getPos().x - cameraX) * Math.min(1, getDeltaTime() * 3);
+        camera.scale += (60 - camera.scale) * Math.min(1, getDeltaTime() * 5);
+        camera.pos.x += (player.getPos().x - camera.pos.x) * Math.min(1, getDeltaTime() * 3);
+        camera.pos.y += (player.getPos().y - camera.pos.y) * Math.min(1, getDeltaTime() * 0.5);
 
         int direction = 0;
-        if (isKeyPressed(KeyEvent.VK_LEFT)) {
+        if (isKeyPressed(KeyEvent.VK_A)) {
             direction--;
         }
-        if (isKeyPressed(KeyEvent.VK_RIGHT)) {
+        if (isKeyPressed(KeyEvent.VK_D)) {
             direction++;
         }
         player.setMoveDirection(direction);
-
+        if (getMouseButton(1)) {
+            Vector2 pos = player.body.getWorldCenter();
+            pos = camera.getWorldMousePos().subtract(pos).getNormalized();
+            player.setReachDirection(pos);
+        } else {
+            player.setReachDirection(new Vector2(0, 0));
+        }
     }
 
     @Override
     public void onKeyPressed(int keyCode) {
         super.onKeyPressed(keyCode);
-        if (keyCode == KeyEvent.VK_UP) {
+        if (keyCode == KeyEvent.VK_W) {
             player.jump();
         }
     }
@@ -75,14 +85,13 @@ public class PlayerModelTestStage extends Stage {
         renderer.setColor(new Color(206, 222, 219));
         renderer.clear();
 
-        renderer.pushState();
-        renderer.translate(getWidth() / 2d, getHeight() / 2d + 20);
-        renderer.scale(60);
-        renderer.translate(-cameraX, 0);
-        world.onRender(renderer);
-        renderer.popState();
+        camera.render(world, renderer);
 
-        renderer.setColor(Color.GREEN);
-        renderer.text("X: " + cameraX, 5, 5);
+        Vector2 v = camera.getWorldMousePos().subtract(player.body.getWorldCenter());
+
+        renderer.setColor(Color.GREEN.darker());
+        renderer.text("X: " + camera.pos, 5, 5);
+        renderer.text("Mouse: " + camera.getWorldMousePos(), 5, 30);
+        renderer.text("Vec: " + v, 5, 55);
     }
 }

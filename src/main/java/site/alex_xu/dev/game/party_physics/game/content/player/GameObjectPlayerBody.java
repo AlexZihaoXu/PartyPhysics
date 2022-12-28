@@ -23,7 +23,7 @@ public class GameObjectPlayerBody extends GameObjectPlayerPart {
         fixture.setFilter(filter);
         fixture.setFriction(0.1);
         addFixture(fixture);
-        setMass(MassType.NORMAL);
+        setMass(new Mass(new Vector2(0, 0), 0.2, 0.03));
         translate(x, y);
     }
 

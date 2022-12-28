@@ -76,6 +76,10 @@ public class PartyPhysicsWindow {
         return false;
     }
 
+    public boolean getMouseButton(int button) {
+        return activeRenderingFrame.mouseButtons[button];
+    }
+
     public int getWidth() {
         return activeRenderingFrame.width;
     }

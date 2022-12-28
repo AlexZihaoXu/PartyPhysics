@@ -4,7 +4,7 @@ import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.collision.CollisionBody;
 import org.dyn4j.collision.broadphase.CollisionBodyBroadphaseFilter;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.geometry.MassType;
+import org.dyn4j.geometry.*;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
@@ -28,7 +28,7 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
         fixture.setFilter(filter);
         fixture.setFriction(0.9);
         addFixture(fixture);
-        setMass(MassType.NORMAL);
+        setMass(new Mass(new Vector2(0, 0), 0.2, 0.03));
         rotate(Math.atan2(y2 - y1, x2 - x1));
         translate((x1 + x2) / 2, (y1 + y2) / 2);
     }

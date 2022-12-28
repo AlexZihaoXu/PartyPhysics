@@ -28,6 +28,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     double mouseX = 0, mouseY = 0;
 
     boolean[] keyStatus = new boolean[256];
+    boolean[] mouseButtons = new boolean[16];
 
     PartyPhysicsWindow partyPhysicsWindow;
 
@@ -39,7 +40,6 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         canvas = new Canvas();
         canvas.setIgnoreRepaint(true);
         canvas.setSize(900, 650);
-        setAlwaysOnTop(true);
         add(canvas);
         pack();
 
@@ -197,6 +197,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     @Override
     public void mousePressed(MouseEvent e) {
         partyPhysicsWindow.getStage().onMousePressed(e.getX(), e.getY(), e.getButton());
+        mouseButtons[e.getButton()] = true;
         mouseX = e.getX();
         mouseY = e.getY();
     }
@@ -204,6 +205,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     @Override
     public void mouseReleased(MouseEvent e) {
         partyPhysicsWindow.getStage().onMouseReleased(e.getX(), e.getY(), e.getButton());
+        mouseButtons[e.getButton()] = false;
         mouseX = e.getX();
         mouseY = e.getY();
     }
@@ -220,7 +222,9 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     @Override
     public void mouseDragged(MouseEvent e) {
-
+        partyPhysicsWindow.getStage().onMouseMove(e.getX(), e.getY());
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 
     @Override

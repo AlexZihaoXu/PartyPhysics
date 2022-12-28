@@ -1,8 +1,10 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
+import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
+import org.dyn4j.dynamics.joint.WeldJoint;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
@@ -12,15 +14,20 @@ import java.util.ArrayList;
 
 public class Player {
 
-    private double x, y;
+    private final double x;
+    private final double y;
     public GameObjectPlayerHead head;
     public GameObjectPlayerBody body;
     GameObjectPlayerLimb armRightStart, armRightEnd, armLeftStart, armLeftEnd;
     GameObjectPlayerLimb legRightStart, legRightEnd, legLeftStart, legLeftEnd;
 
+    GameObjectPlayerFoot footLeft, footRight;
+
     RevoluteJoint<GameObject> headBodyJoint;
     RevoluteJoint<GameObject> rightArmBodyJoint, rightArmJoint, leftArmBodyJoint, leftArmJoint;
     RevoluteJoint<GameObject> rightLegBodyJoint, rightLegJoint, leftLegBodyJoint, leftLegJoint;
+
+    WeldJoint<GameObject> footLeftJoint, footRightJoint;
 
     ArrayList<Joint<GameObject>> joints = new ArrayList<>();
     ArrayList<GameObjectPlayerPart> bodyParts = new ArrayList<>();
@@ -28,12 +35,12 @@ public class Player {
     double lastTouchGroundTime = 0;
     int moveDx = 0;
     boolean touchGround = false;
-    double queuedJumpTime = 0;
-
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
     }
+
+    private final Vector2 reachDirection = new Vector2(0, 0);
 
     public void setTouchGround(double now, GameObject gameObject) {
         if (gameObject == legLeftEnd || gameObject == legRightEnd) {
@@ -67,6 +74,9 @@ public class Player {
         legRightStart = new GameObjectPlayerLimb(lowerCenter.x + legGap, lowerCenter.y, lowerCenter.x + legGap, lowerCenter.y + 0.35);
         legRightEnd = new GameObjectPlayerLimb(lowerCenter.x + legGap, lowerCenter.y + 0.35, lowerCenter.x + legGap, lowerCenter.y + 0.35 + 0.4);
 
+        footLeft = new GameObjectPlayerFoot(lowerCenter.x - legGap, lowerCenter.y + 0.35 + 0.15);
+        footRight = new GameObjectPlayerFoot(lowerCenter.x + legGap, lowerCenter.y + 0.35 + 0.15);
+
         bodyParts.add(head);
         bodyParts.add(body);
         bodyParts.add(armRightStart);
@@ -77,6 +87,8 @@ public class Player {
         bodyParts.add(legLeftEnd);
         bodyParts.add(legRightStart);
         bodyParts.add(legRightEnd);
+        bodyParts.add(footLeft);
+        bodyParts.add(footRight);
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             world.addObject(bodyPart);
             bodyPart.player = this;
@@ -91,6 +103,8 @@ public class Player {
         rightLegBodyJoint = new RevoluteJoint<>(body, legRightStart, new Vector2(lowerCenter.x + legGap, lowerCenter.y));
         leftLegJoint = new RevoluteJoint<>(legLeftStart, legLeftEnd, new Vector2(lowerCenter.x - legGap, lowerCenter.y + 0.35));
         rightLegJoint = new RevoluteJoint<>(legRightStart, legRightEnd, new Vector2(lowerCenter.x + legGap, lowerCenter.y + 0.35));
+        footLeftJoint = new WeldJoint<>(legLeftEnd, footLeft, new Vector2(lowerCenter.x - legGap, lowerCenter.y + 0.35 + 0.4));
+        footRightJoint = new WeldJoint<>(legRightEnd, footRight, new Vector2(lowerCenter.x + legGap, lowerCenter.y + 0.35 + 0.4));
 
         joints.add(headBodyJoint);
         joints.add(leftArmJoint);
@@ -101,19 +115,17 @@ public class Player {
         joints.add(leftLegJoint);
         joints.add(rightLegBodyJoint);
         joints.add(rightLegJoint);
+        joints.add(footLeftJoint);
+        joints.add(footRightJoint);
 
         for (Joint<GameObject> joint : joints) {
             world.getSimulatedWorld().addJoint(joint);
         }
 
-        head.setAngularDamping(10);
-        body.setAngularDamping(100);
-        armLeftEnd.setAngularDamping(80);
-        armRightEnd.setAngularDamping(80);
-        legLeftStart.setAngularDamping(80);
-        legRightStart.setAngularDamping(80);
-        legLeftEnd.setAngularDamping(20);
-        legRightEnd.setAngularDamping(20);
+        for (GameObjectPlayerPart bodyPart : bodyParts) {
+            bodyPart.setAngularDamping(20);
+        }
+
 
         headBodyJoint.setLimitEnabled(true);
         headBodyJoint.setLimits(-2, 2);
@@ -137,52 +149,39 @@ public class Player {
         return moveDx;
     }
 
+    public void setReachDirection(Vector2 reachDirection) {
+        this.reachDirection.set(reachDirection);
+    }
 
     public void onPhysicsTick(double dt, double now) {
 
+
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
-            head.applyForce(new Vector2(0, -15));
-            body.applyForce(new Vector2(0, -13));
-
-            Vector2 pos;
-            double angle;
-
-            pos = legLeftEnd.getWorldCenter();
-            angle = legLeftEnd.getTransform().getRotationAngle();
-            pos.add(new Vector2(legLeftEnd.length, 0).rotate(angle));
-            legLeftEnd.applyForce(new Vector2(-0.15, 10), pos);
-
-            pos = legRightEnd.getWorldCenter();
-            angle = legRightEnd.getTransform().getRotationAngle();
-            pos.add(new Vector2(legRightEnd.length, 0).rotate(angle));
-            legRightEnd.applyForce(new Vector2(0.15, 10));
-
-            legLeftStart.applyForce(new Vector2(-0.5, 0));
-            legRightStart.applyForce(new Vector2(0.5, 0));
-
-            armLeftEnd.applyForce(new Vector2(0, 2));
-            armRightEnd.applyForce(new Vector2(0, 2));
-
-            {
-                Vector2 legLeftPos = legLeftEnd.getWorldPoint(new Vector2(0, 0.3));
-                Vector2 legRightPos = legRightEnd.getWorldPoint(new Vector2(0, 0.3));
-                if (legLeftPos.distanceSquared(legRightPos) < 0.02) {
-                    legRightStart.setAngularVelocity(legRightEnd.getAngularVelocity() - 2);
-                    legLeftStart.setAngularVelocity(legRightEnd.getAngularVelocity() + 2);
-
-                    legLeftEnd.applyImpulse(new Vector2(-0.01, -0.02), legLeftEnd.getWorldPoint(new Vector2(0, -0.3)));
-                    legRightEnd.applyImpulse(new Vector2(0.01, -0.02), legRightEnd.getWorldPoint(new Vector2(0, -0.3)));
-                }
+            footLeft.applyForce(new Vector2(0, 60));
+            footRight.applyForce(new Vector2(0, 60));
+            legLeftStart.applyForce(new Vector2(0, -50));
+            legRightStart.applyForce(new Vector2(0, -50));
+            head.applyForce(new Vector2(0, -50));
+            if (footLeft.getWorldCenter().distanceSquared(footRight.getWorldCenter()) < 0.015) {
+                Vector2 v = footLeft.getWorldCenter().subtract(footRight.getWorldCenter()).getNormalized();
+                footLeft.applyForce(new Vector2(v.x * 0.1, v.y * 0.1));
+                footRight.applyForce(new Vector2(-v.x * 0.1, -v.y * 0.1));
+                body.applyImpulse(new Vector2(0, 1));
+                footLeft.applyImpulse(new Vector2(-0.2, -0.5));
+                footRight.applyImpulse(new Vector2(0.2, -0.5));
             }
-
         } else {
-            legLeftEnd.applyForce(new Vector2(0, 1));
-            legRightEnd.applyForce(new Vector2(0, 1));
+            head.applyForce(Vector2.create(-20, body.getTransform().getRotationAngle() + Math.PI / 2));
+            armLeftEnd.applyForce(Vector2.create(-5, body.getTransform().getRotationAngle()));
+            armRightEnd.applyForce(Vector2.create(5, body.getTransform().getRotationAngle()));
+            footLeft.applyForce(Vector2.create(10, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.2));
+            footRight.applyForce(Vector2.create(10, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.2));
         }
 
         Vector2 vel = body.getLinearVelocity();
-        head.applyForce(new Vector2(-moveDx * 3, 0));
-        body.setLinearVelocity(vel.x + (moveDx * 14 - vel.x) * dt * 5, vel.y);
+        if (isTouchingGround())
+            head.applyForce(new Vector2(-moveDx * 10, -1));
+        body.setLinearVelocity(vel.x + (moveDx * 10 - vel.x) * dt * 35, vel.y);
 
         if (moveDx != 0) {
             rightLegJoint.setLimitEnabled(true);
@@ -234,7 +233,23 @@ public class Player {
             leftLegJoint.setLimitEnabled(false);
             leftLegBodyJoint.setLimitEnabled(false);
         }
+        double armDamping = 5;
 
+        if (reachDirection.distanceSquared(0, 0) > 0.1) {
+            double scale = 20;
+            double scale2 = 0.95;
+            Vector2 v = new Vector2(reachDirection.x * scale, reachDirection.y * scale);
+            Vector2 v2 = new Vector2(reachDirection.x * scale, reachDirection.y * scale - 0.1);
+            armLeftEnd.applyForce(v);
+            armRightEnd.applyForce(v2);
+            armLeftStart.applyForce(new Vector2(-v.x * scale2, -v.y * scale2));
+            armRightStart.applyForce(new Vector2(-v2.x * scale2, -v2.y * scale2));
+            armDamping = 0.01;
+        }
+        armLeftStart.setAngularDamping(armDamping);
+        armRightStart.setAngularDamping(armDamping);
+        armLeftEnd.setAngularDamping(armDamping * 1.5);
+        armRightEnd.setAngularDamping(armDamping * 1.5);
     }
 
     public Vector2 getPos() {

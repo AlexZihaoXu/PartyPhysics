@@ -3,6 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.content.player;
 import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Circle;
+import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
@@ -22,7 +23,7 @@ public class GameObjectPlayerHead extends GameObjectPlayerPart {
         fixture.setFilter(filter);
         fixture.setFriction(0.1);
         addFixture(fixture);
-        setMass(MassType.NORMAL);
+        setMass(new Mass(new Vector2(0, 0), 0.2, 0.03));
         translate(x, y);
     }
 
