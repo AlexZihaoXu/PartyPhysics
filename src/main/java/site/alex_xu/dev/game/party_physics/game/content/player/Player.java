@@ -1,19 +1,13 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
-import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.dynamics.contact.Contact;
-import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.dynamics.joint.DistanceJoint;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.Vector2;
-import org.dyn4j.world.ContactCollisionData;
-import org.dyn4j.world.listener.ContactListener;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
-import site.alex_xu.dev.game.party_physics.game.utils.Clock;
+import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class Player {
@@ -24,7 +18,7 @@ public class Player {
     GameObjectPlayerLimb armRightStart, armRightEnd, armLeftStart, armLeftEnd;
     GameObjectPlayerLimb legRightStart, legRightEnd, legLeftStart, legLeftEnd;
 
-    DistanceJoint<GameObject> headBodyJoint;
+    RevoluteJoint<GameObject> headBodyJoint;
     RevoluteJoint<GameObject> rightArmBodyJoint, rightArmJoint, leftArmBodyJoint, leftArmJoint;
     RevoluteJoint<GameObject> rightLegBodyJoint, rightLegJoint, leftLegBodyJoint, leftLegJoint;
 
@@ -32,29 +26,33 @@ public class Player {
     ArrayList<GameObjectPlayerPart> bodyParts = new ArrayList<>();
 
     double lastTouchGroundTime = 0;
+    int moveDx = 0;
     boolean touchGround = false;
+    double queuedJumpTime = 0;
 
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public void setTouchGround(double now) {
-        lastTouchGroundTime = now;
-        touchGround = true;
+    public void setTouchGround(double now, GameObject gameObject) {
+        if (gameObject == legLeftEnd || gameObject == legRightEnd) {
+            lastTouchGroundTime = now;
+            touchGround = true;
+        }
     }
 
     public boolean isTouchingGround() {
-        return touchGround && (head.getCurrentTime() - lastTouchGroundTime < 0.01);
+        return touchGround && (head.getCurrentTime() - lastTouchGroundTime < 20.0 / PhysicsSettings.TICKS_PER_SECOND);
     }
 
     public void initPhysics(GameWorld world) {
         double x = this.x;
         double y = this.y;
         head = new GameObjectPlayerHead(x, y);
-        body = new GameObjectPlayerBody(x, y + GameObjectPlayerHead.r + GameObjectPlayerBody.h / 2 + 0.01);
+        body = new GameObjectPlayerBody(x, y + GameObjectPlayerHead.r + GameObjectPlayerBody.h / 2 + 0.02);
 
-        Vector2 upperCenter = new Vector2(x, y + GameObjectPlayerHead.r + 0.05 + GameObjectPlayerLimb.r + 0.05);
+        Vector2 upperCenter = new Vector2(x, y + GameObjectPlayerHead.r + 0.05 + GameObjectPlayerLimb.r);
         Vector2 lowerCenter = new Vector2(x, y + GameObjectPlayerHead.r + 0.05 + GameObjectPlayerBody.h - GameObjectPlayerLimb.r);
 
         armRightStart = new GameObjectPlayerLimb(upperCenter.x, upperCenter.y, upperCenter.x + 0.35, upperCenter.y);
@@ -63,7 +61,7 @@ public class Player {
         armLeftStart = new GameObjectPlayerLimb(upperCenter.x, upperCenter.y, upperCenter.x - 0.35, upperCenter.y);
         armLeftEnd = new GameObjectPlayerLimb(upperCenter.x - 0.35, upperCenter.y, upperCenter.x - 0.35 - 0.35, upperCenter.y);
 
-        double legGap = 0.055;
+        double legGap = 0.04;
         legLeftStart = new GameObjectPlayerLimb(lowerCenter.x - legGap, lowerCenter.y, lowerCenter.x - legGap, lowerCenter.y + 0.35);
         legLeftEnd = new GameObjectPlayerLimb(lowerCenter.x - legGap, lowerCenter.y + 0.35, lowerCenter.x - legGap, lowerCenter.y + 0.35 + 0.4);
         legRightStart = new GameObjectPlayerLimb(lowerCenter.x + legGap, lowerCenter.y, lowerCenter.x + legGap, lowerCenter.y + 0.35);
@@ -84,7 +82,7 @@ public class Player {
             bodyPart.player = this;
         }
 
-        headBodyJoint = new DistanceJoint<>(head, body, new Vector2(x, y), new Vector2(x, y + GameObjectPlayerHead.r + 0.05));
+        headBodyJoint = new RevoluteJoint<>(head, body, new Vector2(x, y + (GameObjectPlayerHead.r + 0.05) / 2));
         leftArmBodyJoint = new RevoluteJoint<>(body, armLeftStart, upperCenter);
         leftArmJoint = new RevoluteJoint<>(armLeftStart, armLeftEnd, new Vector2(upperCenter.x - 0.35, upperCenter.y));
         rightArmBodyJoint = new RevoluteJoint<>(body, armRightStart, upperCenter);
@@ -108,7 +106,7 @@ public class Player {
             world.getSimulatedWorld().addJoint(joint);
         }
 
-        head.setAngularDamping(200);
+        head.setAngularDamping(10);
         body.setAngularDamping(100);
         armLeftEnd.setAngularDamping(80);
         armRightEnd.setAngularDamping(80);
@@ -116,20 +114,32 @@ public class Player {
         legRightStart.setAngularDamping(80);
         legLeftEnd.setAngularDamping(20);
         legRightEnd.setAngularDamping(20);
+
+        headBodyJoint.setLimitEnabled(true);
+        headBodyJoint.setLimits(-2, 2);
     }
 
     public void jump() {
         if (isTouchingGround()) {
             touchGround = false;
-            head.applyImpulse(new Vector2(0, -4));
-            body.applyImpulse(new Vector2(0, -2));
-            armLeftStart.applyImpulse(new Vector2(-0.15, 0));
-            armRightStart.applyImpulse(new Vector2(0.15, 0));
+            for (GameObjectPlayerPart bodyPart : bodyParts) {
+                Vector2 vel = bodyPart.getLinearVelocity();
+                bodyPart.setLinearVelocity(vel.x, vel.y - 13);
+            }
         }
+    }
+
+    public void setMoveDirection(int dx) {
+        moveDx = dx;
+    }
+
+    public int getMoveDirection() {
+        return moveDx;
     }
 
 
     public void onPhysicsTick(double dt, double now) {
+
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
             head.applyForce(new Vector2(0, -15));
             body.applyForce(new Vector2(0, -13));
@@ -147,8 +157,8 @@ public class Player {
             pos.add(new Vector2(legRightEnd.length, 0).rotate(angle));
             legRightEnd.applyForce(new Vector2(0.15, 10));
 
-            legLeftStart.applyForce(new Vector2(-0.1, 0));
-            legRightStart.applyForce(new Vector2(0.1, 0));
+            legLeftStart.applyForce(new Vector2(-0.5, 0));
+            legRightStart.applyForce(new Vector2(0.5, 0));
 
             armLeftEnd.applyForce(new Vector2(0, 2));
             armRightEnd.applyForce(new Vector2(0, 2));
@@ -166,10 +176,69 @@ public class Player {
             }
 
         } else {
-            head.applyForce(new Vector2(0, -0.5));
-            legLeftEnd.applyForce(new Vector2(0, 0.4));
-            legRightEnd.applyForce(new Vector2(0, 0.4));
+            legLeftEnd.applyForce(new Vector2(0, 1));
+            legRightEnd.applyForce(new Vector2(0, 1));
+        }
+
+        Vector2 vel = body.getLinearVelocity();
+        head.applyForce(new Vector2(-moveDx * 3, 0));
+        body.setLinearVelocity(vel.x + (moveDx * 14 - vel.x) * dt * 5, vel.y);
+
+        if (moveDx != 0) {
+            rightLegJoint.setLimitEnabled(true);
+            rightLegBodyJoint.setLimitEnabled(true);
+            rightLegJoint.setReferenceAngle(0);
+            rightLegBodyJoint.setReferenceAngle(0);
+
+            leftLegJoint.setLimitEnabled(true);
+            leftLegBodyJoint.setLimitEnabled(true);
+            leftLegJoint.setReferenceAngle(0);
+            leftLegBodyJoint.setReferenceAngle(0);
+            double duration = 0.2;
+            double ratec = Math.cos(now / duration * Math.PI) * 0.5 + 0.5;
+            double rates = Math.sin(now / duration * Math.PI) * 0.5 + 0.5;
+            double angle, angle2;
+            angle = 0.2 + ratec * 2.2;
+            angle2 = rates * 1.8;
+
+            if (moveDx < 0) {
+                angle2 *= -1;
+                angle = Math.PI - angle;
+            }
+
+            angle *= -1;
+            angle2 *= -1;
+
+            double gap = 0.1;
+
+            rightLegBodyJoint.setLimits(angle - gap, angle + gap);
+            rightLegJoint.setLimits(angle2 - gap, angle2 + gap);
+
+            angle = 0.2 + (1 - ratec) * 2.2;
+            angle2 = (1 - rates) * 1.8;
+
+            if (moveDx < 0) {
+                angle2 *= -1;
+                angle = Math.PI - angle;
+            }
+
+            angle *= -1;
+            angle2 *= -1;
+
+            leftLegBodyJoint.setLimits(angle - gap, angle + gap);
+            leftLegJoint.setLimits(angle2 - gap, angle2 + gap);
+
+        } else {
+            rightLegJoint.setLimitEnabled(false);
+            rightLegBodyJoint.setLimitEnabled(false);
+            leftLegJoint.setLimitEnabled(false);
+            leftLegBodyJoint.setLimitEnabled(false);
         }
 
     }
+
+    public Vector2 getPos() {
+        return body.getWorldCenter();
+    }
+
 }

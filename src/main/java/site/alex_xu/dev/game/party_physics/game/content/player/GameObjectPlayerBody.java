@@ -12,7 +12,7 @@ import java.awt.*;
 public class GameObjectPlayerBody extends GameObjectPlayerPart {
 
     Color color = new Color(99, 194, 42, 255);
-    static final double w = 0.25, h = 0.8;
+    static final double w = 0.2, h = 0.82;
 
     public GameObjectPlayerBody(double x, double y) {
         super();
@@ -33,7 +33,7 @@ public class GameObjectPlayerBody extends GameObjectPlayerPart {
         renderer.setColor(color);
         renderer.translate(getWorldCenter());
         renderer.rotate(getTransform().getRotationAngle());
-        renderer.rect(-w / 2, -h / 2, w, h/2, 0.3);
+        renderer.rect(-w / 2, -h / 2, w, h/2, 0.2);
         renderer.rect(-w / 2, -0.25, w, h/2 + 0.25, 0.2);
         renderer.popState();
     }

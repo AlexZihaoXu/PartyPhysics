@@ -29,7 +29,7 @@ public class GameObjectWoodPlank extends GameObject {
         fixture.setFriction(0.4);
         addFixture(fixture);
 
-        setMass(new Mass(new Vector2(0, 0), 1, 0.5));
+        setMass(new Mass(new Vector2(0, 0), 0.7, 0.5));
         translate(x + w / 2, y + h / 2);
     }
     @Override

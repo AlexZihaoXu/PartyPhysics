@@ -21,7 +21,7 @@ public class GameObjectBox extends GameObject {
         fixture.setFriction(0.2);
 //        fixture.setRestitutionVelocity(1);
         addFixture(fixture);
-        setMass(new Mass(new Vector2(0, 0), 1, 0.3));
+        setMass(new Mass(new Vector2(0, 0), 0.2, 0.3));
         translate(x + size / 2, y + size / 2);
     }
 

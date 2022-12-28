@@ -43,7 +43,13 @@ class PlayerCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void collision(ContactCollisionData collision) {
-
+        GameObject body1 = (GameObject) collision.getBody1();
+        GameObject body2 = (GameObject) collision.getBody2();
+        if (isPlayerPart(body1) && !isPlayerPart(body2)) {
+            ((GameObjectPlayerPart) body1).getPlayer().setTouchGround(now, body1);
+        } else if (isPlayerPart(body2) && !isPlayerPart(body1)) {
+            ((GameObjectPlayerPart) body2).getPlayer().setTouchGround(now, body2);
+        }
     }
 
     @Override
@@ -53,8 +59,6 @@ class PlayerCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void postSolve(ContactCollisionData collision, SolvedContact contact) {
-        if (isPlayerPart((GameObject) collision.getBody1()) && !isPlayerPart((GameObject) collision.getBody2())) {
-            ((GameObjectPlayerPart) collision.getBody1()).getPlayer().setTouchGround(now);
-        }
+
     }
 }
