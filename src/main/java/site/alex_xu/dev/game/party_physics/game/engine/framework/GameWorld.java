@@ -3,6 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.World;
+import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
@@ -16,7 +17,7 @@ public class GameWorld {
 
     PlayerCollisionHandler playerCollisionHandler = new PlayerCollisionHandler(this);
     World<GameObject> world;
-    HashSet<GameObject> objects = new HashSet<>();
+    ArrayList<GameObject> objects = new ArrayList<>();
 
     private final Body staticBody = new Body();
     long updateCount = 0;
@@ -67,7 +68,12 @@ public class GameWorld {
 
     public void onRender(Renderer renderer) {
         for (GameObject object : objects) {
-            object.onRender(renderer);
+            if (!(object instanceof GameObjectPlayerPart)) {
+                object.onRender(renderer);
+            }
+        }
+        for (Player player : players) {
+            player.onRender(renderer);
         }
     }
 

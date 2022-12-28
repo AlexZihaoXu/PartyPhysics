@@ -6,6 +6,7 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
+import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -167,7 +168,7 @@ public class Player {
             touchGround = false;
             for (GameObjectPlayerPart bodyPart : bodyParts) {
                 Vector2 vel = bodyPart.getLinearVelocity();
-                bodyPart.setLinearVelocity(vel.x, vel.y - 13);
+                bodyPart.setLinearVelocity(vel.x, vel.y - 12);
             }
         }
     }
@@ -300,4 +301,9 @@ public class Player {
         return body.getWorldCenter();
     }
 
+    public void onRender(Renderer renderer) {
+        for (GameObjectPlayerPart bodyPart : bodyParts) {
+            bodyPart.onRender(renderer);
+        }
+    }
 }

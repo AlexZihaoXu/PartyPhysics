@@ -23,7 +23,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     double now;
 
-    int msaaLevel = 0;
+    int aaLevel = 0;
 
     double mouseX = 0, mouseY = 0;
 
@@ -31,6 +31,12 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     boolean[] mouseButtons = new boolean[16];
 
     PartyPhysicsWindow partyPhysicsWindow;
+
+    boolean autoSwitchAALevel = false;
+
+    public void setAutoSwitchAALevelEnabled(boolean enabled) {
+        autoSwitchAALevel = enabled;
+    }
 
     ActiveRenderingJFrame(String title, PartyPhysicsWindow window) {
         super(title);
@@ -72,7 +78,20 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         VolatileImage[] msaaBuffers = null;
 
         int renderScale = 1;
+        double videoDt = 0.001;
         while (running) {
+
+            double higher = videoDt * 64;
+
+            if (higher < 1d / 16) {
+                aaLevel++;
+            }
+            if (videoDt > 1d / 16) {
+                if (aaLevel > 0)
+                    aaLevel--;
+            }
+            aaLevel = Math.max(0, Math.min(3, aaLevel));
+
             now = clock.elapsedTime();
             dt = now - lastTickTime;
             lastTickTime = now;
@@ -83,22 +102,23 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
             partyPhysicsWindow.onTick();
 
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
-            if (msaaLevel == 0) {
+            if (aaLevel == 0) {
                 renderScale = 1;
                 Renderer renderer = new Renderer(g, width, height);
                 partyPhysicsWindow.onRender(renderer);
             } else {
-                if (msaaBuffers == null || msaaBuffers.length != msaaLevel || msaaBuffers[0].validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE || msaaBuffers[0].getWidth() / 2 != width || msaaBuffers[0].getHeight() / 2 != height) {
+                if (msaaBuffers == null || msaaBuffers.length != aaLevel || msaaBuffers[0].validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE || msaaBuffers[0].getWidth() / 2 != width || msaaBuffers[0].getHeight() / 2 != height) {
                     renderScale = 2;
-                    msaaBuffers = new VolatileImage[msaaLevel];
+                    msaaBuffers = new VolatileImage[aaLevel];
                     msaaBuffers[0] = getGraphicsConfiguration().createCompatibleVolatileImage(width * 2, height * 2);
-                    for (int i = 1; i < msaaLevel; i++) {
+                    for (int i = 1; i < aaLevel; i++) {
                         msaaBuffers[i] = getGraphicsConfiguration().createCompatibleVolatileImage(msaaBuffers[i - 1].getWidth() * 2, msaaBuffers[i - 1].getHeight() * 2);
                         msaaBuffers[i].setAccelerationPriority(1);
                         renderScale *= 2;
                     }
                 }
 
+                Clock videoDtClock = new Clock();
                 VolatileImage lastBuffer = msaaBuffers[msaaBuffers.length - 1];
                 Graphics2D g2 = lastBuffer.createGraphics();
                 Renderer renderer = new Renderer(g2, lastBuffer.getWidth(), lastBuffer.getHeight());
@@ -118,6 +138,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
                 g.drawImage(msaaBuffers[0], 0, 0, width, height, this);
 
                 g2.dispose();
+                videoDt = videoDtClock.elapsedTime();
 
             }
 

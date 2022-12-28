@@ -65,7 +65,7 @@ public class PartyPhysicsWindow {
     // Setters
 
     public void setAALevel(int level) {
-        activeRenderingFrame.msaaLevel = level;
+        activeRenderingFrame.aaLevel = level;
     }
 
     // Getters
@@ -108,8 +108,8 @@ public class PartyPhysicsWindow {
         return activeRenderingFrame.now;
     }
 
-    public int getMSAALevel() {
-        return activeRenderingFrame.msaaLevel;
+    public int getAALevel() {
+        return activeRenderingFrame.aaLevel;
     }
 
     public Stage getStage() {

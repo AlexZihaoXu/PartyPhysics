@@ -43,6 +43,9 @@ public class PlayerModelTestStage extends Stage {
 
         player = new Player(new Color(99, 194, 42, 255), -3, -10);
         world.addPlayer(player);
+        for (int i = -5; i < 2; i++) {
+            world.addPlayer(new Player(new Color((int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), 255), i * 0.3 + Math.random() * 0.5, -10));
+        }
 
     }
 
@@ -77,6 +80,12 @@ public class PlayerModelTestStage extends Stage {
         if (keyCode == KeyEvent.VK_W) {
             player.jump();
         }
+        if (keyCode == KeyEvent.VK_LEFT) {
+            getWindow().setAALevel(getWindow().getAALevel() - 1);
+        }
+        if (keyCode == KeyEvent.VK_RIGHT) {
+            getWindow().setAALevel(getWindow().getAALevel() + 1);
+        }
     }
 
     @Override
@@ -87,11 +96,8 @@ public class PlayerModelTestStage extends Stage {
 
         camera.render(world, renderer);
 
-        Vector2 v = camera.getWorldMousePos().subtract(player.body.getWorldCenter());
-
         renderer.setColor(Color.GREEN.darker());
-        renderer.text("X: " + camera.pos, 5, 5);
-        renderer.text("Mouse: " + camera.getWorldMousePos(), 5, 30);
-        renderer.text("Vec: " + v, 5, 55);
+        renderer.text("Dt = " + String.format("%.2f ms", getDeltaTime()), 5, 5);
+        renderer.text("AA.level = " + getWindow().getAALevel(), 5, 35);
     }
 }
