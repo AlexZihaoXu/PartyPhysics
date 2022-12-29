@@ -1,8 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
-import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectBox;
-import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectGround;
-import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectWoodPlank;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectWoodPlank;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;

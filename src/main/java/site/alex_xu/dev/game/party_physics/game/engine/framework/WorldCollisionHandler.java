@@ -10,16 +10,16 @@ import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerH
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerLimb;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 
-class PlayerCollisionHandler implements ContactListener<GameObject> {
+class WorldCollisionHandler implements ContactListener<GameObject> {
     GameWorld world;
 
     double now = 0;
-    PlayerCollisionHandler(GameWorld world) {
+    WorldCollisionHandler(GameWorld world) {
         this.world = world;
     }
 
     public boolean isPlayerPart(GameObject object) {
-        return object instanceof GameObjectPlayerHead || object instanceof GameObjectPlayerBody || object instanceof GameObjectPlayerLimb;
+        return object instanceof GameObjectPlayerPart;
     }
 
     @Override
@@ -34,7 +34,12 @@ class PlayerCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void end(ContactCollisionData collision, Contact contact) {
+        GameObject body1 = (GameObject) collision.getBody1();
+        GameObject body2 = (GameObject) collision.getBody2();
 
+        if (body1 instanceof GameObjectPlayerPart && body2 instanceof GameObjectPlayerPart) {
+            System.out.println("player");
+        }
     }
 
     @Override

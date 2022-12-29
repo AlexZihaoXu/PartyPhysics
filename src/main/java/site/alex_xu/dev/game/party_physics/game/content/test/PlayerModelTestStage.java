@@ -1,9 +1,9 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
 import org.dyn4j.geometry.Vector2;
-import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectBox;
-import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectGround;
-import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectWoodPlank;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectWoodPlank;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
@@ -43,8 +43,8 @@ public class PlayerModelTestStage extends Stage {
 
         player = new Player(new Color(99, 194, 42, 255), -3, -10);
         world.addPlayer(player);
-        for (int i = -1; i < 2; i++) {
-            world.addPlayer(new Player(new Color((int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), 255), i * 0.3 + Math.random() * 0.5, -10));
+        for (int i = -1; i < 1; i++) {
+            world.addPlayer(new Player(new Color((int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), 255), i * 0.3 + Math.random() *2.5, -10));
         }
 
     }
@@ -75,16 +75,31 @@ public class PlayerModelTestStage extends Stage {
     }
 
     @Override
+    public void onMousePressed(double x, double y, int button) {
+        super.onMousePressed(x, y, button);
+        if (button == 3) {
+            Vector2 pos = player.body.getWorldCenter();
+            pos = camera.getWorldMousePos().subtract(pos).getNormalized();
+            player.punch(pos);
+        }
+    }
+
+    @Override
     public void onKeyPressed(int keyCode) {
         super.onKeyPressed(keyCode);
         if (keyCode == KeyEvent.VK_W) {
             player.jump();
         }
-        if (keyCode == KeyEvent.VK_LEFT) {
-            getWindow().setAALevel(getWindow().getAALevel() - 1);
+        if (keyCode == KeyEvent.VK_S) {
+            player.setSneak(true);
         }
-        if (keyCode == KeyEvent.VK_RIGHT) {
-            getWindow().setAALevel(getWindow().getAALevel() + 1);
+    }
+
+    @Override
+    public void onKeyReleased(int keyCode) {
+        super.onKeyReleased(keyCode);
+        if (keyCode == KeyEvent.VK_S) {
+            player.setSneak(false);
         }
     }
 
@@ -97,7 +112,7 @@ public class PlayerModelTestStage extends Stage {
         camera.render(world, renderer);
 
         renderer.setColor(Color.GREEN.darker());
-        renderer.text("Dt = " + String.format("%.2f ms", getWindow().getVideoDt() * 1000 ), 5, 5);
+        renderer.text("Dt = " + String.format("%.2f ms", getWindow().getVideoDt() * 1000), 5, 5);
         renderer.text("AA.level = " + getWindow().getAALevel(), 5, 35);
     }
 }

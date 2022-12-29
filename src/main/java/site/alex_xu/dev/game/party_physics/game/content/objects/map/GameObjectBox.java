@@ -1,4 +1,4 @@
-package site.alex_xu.dev.game.party_physics.game.content.objects;
+package site.alex_xu.dev.game.party_physics.game.content.objects.map;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.*;

@@ -10,12 +10,10 @@ import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class GameWorld {
 
-    PlayerCollisionHandler playerCollisionHandler = new PlayerCollisionHandler(this);
+    WorldCollisionHandler playerCollisionHandler = new WorldCollisionHandler(this);
     World<GameObject> world;
     ArrayList<GameObject> objects = new ArrayList<>();
 
@@ -89,6 +87,11 @@ public class GameWorld {
             }
             for (Player player : players) {
                 player.onPhysicsTick(dt, updateCount * dt);
+                for (Player p : players) {
+                    if (p != player) {
+                        player.tickPlayers(p);
+                    }
+                }
             }
             updateCount++;
         }

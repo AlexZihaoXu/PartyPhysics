@@ -1,6 +1,5 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
-import org.dyn4j.dynamics.Force;
 import org.dyn4j.dynamics.joint.*;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
@@ -26,7 +25,8 @@ public class Player {
     RevoluteJoint<GameObject> rightArmBodyJoint, rightArmJoint, leftArmBodyJoint, leftArmJoint;
     RevoluteJoint<GameObject> rightLegBodyJoint, rightLegJoint, leftLegBodyJoint, leftLegJoint;
 
-    MotorJoint<GameObject> armMotor1, armMotor2;
+    MotorJoint<GameObject> armRightMotor1, armRightMotor2;
+    MotorJoint<GameObject> armLeftMotor1, armLeftMotor2;
 
     WeldJoint<GameObject> footLeftJoint, footRightJoint;
 
@@ -40,6 +40,8 @@ public class Player {
     GameObject groundObject = null;
     boolean touchGround = false;
     boolean sneak = false;
+
+    Vector2 punchDirection = new Vector2();
 
     Color color;
 
@@ -89,10 +91,10 @@ public class Player {
         Vector2 lowerCenter = new Vector2(x, y + GameObjectPlayerHead.r + 0.05 + GameObjectPlayerBody.h - GameObjectPlayerLimb.r);
 
         armRightStart = new GameObjectPlayerLimb(upperCenter.x, upperCenter.y, upperCenter.x + 0.35, upperCenter.y);
-        armRightEnd = new GameObjectPlayerLimb(upperCenter.x + 0.35, upperCenter.y, upperCenter.x + 0.35 + 0.35, upperCenter.y);
+        armRightEnd = new GameObjectPlayerLimb(upperCenter.x + 0.35, upperCenter.y, upperCenter.x + 0.37 + 0.37, upperCenter.y);
 
         armLeftStart = new GameObjectPlayerLimb(upperCenter.x, upperCenter.y, upperCenter.x - 0.35, upperCenter.y);
-        armLeftEnd = new GameObjectPlayerLimb(upperCenter.x - 0.35, upperCenter.y, upperCenter.x - 0.35 - 0.35, upperCenter.y);
+        armLeftEnd = new GameObjectPlayerLimb(upperCenter.x - 0.35, upperCenter.y, upperCenter.x - 0.37 - 0.37, upperCenter.y);
 
         double legGap = 0.04;
         legLeftStart = new GameObjectPlayerLimb(lowerCenter.x - legGap, lowerCenter.y, lowerCenter.x - legGap, lowerCenter.y + 0.35);
@@ -103,8 +105,10 @@ public class Player {
         footLeft = new GameObjectPlayerFoot(lowerCenter.x - legGap, lowerCenter.y + 0.35 + 0.15);
         footRight = new GameObjectPlayerFoot(lowerCenter.x + legGap, lowerCenter.y + 0.35 + 0.15);
 
-        armMotor1 = new MotorJoint<>(body, armRightStart);
-        armMotor2 = new MotorJoint<>(armRightStart, armRightEnd);
+        armRightMotor1 = new MotorJoint<>(body, armRightStart);
+        armRightMotor2 = new MotorJoint<>(armRightStart, armRightEnd);
+        armLeftMotor1 = new MotorJoint<>(body, armLeftStart);
+        armLeftMotor2 = new MotorJoint<>(armLeftStart, armLeftEnd);
 
         bodyParts.add(head);
         bodyParts.add(body);
@@ -146,12 +150,19 @@ public class Player {
         joints.add(rightLegJoint);
         joints.add(footLeftJoint);
         joints.add(footRightJoint);
-        joints.add(armMotor1);
-        joints.add(armMotor2);
-        armMotor1.setMaximumForce(25);
-        armMotor2.setMaximumForce(25);
-        armMotor1.setCollisionAllowed(false);
-        armMotor2.setCollisionAllowed(false);
+        joints.add(armRightMotor1);
+        joints.add(armRightMotor2);
+        joints.add(armLeftMotor1);
+        joints.add(armLeftMotor2);
+        armRightMotor1.setMaximumForce(25);
+        armRightMotor2.setMaximumForce(25);
+        armRightMotor1.setCollisionAllowed(false);
+        armRightMotor2.setCollisionAllowed(false);
+
+        armLeftMotor1.setMaximumForce(25);
+        armLeftMotor2.setMaximumForce(25);
+        armLeftMotor1.setCollisionAllowed(false);
+        armLeftMotor2.setCollisionAllowed(false);
 
         for (Joint<GameObject> joint : joints) {
             world.getSimulatedWorld().addJoint(joint);
@@ -168,6 +179,11 @@ public class Player {
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             bodyPart.color = this.color;
         }
+    }
+
+    public void punch(Vector2 direction) {
+        if (punchDirection.distanceSquared(0, 0) < 0.001)
+            punchDirection = direction.getNormalized();
     }
 
     public void jump() {
@@ -197,6 +213,9 @@ public class Player {
         this.reachDirection.set(reachDirection);
     }
 
+    public boolean isPunching() {
+        return punchDirection.distanceSquared(0, 0) > 0.01;
+    }
     public void onPhysicsTick(double dt, double now) {
 
 
@@ -230,23 +249,30 @@ public class Player {
                 body.applyForce(new Vector2(50 * moveDx, 0));
             }
             double angle = body.getTransform().getRotationAngle();
-            head.applyForce(Vector2.create(-angle * 40, angle));
+            head.applyForce(Vector2.create(-angle * 30, angle));
+            if (sneak) {
+                body.applyForce(new Vector2(0, 120));
+                footLeft.applyForce(new Vector2(0, -30));
+                footRight.applyForce(new Vector2(0, -30));
 
-            if (moveDx == 0) {
-                Vector2 bodyPos = body.getWorldCenter();
-                Vector2 leftLegPos = legLeftEnd.getWorldCenter();
-                Vector2 rightLegPos = legRightEnd.getWorldCenter();
-                double centerX = (leftLegPos.x + rightLegPos.x) / 2;
+            } else {
+                if (moveDx == 0) {
+                    Vector2 bodyPos = body.getWorldCenter();
+                    Vector2 leftLegPos = legLeftEnd.getWorldCenter();
+                    Vector2 rightLegPos = legRightEnd.getWorldCenter();
+                    double centerX = (leftLegPos.x + rightLegPos.x) / 2;
 
-                double rate = Math.min(1, Math.abs(body.getTransform().getRotationAngle() / 0.07));
-                if (centerX > bodyPos.x) {
-                    legLeftStart.applyTorque(4 * rate);
-                    legRightStart.applyTorque(6 * rate);
-                } else {
-                    legLeftStart.applyTorque(-6 * rate);
-                    legRightStart.applyTorque(-4 * rate);
+                    double rate = Math.min(1, Math.abs(body.getTransform().getRotationAngle() / 0.08));
+                    if (centerX > bodyPos.x) {
+                        legLeftStart.applyTorque(4 * rate);
+                        legRightStart.applyTorque(4 * rate);
+                    } else {
+                        legLeftStart.applyTorque(-4 * rate);
+                        legRightStart.applyTorque(-4 * rate);
+                    }
                 }
             }
+
         } else {
             body.applyForce(new Vector2(10 * moveDx, 0));
         }
@@ -307,19 +333,19 @@ public class Player {
         if (reachDirection.distanceSquared(0, 0) > 0.1) {
             body.applyForce(new Vector2(reachDirection.x * 0.3, reachDirection.y));
             double angle = -reachDirection.getAngleBetween(new Vector2(0, 0));
-            armMotor1.setMaximumForce(10);
-            armMotor2.setMaximumForce(10);
-            armMotor1.setMaximumTorque(10);
-            armMotor2.setMaximumTorque(10);
+            armRightMotor1.setMaximumForce(20);
+            armRightMotor2.setMaximumForce(20);
+            armRightMotor1.setMaximumTorque(20);
+            armRightMotor2.setMaximumTorque(20);
 
             double a = 0.5 * (reachDirection.x > 0 ? 1 : -1);
-            armMotor1.setAngularTarget(angle + a / 2);
-            armMotor2.setAngularTarget(-a / 2);
+            armRightMotor1.setAngularTarget(angle + a / 2);
+            armRightMotor2.setAngularTarget(-a / 2);
         } else {
-            armMotor1.setMaximumForce(0);
-            armMotor2.setMaximumForce(0);
-            armMotor1.setMaximumTorque(0);
-            armMotor2.setMaximumTorque(0);
+            armRightMotor1.setMaximumForce(0);
+            armRightMotor2.setMaximumForce(0);
+            armRightMotor1.setMaximumTorque(0);
+            armRightMotor2.setMaximumTorque(0);
             if (grabbingJoint != null) {
                 head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
                 grabbingJoint = null;
@@ -331,10 +357,52 @@ public class Player {
         armRightStart.setAngularDamping(armDamping);
         armLeftEnd.setAngularDamping(armDamping * 1.5);
         armRightEnd.setAngularDamping(armDamping * 1.5);
+
+
+        if (isPunching()) {
+
+            armLeftEnd.applyImpulse(new Vector2(punchDirection.x * 0.8, punchDirection.y > 0 ? punchDirection.y : punchDirection.y * 0.1));
+            legRightEnd.applyImpulse(new Vector2(-punchDirection.x * 0.15, punchDirection.y > 0 ? -punchDirection.y * 0.5 : -punchDirection.y * 0.05));
+            legLeftEnd.applyImpulse(new Vector2(-punchDirection.x * 0.15, punchDirection.y > 0 ? -punchDirection.y * 0.5 : -punchDirection.y * 0.05));
+            armLeftMotor1.setMaximumForce(20);
+            armLeftMotor2.setMaximumForce(20);
+            armLeftMotor1.setMaximumTorque(150);
+            armLeftMotor2.setMaximumTorque(20);
+
+            double rate = Math.abs(1 - (1- punchDirection.distance(0, 0)) * 1.3);
+            double n = rate * 1.3;
+            double angle = punchDirection.getDirection();
+            if (Math.cos(angle) > 0) {
+                armLeftMotor1.setAngularTarget(n + angle);
+                armLeftMotor2.setAngularTarget(-n * 2);
+            } else {
+                armLeftMotor1.setAngularTarget(-n + angle);
+                armLeftMotor2.setAngularTarget(n * 2);
+            }
+        } else {
+            armLeftMotor1.setMaximumForce(0);
+            armLeftMotor2.setMaximumForce(0);
+            armLeftMotor1.setMaximumTorque(0);
+            armLeftMotor2.setMaximumTorque(0);
+        }
+        punchDirection.x -= punchDirection.x * dt * 25;
+        punchDirection.y -= punchDirection.y * dt * 25;
+
     }
 
     public Vector2 getPos() {
         return body.getWorldCenter();
+    }
+
+    public void tickPlayers(Player player) {
+        if (isPunching()) {
+            if (armLeftEnd.getWorldCenter().distance(player.getPos()) < 0.7) {
+                player.body.applyImpulse(punchDirection.product(3));
+            }
+            if (armLeftEnd.getWorldCenter().distance(player.head.getWorldCenter()) < 0.3) {
+                player.head.applyImpulse(punchDirection.product(6));
+            }
+        }
     }
 
     public void onRender(Renderer renderer) {
@@ -342,4 +410,7 @@ public class Player {
             bodyPart.onRender(renderer);
         }
     }
+
+
+
 }
