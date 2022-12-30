@@ -173,8 +173,7 @@ public class Player {
         }
 
 
-        headBodyJoint.setLimitEnabled(true);
-        headBodyJoint.setLimits(-2, 2);
+        headBodyJoint.setLimitEnabled(false);
 
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             bodyPart.color = this.color;
@@ -234,11 +233,12 @@ public class Player {
                 footRight.applyImpulse(new Vector2(0.2, -0.5));
             }
         } else {
-            head.applyForce(Vector2.create(-30, body.getTransform().getRotationAngle() + Math.PI / 2));
+            head.applyForce(Vector2.create(-10, body.getTransform().getRotationAngle() + Math.PI / 2));
+            body.applyForce(Vector2.create(-30, body.getTransform().getRotationAngle() + Math.PI / 2));
             armLeftEnd.applyForce(Vector2.create(-5, body.getTransform().getRotationAngle()));
             armRightEnd.applyForce(Vector2.create(5, body.getTransform().getRotationAngle()));
-            footLeft.applyForce(Vector2.create(15, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.4));
-            footRight.applyForce(Vector2.create(15, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.4));
+            footLeft.applyForce(Vector2.create(20, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.1));
+            footRight.applyForce(Vector2.create(20, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.1));
         }
 
 

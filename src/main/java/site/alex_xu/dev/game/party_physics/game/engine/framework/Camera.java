@@ -22,11 +22,15 @@ public class Camera {
 
     public void render(GameWorld world, Renderer renderer) {
         renderer.pushState();
+        applyTransform(renderer);
+        world.onRender(renderer);
+        renderer.popState();
+    }
+
+    public void applyTransform(Renderer renderer) {
         renderer.translate(getWidth() / 2, getHeight() / 2);
         renderer.scale(scale);
         renderer.translate(-pos.x, -pos.y);
-        world.onRender(renderer);
-        renderer.popState();
     }
 
     public Vector2 getWorldMousePos() {

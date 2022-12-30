@@ -68,6 +68,11 @@ public class PartyPhysicsWindow {
         activeRenderingFrame.aaLevel = level;
     }
 
+
+    public void setAutoSwitchAALevelEnabled(boolean enabled) {
+        activeRenderingFrame.autoSwitchAALevel = enabled;
+    }
+
     // Getters
 
     public boolean isKeyPressed(int keyCode) {

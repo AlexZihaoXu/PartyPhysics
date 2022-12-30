@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import org.dyn4j.geometry.Rectangle;
+import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 
 import java.awt.*;
@@ -181,6 +182,11 @@ public class Renderer {
         path.lineTo(x3, y3);
         path.closePath();
         g.fill(path);
+    }
+
+    public void triangle(Triangle triangle) {
+        Vector2[] vertices = triangle.getVertices();
+        this.triangle(vertices[0].x, vertices[0].y, vertices[1].x, vertices[1].y, vertices[2].x, vertices[2].y);
     }
 
     public void line(Point p1, Point p2) {

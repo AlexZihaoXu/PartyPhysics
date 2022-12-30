@@ -32,11 +32,8 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     PartyPhysicsWindow partyPhysicsWindow;
 
-    boolean autoSwitchAALevel = false;
+    boolean autoSwitchAALevel = true;
 
-    public void setAutoSwitchAALevelEnabled(boolean enabled) {
-        autoSwitchAALevel = enabled;
-    }
 
 
     ActiveRenderingJFrame(String title, PartyPhysicsWindow window) {
@@ -79,34 +76,44 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         VolatileImage[] msaaBuffers = null;
 
         int renderScale = 1;
+        int maxAutoAALevel = 3;
         videoDt = 0.01;
         double lastSwitch = now;
         while (running) {
 
-            if (now - lastSwitch > 0.25) {
-                if (videoDt > 1d / 60) {
-                    lastSwitch = now;
-                    aaLevel--;
-                } else if (videoDt * 8 < 1d / 120) {
-                    lastSwitch = now;
-                    aaLevel++;
+            if (autoSwitchAALevel) {
+                if (width != canvas.getWidth() || height != canvas.getHeight()) {
+                    aaLevel = 0;
+                    double pixelCount = canvas.getWidth() * canvas.getHeight();
+                    maxAutoAALevel = pixelCount > 1e6 ? 2 : 3;
                 }
+                if (now - lastSwitch > 0.25) {
+                    if (videoDt > 1d / 60) {
+                        lastSwitch = now;
+                        aaLevel--;
+                        if (videoDt > 0.5) {
+                            maxAutoAALevel = aaLevel;
+                        }
+                    } else if (videoDt * 8 < 1d / 120) {
+                        lastSwitch = now;
+                        aaLevel++;
+                    }
+                }
+                aaLevel = Math.max(0, Math.min(maxAutoAALevel, aaLevel));
             }
-            aaLevel = Math.max(0, Math.min(3, aaLevel));
-
+            width = canvas.getWidth();
+            height = canvas.getHeight();
             now = clock.elapsedTime();
             dt = now - lastTickTime;
             lastTickTime = now;
 
-            width = canvas.getWidth();
-            height = canvas.getHeight();
+
 
             partyPhysicsWindow.onTick();
 
             Clock videoDtClock = new Clock();
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
             if (aaLevel == 0) {
-                renderScale = 1;
                 Renderer renderer = new Renderer(g, width, height);
                 partyPhysicsWindow.onRender(renderer);
             } else {
