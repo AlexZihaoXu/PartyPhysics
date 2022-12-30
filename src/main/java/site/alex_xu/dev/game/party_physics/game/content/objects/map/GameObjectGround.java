@@ -31,7 +31,7 @@ public class GameObjectGround extends GameObject {
     @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
-        renderer.translate(getWorldCenter());
+        renderer.translate(getRenderPos());
         renderer.setColor(color);
         renderer.rect(-width / 2, -height / 2, width, height);
         renderer.popState();

@@ -36,8 +36,8 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
     public void onRender(Renderer renderer) {
         renderer.pushState();
         renderer.setColor(color);
-        renderer.translate(getWorldCenter());
-        renderer.rotate(getTransform().getRotationAngle());
+        renderer.translate(getRenderPos());
+        renderer.rotate(getRenderRotationAngle());
         renderer.rect(-length / 2 - r, -r, length + r * 2, r * 2, r);
         renderer.popState();
     }

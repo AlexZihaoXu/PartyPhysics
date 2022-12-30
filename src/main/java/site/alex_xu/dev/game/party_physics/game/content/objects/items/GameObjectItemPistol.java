@@ -35,8 +35,8 @@ public class GameObjectItemPistol extends GameObjectItem {
     public void onRender(Renderer renderer) {
         renderer.pushState();
         renderer.setColor(100);
-        renderer.translate(getTransform().getTranslation());
-        renderer.rotate(getTransform().getRotationAngle());
+        renderer.translate(getRenderPos());
+        renderer.rotate(getRenderRotationAngle());
         for (Triangle triangle : triangles)
             renderer.triangle(triangle);
         renderer.popState();

@@ -28,8 +28,8 @@ public class GameObjectBox extends GameObject {
     @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
-        renderer.translate(getWorldCenter());
-        renderer.rotate(getTransform().getRotationAngle());
+        renderer.translate(getRenderPos());
+        renderer.rotate(getRenderRotationAngle());
 
         renderer.setColor(color);
         renderer.rect(-size / 2, -size / 2, size, size);

@@ -35,8 +35,8 @@ public class GameObjectWoodPlank extends GameObject {
     @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
-        renderer.translate(getWorldCenter());
-        renderer.rotate(getTransform().getRotationAngle());
+        renderer.translate(getRenderPos());
+        renderer.rotate(getRenderRotationAngle());
         renderer.setColor(color);
         renderer.rect(-width / 2, -height / 2, width, height);
         renderer.setColor(color.darker());

@@ -30,7 +30,7 @@ public class GameObjectPlayerHead extends GameObjectPlayerPart {
     public void onRender(Renderer renderer) {
         renderer.pushState();
         renderer.setColor(color);
-        renderer.circle(getWorldCenter(), r);
+        renderer.circle(getRenderPos(), r);
         renderer.setColor(color.darker());
         renderer.popState();
     }

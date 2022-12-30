@@ -99,6 +99,9 @@ public class GameWorld {
         for (GameObject object : objects) {
             object.onTick();
         }
+        for (GameObject object : objects) {
+            object.onTickAnimation();
+        }
 
     }
 

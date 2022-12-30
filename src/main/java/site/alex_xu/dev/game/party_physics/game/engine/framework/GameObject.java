@@ -1,12 +1,30 @@
 package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
 import org.dyn4j.dynamics.Body;
+import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 public abstract class GameObject extends Body {
 
     GameWorld world = null;
+    private Vector2 renderPosition = new Vector2();
+    private double renderRotationAngle = 0;
+
+    public Vector2 getRenderPos() {
+        return renderPosition;
+    }
+
+    public double getRenderRotationAngle() {
+        return renderRotationAngle;
+    }
+
+    public void onTickAnimation() {
+        Vector2 vel = getLinearVelocity();
+        renderRotationAngle += getDeltaTime() * getAngularVelocity();
+        renderPosition.x += vel.x * getDeltaTime();
+        renderPosition.y += vel.y * getDeltaTime();
+    }
 
     public double getDeltaTime() {
         return getWindow().getDeltaTime();
@@ -29,7 +47,8 @@ public abstract class GameObject extends Body {
     }
 
     public void onPhysicsTick(double dt) {
-
+        renderPosition.set(getTransform().getTranslation());
+        renderRotationAngle = getTransform().getRotationAngle();
     }
 
     abstract public void onRender(Renderer renderer);
