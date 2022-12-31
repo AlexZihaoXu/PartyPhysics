@@ -4,5 +4,8 @@ public enum PackageTypes {
     HANDSHAKE,
     PING,
 
+    PHYSICS_SYNC_GAME_OBJECT_TRANSFORM,
+    PHYSICS_SYNC_GAME_OBJECT_CREATE
+
 
 }

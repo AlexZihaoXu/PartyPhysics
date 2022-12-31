@@ -5,8 +5,10 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectItem;
-import site.alex_xu.dev.game.party_physics.game.content.objects.projectile.LiteBullet;
+import site.alex_xu.dev.game.party_physics.game.content.objects.projectile.GameObjectLiteBullet;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -16,8 +18,12 @@ public class GameObjectItemPistol extends GameObjectItem {
     private double lastShootTime = 0;
 
     public GameObjectItemPistol(double x, double y) {
+        this(x, y, false);
+    }
+
+    GameObjectItemPistol(double x, double y, boolean flipped) {
         super();
-        updateModel(false);
+        updateModel(flipped);
         translate(x, y);
     }
 
@@ -46,11 +52,40 @@ public class GameObjectItemPistol extends GameObjectItem {
         if (now - lastShootTime > 1 / 4d) {
             lastShootTime = now;
             Vector2 vel = Vector2.create(80, getTransform().getRotationAngle());
-            LiteBullet bullet = new LiteBullet(getWorldPoint(new Vector2(0.24, 0.15 * (isFlipped() ? 1 : -1))), vel);
+            GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.24, 0.15 * (isFlipped() ? 1 : -1))), vel);
             getWorld().addObject(bullet);
             user.body.applyImpulse(Vector2.create(-5, getTransform().getRotationAngle()));
         }
     }
+
+    @Override
+    public Package createCreationPackage() {
+        Package pkg = super.createCreationPackage();
+        pkg.setBoolean("flip", isFlipped());
+        return pkg;
+    }
+
+    @Override
+    public GameObject createFromPackage(Package pkg) {
+
+        int id = pkg.getInteger("id");
+        double posX = pkg.getFraction("pos.x");
+        double posY = pkg.getFraction("pos.y");
+        double posA = pkg.getFraction("pos.a");
+        double velX = pkg.getFraction("vel.x");
+        double velY = pkg.getFraction("vel.y");
+        double velA = pkg.getFraction("vel.a");
+        boolean flipped = pkg.getBoolean("flip");
+
+        GameObject.objectIDCounter = id;
+        GameObjectItemPistol pistol = new GameObjectItemPistol(posX, posY, flipped);
+        pistol.getTransform().setTranslation(posX, posY);
+        pistol.getTransform().setRotation(posA);
+        pistol.setLinearVelocity(velX, velY);
+        pistol.setAngularVelocity(velA);
+        return pistol;
+    }
+
     @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();

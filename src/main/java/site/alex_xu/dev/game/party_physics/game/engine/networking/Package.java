@@ -10,8 +10,9 @@ public class Package {
     private static final byte TYPE_INTEGER = 0;
     private static final byte TYPE_FRACTION = 1;
     private static final byte TYPE_STRING = 2;
+    private static final byte TYPE_BOOLEAN = 3;
 
-    private static final String[] TYPE_NAMES = {"Integer", "Fraction", "String"};
+    private static final String[] TYPE_NAMES = {"Integer", "Fraction", "String", "Boolean"};
     private final PackageTypes type;
     TreeMap<Integer, Object> data = new TreeMap<>();
     TreeMap<Integer, Byte> types = new TreeMap<>();
@@ -100,6 +101,12 @@ public class Package {
         types.put(hash, TYPE_STRING);
     }
 
+    public void setBoolean(String key, boolean value) {
+        int hash = key.hashCode();
+        data.put(hash, value);
+        types.put(hash, TYPE_BOOLEAN);
+    }
+
     public int getInteger(String key) {
         int hash = key.hashCode();
         if (data.containsKey(hash)) {
@@ -131,6 +138,19 @@ public class Package {
         if (data.containsKey(hash)) {
             if (types.get(hash) == TYPE_STRING) {
                 return (String) data.get(hash);
+            } else {
+                throw new RuntimeException("Type for key " + key + " was " + TYPE_NAMES[types.get(hash)]);
+            }
+        } else {
+            throw new RuntimeException("Key " + key + " doesn't exist in the package!");
+        }
+    }
+
+    public boolean getBoolean(String key) {
+        int hash = key.hashCode();
+        if (data.containsKey(hash)) {
+            if (types.get(hash) == TYPE_BOOLEAN) {
+                return (boolean) data.get(hash);
             } else {
                 throw new RuntimeException("Type for key " + key + " was " + TYPE_NAMES[types.get(hash)]);
             }

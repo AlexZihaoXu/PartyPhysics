@@ -3,7 +3,9 @@ package site.alex_xu.dev.game.party_physics.game.content.objects.map;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.*;
 import org.dyn4j.geometry.Rectangle;
+import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemPistol;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
@@ -14,15 +16,31 @@ public class GameObjectBox extends GameObject {
 
     public GameObjectBox(double x, double y) {
         super();
-
-
         Rectangle rectangle = new Rectangle(size, size);
         BodyFixture fixture = new BodyFixture(rectangle);
         fixture.setFriction(0.2);
-//        fixture.setRestitutionVelocity(1);
         addFixture(fixture);
         setMass(new Mass(new Vector2(0, 0), 0.125, 0.3));
         translate(x + size / 2, y + size / 2);
+    }
+
+    @Override
+    public GameObject createFromPackage(Package pkg) {
+        int id = pkg.getInteger("id");
+        double posX = pkg.getFraction("pos.x");
+        double posY = pkg.getFraction("pos.y");
+        double posA = pkg.getFraction("pos.a");
+        double velX = pkg.getFraction("vel.x");
+        double velY = pkg.getFraction("vel.y");
+        double velA = pkg.getFraction("vel.a");
+
+        GameObject.objectIDCounter = id;
+        GameObjectBox box = new GameObjectBox(posX, posY);
+        box.getTransform().setTranslation(posX, posY);
+        box.getTransform().setRotation(posA);
+        box.setLinearVelocity(velX, velY);
+        box.setAngularVelocity(velA);
+        return box;
     }
 
     @Override

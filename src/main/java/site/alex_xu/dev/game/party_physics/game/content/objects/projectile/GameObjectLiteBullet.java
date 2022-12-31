@@ -7,11 +7,12 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectProjectile;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
-public class LiteBullet extends GameObjectProjectile {
+public class GameObjectLiteBullet extends GameObjectProjectile {
 
     private static final double width = 0.3;
     private static final double height = 0.05;
@@ -19,7 +20,7 @@ public class LiteBullet extends GameObjectProjectile {
     private int hitCount = 0;
 
 
-    public LiteBullet(Vector2 pos, Vector2 vel) {
+    public GameObjectLiteBullet(Vector2 pos, Vector2 vel) {
         super();
         Rectangle rectangle = new Rectangle(width, height);
         BodyFixture fixture = new BodyFixture(rectangle);
@@ -32,6 +33,34 @@ public class LiteBullet extends GameObjectProjectile {
         getTransform().setRotation(vel.getDirection());
         setLinearVelocity(vel);
         setBullet(true);
+    }
+
+    @Override
+    public Package createCreationPackage() {
+        Package pkg = super.createCreationPackage();
+        pkg.setInteger("hit", hitCount);
+        return pkg;
+    }
+
+    @Override
+    public GameObject createFromPackage(Package pkg) {
+        int id = pkg.getInteger("id");
+        double posX = pkg.getFraction("pos.x");
+        double posY = pkg.getFraction("pos.y");
+        double posA = pkg.getFraction("pos.a");
+        double velX = pkg.getFraction("vel.x");
+        double velY = pkg.getFraction("vel.y");
+        double velA = pkg.getFraction("vel.a");
+        int hit = pkg.getInteger("hit");
+
+        GameObject.objectIDCounter = id;
+        GameObjectLiteBullet bullet = new GameObjectLiteBullet(new Vector2(), new Vector2());
+        bullet.getTransform().setTranslation(posX, posY);
+        bullet.getTransform().setRotation(posA);
+        bullet.setLinearVelocity(velX, velY);
+        bullet.setAngularVelocity(velA);
+        bullet.hitCount = hit;
+        return bullet;
     }
 
     @Override

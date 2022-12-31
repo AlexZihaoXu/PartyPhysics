@@ -2,13 +2,50 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 public abstract class GameObject extends Body {
 
+    public static int objectIDCounter = 0;
+    private final int objectID = objectIDCounter++;
+
+    public int getObjectID() {
+        return objectID;
+    }
+
+    public Package createSyncPackage() {
+        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_TRANSFORM);
+
+        pkg.setInteger("id", objectID);
+        pkg.setFraction("angle", getTransform().getRotationAngle());
+        pkg.setFraction("pos.x", getTransform().getTranslationX());
+        pkg.setFraction("pos.y", getTransform().getTranslationY());
+        pkg.setFraction("vel.x", getLinearVelocity().x);
+        pkg.setFraction("vel.y", getLinearVelocity().y);
+        pkg.setFraction("vel.a", getAngularVelocity());
+
+        return pkg;
+    }
+
+    public Package createCreationPackage() {
+        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE);
+        pkg.setInteger("id", getObjectID());
+        pkg.setFraction("pos.x", getTransform().getTranslationX());
+        pkg.setFraction("pos.y", getTransform().getTranslationY());
+        pkg.setFraction("pos.a", getTransform().getRotationAngle());
+        pkg.setFraction("vel.x", getLinearVelocity().x);
+        pkg.setFraction("vel.y", getLinearVelocity().y);
+        pkg.setFraction("vel.a", getAngularVelocity());
+        return pkg;
+    }
+
+    public abstract GameObject createFromPackage(Package pkg);
+
     GameWorld world = null;
-    private Vector2 renderPosition = new Vector2();
+    private final Vector2 renderPosition = new Vector2();
     private double renderRotationAngle = 0;
 
     public Vector2 getRenderPos() {

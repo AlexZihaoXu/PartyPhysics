@@ -1,11 +1,13 @@
 package site.alex_xu.dev.game.party_physics.game.content.objects;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerHead;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
-public class GameObjectProjectile extends GameObject {
+public abstract class GameObjectProjectile extends GameObject {
 
     public GameObjectProjectile(){
         super();

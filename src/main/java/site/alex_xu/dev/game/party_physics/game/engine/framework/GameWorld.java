@@ -11,6 +11,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 public class GameWorld {
 
@@ -18,6 +19,7 @@ public class GameWorld {
     World<GameObject> world;
     ArrayList<GameObject> objects = new ArrayList<>();
 
+    TreeMap<Integer, GameObject> objectsIdMap = new TreeMap<>();
 
     private final Body staticBody = new Body();
     long updateCount = 0;
@@ -112,6 +114,7 @@ public class GameWorld {
             throw new IllegalStateException("Attempted to add an object that has already been added to a world!");
         object.world = this;
         objects.add(object);
+        objectsIdMap.put(object.getObjectID(), object);
         world.addBody(object);
     }
 
@@ -126,6 +129,7 @@ public class GameWorld {
             throw new RuntimeException("Attempted to remove an object that doesn't belong to this world!");
         }
         objects.remove(object);
+        objectsIdMap.remove(object.getObjectID());
         world.removeBody(object);
     }
 }

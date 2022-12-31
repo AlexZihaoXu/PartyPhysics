@@ -5,8 +5,10 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Triangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectItem;
-import site.alex_xu.dev.game.party_physics.game.content.objects.projectile.LiteBullet;
+import site.alex_xu.dev.game.party_physics.game.content.objects.projectile.GameObjectLiteBullet;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -16,6 +18,10 @@ public class GameObjectItemSMG extends GameObjectItem {
     private double lastShootTime = 0;
 
     public GameObjectItemSMG(double x, double y) {
+        this(x, y, false);
+    }
+
+    public GameObjectItemSMG(double x, double y, boolean flipped) {
         super();
         updateModel(false);
         translate(x, y);
@@ -46,11 +52,39 @@ public class GameObjectItemSMG extends GameObjectItem {
         if (now - lastShootTime > 1 / 12d) {
             lastShootTime = now;
             Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
-            LiteBullet bullet = new LiteBullet(getWorldPoint(new Vector2(0.26, 0.15 * (isFlipped() ? 1 : -1))), vel);
+            GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.26, 0.15 * (isFlipped() ? 1 : -1))), vel);
             getWorld().addObject(bullet);
             user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.1));
         }
     }
+
+    @Override
+    public Package createCreationPackage() {
+        Package pkg = super.createCreationPackage();
+        pkg.setBoolean("flip", isFlipped());
+        return pkg;
+    }
+
+    @Override
+    public GameObject createFromPackage(Package pkg) {
+        int id = pkg.getInteger("id");
+        double posX = pkg.getFraction("pos.x");
+        double posY = pkg.getFraction("pos.y");
+        double posA = pkg.getFraction("pos.a");
+        double velX = pkg.getFraction("vel.x");
+        double velY = pkg.getFraction("vel.y");
+        double velA = pkg.getFraction("vel.a");
+        boolean flipped = pkg.getBoolean("flip");
+
+        GameObject.objectIDCounter = id;
+        GameObjectItemSMG smg = new GameObjectItemSMG(posX, posY, flipped);
+        smg.getTransform().setTranslation(posX, posY);
+        smg.getTransform().setRotation(posA);
+        smg.setLinearVelocity(velX, velY);
+        smg.setAngularVelocity(velA);
+        return smg;
+    }
+
     @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
