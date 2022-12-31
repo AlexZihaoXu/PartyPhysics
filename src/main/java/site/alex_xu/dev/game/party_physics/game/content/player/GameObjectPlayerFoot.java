@@ -6,6 +6,7 @@ import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 public class GameObjectPlayerFoot extends GameObjectPlayerPart{
@@ -15,8 +16,7 @@ public class GameObjectPlayerFoot extends GameObjectPlayerPart{
 
         Circle circle = new Circle(0.2);
         BodyFixture fixture = new BodyFixture(circle);
-        CategoryFilter filter = new CategoryFilter(2, 0);
-        fixture.setFilter(filter);
+        fixture.setFilter(PhysicsSettings.playerFilter);
         fixture.setFriction(0.9);
         addFixture(fixture);
         setMass(new Mass(new Vector2(0, 0), 0.001, 0.03));

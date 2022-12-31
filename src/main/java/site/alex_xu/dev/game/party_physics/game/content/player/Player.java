@@ -2,6 +2,8 @@ package site.alex_xu.dev.game.party_physics.game.content.player;
 
 import org.dyn4j.dynamics.joint.*;
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectItem;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
@@ -70,7 +72,16 @@ public class Player {
     public void tryGrabItem(GameObject grabbed, GameObject bodyPart) {
         if (grabbingJoint == null && reachDirection.distanceSquared(0, 0) > 0.1) {
             if (bodyPart == this.armRightEnd) {
+                if (grabbed instanceof GameObjectGround) return;
                 grabbingObject = grabbed;
+                if (grabbed instanceof GameObjectItem) {
+                    Vector2 point = armRightEnd.getWorldPoint(new Vector2(0.2, 0));
+                    grabbed.getTransform().setTranslation(point);
+                    grabbed.getTransform().setRotation(armRightEnd.getTransform().getRotationAngle());
+                    grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, point);
+                    ((GameObjectItem) grabbed).setHoldByPlayer(true);
+                    ((GameObjectItem) grabbed).forceUpdateModel(reachDirection.x < 0);
+                }
                 grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, armRightEnd.getWorldCenter());
                 head.getWorld().getSimulatedWorld().addJoint(grabbingJoint);
             }
@@ -215,8 +226,8 @@ public class Player {
     public boolean isPunching() {
         return punchDirection.distanceSquared(0, 0) > 0.01;
     }
-    public void onPhysicsTick(double dt, double now) {
 
+    public void onPhysicsTick(double dt, double now) {
 
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
             footLeft.applyForce(new Vector2(0, 60));
@@ -341,12 +352,20 @@ public class Player {
             double a = 0.5 * (reachDirection.x > 0 ? 1 : -1);
             armRightMotor1.setAngularTarget(angle + a / 2);
             armRightMotor2.setAngularTarget(-a / 2);
+
+            if (getHoldItem() != null) {
+                getHoldItem().setFlipped(reachDirection.x < 0);
+            }
         } else {
             armRightMotor1.setMaximumForce(0);
             armRightMotor2.setMaximumForce(0);
             armRightMotor1.setMaximumTorque(0);
             armRightMotor2.setMaximumTorque(0);
             if (grabbingJoint != null) {
+                if (grabbingObject instanceof GameObjectItem) {
+                    ((GameObjectItem) grabbingObject).setHoldByPlayer(false);
+                    ((GameObjectItem) grabbingObject).forceUpdateModel(((GameObjectItem) grabbingObject).isFlipped());
+                }
                 head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
                 grabbingJoint = null;
                 grabbingObject = null;
@@ -369,7 +388,7 @@ public class Player {
             armLeftMotor1.setMaximumTorque(150);
             armLeftMotor2.setMaximumTorque(20);
 
-            double rate = Math.abs(1 - (1- punchDirection.distance(0, 0)) * 1.3);
+            double rate = Math.abs(1 - (1 - punchDirection.distance(0, 0)) * 1.3);
             double n = rate * 1.3;
             double angle = punchDirection.getDirection();
             if (Math.cos(angle) > 0) {
@@ -389,6 +408,7 @@ public class Player {
         punchDirection.y -= punchDirection.y * dt * 25;
 
     }
+
 
     public Vector2 getPos() {
         return body.getWorldCenter();
@@ -412,5 +432,12 @@ public class Player {
     }
 
 
-
+    public GameObjectItem getHoldItem() {
+        if (this.grabbingJoint != null) {
+            if (this.grabbingObject instanceof GameObjectItem) {
+                return (GameObjectItem) grabbingObject;
+            }
+        }
+        return null;
+    }
 }

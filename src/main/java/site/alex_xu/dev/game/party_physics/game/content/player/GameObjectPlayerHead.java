@@ -7,6 +7,7 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
@@ -18,8 +19,7 @@ public class GameObjectPlayerHead extends GameObjectPlayerPart {
 
         Circle circle = new Circle(r);
         BodyFixture fixture = new BodyFixture(circle);
-        CategoryFilter filter = new CategoryFilter(2, 0);
-        fixture.setFilter(filter);
+        fixture.setFilter(PhysicsSettings.playerFilter);
         fixture.setFriction(0.1);
         addFixture(fixture);
         setMass(new Mass(new Vector2(0, 0), 0.2, 0.03));

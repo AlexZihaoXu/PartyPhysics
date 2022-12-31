@@ -8,6 +8,7 @@ import org.dyn4j.geometry.*;
 import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
@@ -23,8 +24,7 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
         length = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
         org.dyn4j.geometry.Rectangle shape = new Rectangle(length + r * 2, r);
         BodyFixture fixture = new BodyFixture(shape);
-        CategoryFilter filter = new CategoryFilter(2, 0);
-        fixture.setFilter(filter);
+        fixture.setFilter(PhysicsSettings.playerFilter);
         fixture.setFriction(0.9);
         addFixture(fixture);
         setMass(new Mass(new Vector2(0, 0), 0.2, 0.03));

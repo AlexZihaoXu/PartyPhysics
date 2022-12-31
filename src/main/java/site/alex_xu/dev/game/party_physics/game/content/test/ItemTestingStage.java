@@ -28,15 +28,15 @@ public class ItemTestingStage extends Stage {
 
         player = new Player(new Color(0, 0, 0, 255), -3, -10);
         world.addPlayer(player);
-        for (int i = 0; i < 3; i++) {
-            world.addPlayer(new Player(new Color(0, 25, 0, 255), -3 + i, -10));
-        }
+//        for (int i = -1; i < 2; i++) {
+//            world.addPlayer(new Player(new Color(0, 25, 0, 255), -3 + i * 3, -10));
+//        }
 
-        for (int i = 0; i < 10; i++) {
-            world.addObject(new GameObjectBox(i * 1.5, i));
-        }
+//        for (int i = -3; i < 3; i++) {
+//            world.addObject(new GameObjectBox(i * 1.5, i + Math.sin(i * 0.3) * 3));
+//        }
         
-        for (int i = 0; i < 20; i++) {
+        for (int i = -5; i < 5; i++) {
             world.addObject(new GameObjectItemPistol(i / 2d, -10 - i));
         }
 
@@ -63,8 +63,12 @@ public class ItemTestingStage extends Stage {
             Vector2 pos = player.body.getWorldCenter();
             pos = camera.getWorldMousePos().subtract(pos).getNormalized();
             player.setReachDirection(pos);
-        } else {
+        } else if (player.getHoldItem() == null) {
             player.setReachDirection(new Vector2(0, 0));
+        } else {
+            Vector2 pos = player.body.getWorldCenter();
+            pos = camera.getWorldMousePos().subtract(pos).getNormalized();
+            player.setReachDirection(pos);
         }
     }
 
@@ -76,6 +80,11 @@ public class ItemTestingStage extends Stage {
             pos = camera.getWorldMousePos().subtract(pos).getNormalized();
             player.punch(pos);
         }
+        if (button == 1) {
+            if (player.getHoldItem() != null) {
+                player.setReachDirection(new Vector2(0, 0));
+            }
+        }
     }
 
     @Override
@@ -86,6 +95,9 @@ public class ItemTestingStage extends Stage {
         }
         if (keyCode == KeyEvent.VK_S) {
             player.setSneak(true);
+        }
+        if (keyCode == KeyEvent.VK_F) {
+            player.setReachDirection(new Vector2(0, 0));
         }
     }
 

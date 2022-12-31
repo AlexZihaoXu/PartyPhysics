@@ -94,7 +94,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
                         if (videoDt > 0.5) {
                             maxAutoAALevel = aaLevel;
                         }
-                    } else if (videoDt * 8 < 1d / 120) {
+                    } else if (videoDt * 8 < 1d / 60) {
                         lastSwitch = now;
                         aaLevel++;
                     }
