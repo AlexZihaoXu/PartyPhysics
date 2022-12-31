@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ClientSocket {
-    private final String host;
-    private final int port;
+    private String host;
+    private int port;
     private Socket socket = null;
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
@@ -15,6 +15,12 @@ public class ClientSocket {
     public ClientSocket(String host, int port) {
         this.host = host;
         this.port = port;
+    }
+
+    public ClientSocket(Socket socket) throws IOException {
+        this.socket = socket;
+        outputStream = new DataOutputStream(socket.getOutputStream());
+        inputStream = new DataInputStream(socket.getInputStream());
     }
 
     public void connect() {
@@ -40,7 +46,15 @@ public class ClientSocket {
         }
     }
 
-    public Package pull() {
+    public Package pull() throws IOException {
         return new Package(inputStream);
+    }
+
+    public boolean isClosed() {
+        return socket.isClosed();
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

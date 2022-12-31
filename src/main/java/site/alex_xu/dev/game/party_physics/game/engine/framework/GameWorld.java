@@ -118,6 +118,10 @@ public class GameWorld {
         world.addBody(object);
     }
 
+    public ArrayList<GameObject> getObjects() {
+        return objects;
+    }
+
     public boolean hasObject(GameObject object) {
         return object.world == this;
     }

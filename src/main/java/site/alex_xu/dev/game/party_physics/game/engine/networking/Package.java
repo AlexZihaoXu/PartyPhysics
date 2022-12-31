@@ -21,8 +21,8 @@ public class Package {
         this.type = type;
     }
 
-    Package(DataInputStream stream) {
-        try {
+    Package(DataInputStream stream) throws IOException {
+
             type = PackageTypes.values()[stream.readByte()];
 
             int size = stream.readByte();
@@ -44,9 +44,6 @@ public class Package {
                 }
             }
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     void writeStream(DataOutputStream stream) {
