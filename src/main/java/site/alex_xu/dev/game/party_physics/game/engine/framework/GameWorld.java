@@ -10,12 +10,14 @@ import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class GameWorld {
 
     WorldCollisionHandler playerCollisionHandler = new WorldCollisionHandler(this);
     World<GameObject> world;
     ArrayList<GameObject> objects = new ArrayList<>();
+
 
     private final Body staticBody = new Body();
     long updateCount = 0;
@@ -32,7 +34,6 @@ public class GameWorld {
         world.addContactListener(playerCollisionHandler);
 
         staticBody.setMass(MassType.INFINITE);
-
     }
 
     public void addPlayer(Player player) {
@@ -82,6 +83,7 @@ public class GameWorld {
         while (updateCount < expectedUpdateCount) {
             playerCollisionHandler.now = updateCount * dt;
             world.updatev(dt);
+            ArrayList<GameObject> objects = new ArrayList<>(this.objects);
             for (GameObject object : objects) {
                 object.onPhysicsTick(dt);
             }

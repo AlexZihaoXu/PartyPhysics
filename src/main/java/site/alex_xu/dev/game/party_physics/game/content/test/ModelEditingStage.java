@@ -6,6 +6,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -32,10 +33,10 @@ public class ModelEditingStage extends Stage {
         renderer.setLineWidth(1 / camera.scale);
         renderer.setColor(100);
 
-        for (int x = -25; x < 25; x++) {
+        for (int x = -50; x < 50; x++) {
             renderer.line(x, -100, x, 100);
         }
-        for (int y = -25; y < 25; y++) {
+        for (int y = -50; y < 50; y++) {
             renderer.line(-100, y, 100, y);
         }
         renderer.setColor(150, 0, 0);
@@ -69,6 +70,16 @@ public class ModelEditingStage extends Stage {
         renderer.circle(selectedX, selectedY, 1 / camera.scale * 1.2);
         renderer.popState();
 
+    }
+
+    @Override
+    public void onKeyPressed(int keyCode) {
+        super.onKeyPressed(keyCode);
+        if (keyCode == KeyEvent.VK_Z) {
+            if (isKeyPressed(KeyEvent.VK_CONTROL)) {
+                vertices.remove(vertices.size() - 1);
+            }
+        }
     }
 
     @Override
@@ -115,6 +126,8 @@ public class ModelEditingStage extends Stage {
     public void onTick() {
         super.onTick();
         camera.scale += (30 - camera.scale) * Math.min(1, 3 * getDeltaTime());
+        camera.pos.x += (6 - camera.pos.x) * Math.min(1, 3 *getDeltaTime());
+        camera.pos.y += (-6 - camera.pos.y) * Math.min(1, 3 *getDeltaTime());
         Vector2 worldPos = camera.getWorldMousePos();
         worldPos.x = Math.round(worldPos.x);
         worldPos.y = Math.round(worldPos.y);

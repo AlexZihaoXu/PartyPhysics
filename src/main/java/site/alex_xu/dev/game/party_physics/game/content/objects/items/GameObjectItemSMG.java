@@ -10,12 +10,12 @@ import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
-public class GameObjectItemPistol extends GameObjectItem {
+public class GameObjectItemSMG extends GameObjectItem {
 
     private Triangle[] triangles;
     private double lastShootTime = 0;
 
-    public GameObjectItemPistol(double x, double y) {
+    public GameObjectItemSMG(double x, double y) {
         super();
         updateModel(false);
         translate(x, y);
@@ -24,7 +24,7 @@ public class GameObjectItemPistol extends GameObjectItem {
     @Override
     protected void updateModel(boolean flipped) {
         this.removeAllFixtures();
-        triangles = flipped ? getFlippedModel("models/gun/pistol.mdl") : getModel("models/gun/pistol.mdl");
+        triangles = flipped ? getFlippedModel("models/gun/smg.mdl") : getModel("models/gun/smg.mdl");
         for (Triangle triangle : triangles) {
             BodyFixture fixture = new BodyFixture(triangle);
             if (isHoldByPlayer())
@@ -33,9 +33,9 @@ public class GameObjectItemPistol extends GameObjectItem {
             addFixture(fixture);
         }
         if (isHoldByPlayer()) {
-            setAngularDamping(0.1);
+            setAngularDamping(0.3);
         } else {
-            setAngularDamping(10);
+            setAngularDamping(15);
         }
         setMass(new Mass(new Vector2(0, 0), 0.01, 0.001));
     }
@@ -43,12 +43,12 @@ public class GameObjectItemPistol extends GameObjectItem {
     @Override
     public void onUse(Player user) {
         double now = getPhysicsTime();
-        if (now - lastShootTime > 1 / 4d) {
+        if (now - lastShootTime > 1 / 12d) {
             lastShootTime = now;
-            Vector2 vel = Vector2.create(80, getTransform().getRotationAngle());
-            LiteBullet bullet = new LiteBullet(getWorldPoint(new Vector2(0.24, 0.15 * (isFlipped() ? 1 : -1))), vel);
+            Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
+            LiteBullet bullet = new LiteBullet(getWorldPoint(new Vector2(0.26, 0.15 * (isFlipped() ? 1 : -1))), vel);
             getWorld().addObject(bullet);
-            user.body.applyImpulse(Vector2.create(-5, getTransform().getRotationAngle()));
+            user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.1));
         }
     }
     @Override

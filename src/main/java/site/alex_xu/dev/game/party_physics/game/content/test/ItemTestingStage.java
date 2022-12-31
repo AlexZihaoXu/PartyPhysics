@@ -1,10 +1,10 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemSMG;
 import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemPistol;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
-import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectWoodPlank;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
@@ -28,6 +28,9 @@ public class ItemTestingStage extends Stage {
 
         player = new Player(new Color(0, 0, 0, 255), -3, -10);
         world.addPlayer(player);
+        world.addPlayer(new Player(new Color(176, 167, 0, 255), -3, -10));
+        world.addObject(new GameObjectBox(-6, -1));
+        world.addObject(new GameObjectBox(-6, 0));
 //        for (int i = -1; i < 2; i++) {
 //            world.addPlayer(new Player(new Color(0, 25, 0, 255), -3 + i * 3, -10));
 //        }
@@ -35,9 +38,10 @@ public class ItemTestingStage extends Stage {
 //        for (int i = -3; i < 3; i++) {
 //            world.addObject(new GameObjectBox(i * 1.5, i + Math.sin(i * 0.3) * 3));
 //        }
-        
-        for (int i = -5; i < 5; i++) {
-            world.addObject(new GameObjectItemPistol(i / 2d, -10 - i));
+
+        for (int i = -2; i < 2; i++) {
+            world.addObject(new GameObjectItemPistol(i  * 5, -10 - i));
+            world.addObject(new GameObjectItemSMG(i  * 5 + 3, -10 - i));
         }
 
 
@@ -60,13 +64,16 @@ public class ItemTestingStage extends Stage {
         }
         player.setMoveDirection(direction);
         if (getMouseButton(1)) {
-            Vector2 pos = player.body.getWorldCenter();
+            if (player.getHoldItem() != null) {
+                player.getHoldItem().use();
+            }
+            Vector2 pos = player.body.getWorldPoint(new Vector2(0, -0.35));
             pos = camera.getWorldMousePos().subtract(pos).getNormalized();
-            player.setReachDirection(pos);
+            player.setReachDirection(Vector2.create(1, pos.getDirection()));
         } else if (player.getHoldItem() == null) {
             player.setReachDirection(new Vector2(0, 0));
         } else {
-            Vector2 pos = player.body.getWorldCenter();
+            Vector2 pos = player.body.getWorldPoint(new Vector2(0, -0.35));
             pos = camera.getWorldMousePos().subtract(pos).getNormalized();
             player.setReachDirection(pos);
         }
@@ -80,11 +87,7 @@ public class ItemTestingStage extends Stage {
             pos = camera.getWorldMousePos().subtract(pos).getNormalized();
             player.punch(pos);
         }
-        if (button == 1) {
-            if (player.getHoldItem() != null) {
-                player.setReachDirection(new Vector2(0, 0));
-            }
-        }
+
     }
 
     @Override
@@ -112,7 +115,7 @@ public class ItemTestingStage extends Stage {
     @Override
     public void onRender(Renderer renderer) {
         super.onRender(renderer);
-        renderer.setColor(206, 222, 219);
+        renderer.setColor(106, 122, 119);
         renderer.clear();
         camera.render(world, renderer);
 

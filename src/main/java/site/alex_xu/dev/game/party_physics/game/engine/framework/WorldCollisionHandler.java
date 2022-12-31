@@ -5,6 +5,7 @@ import org.dyn4j.dynamics.contact.SolvedContact;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.ContactCollisionData;
 import org.dyn4j.world.listener.ContactListener;
+import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectProjectile;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerBody;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerHead;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerLimb;
@@ -14,6 +15,7 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
     GameWorld world;
 
     double now = 0;
+
     WorldCollisionHandler(GameWorld world) {
         this.world = world;
     }
@@ -68,6 +70,17 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
         } else if (isPlayerPart(body2) && !isPlayerPart(body1)) {
             ((GameObjectPlayerPart) body2).getPlayer().setTouchGround(now, body2, body1, point);
             ((GameObjectPlayerPart) body2).getPlayer().tryGrabItem(body1, body2);
+        }
+        if (body1 instanceof GameObjectProjectile) {
+            boolean delete = ((GameObjectProjectile) body1).onHit(body2, point);
+            if (delete) {
+                world.removeObject(body1);
+            }
+        } else if (body2 instanceof GameObjectProjectile) {
+            boolean delete = ((GameObjectProjectile) body2).onHit(body1, point);
+            if (delete) {
+                world.removeObject(body2);
+            }
         }
     }
 }

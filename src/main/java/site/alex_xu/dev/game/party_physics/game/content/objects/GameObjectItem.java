@@ -16,21 +16,40 @@ public abstract class GameObjectItem extends GameObject {
     private static final HashMap<String, Triangle[]> cache = new HashMap<>();
     private static final HashMap<String, Triangle[]> cacheFlipped = new HashMap<>();
 
-    private boolean holdByPlayer = false;
+    private boolean requestUse = false;
+
+    private Player heldPlayer = null;
 
     private boolean isFlipped = false;
 
-    public void setHoldByPlayer(boolean holdByPlayer) {
-        this.holdByPlayer = holdByPlayer;
+    private double physicsTime = 0;
+
+    public double getPhysicsTime() {
+        return physicsTime;
+    }
+
+    @Override
+    public void onPhysicsTick(double dt) {
+        super.onPhysicsTick(dt);
+        physicsTime += dt;
+        if (requestUse) {
+            onUse(heldPlayer);
+            requestUse = false;
+        }
+    }
+
+    public void setHoldPlayer(Player player) {
+        this.heldPlayer = player;
     }
 
     public boolean isHoldByPlayer() {
-        return holdByPlayer;
+        return heldPlayer != null;
     }
 
     public void forceUpdateModel(boolean flipped) {
         updateModel(flipped);
         isFlipped = flipped;
+        updateMass();
     }
 
     protected abstract void updateModel(boolean flipped);
@@ -38,6 +57,7 @@ public abstract class GameObjectItem extends GameObject {
     public void setFlipped(boolean isFlipped) {
         if (isFlipped != this.isFlipped) {
             updateModel(isFlipped);
+            updateMass();
         }
         this.isFlipped = isFlipped;
     }
@@ -119,5 +139,9 @@ public abstract class GameObjectItem extends GameObject {
         return cacheFlipped.get(path);
     }
 
-    public abstract void onUse(Player user);
+    protected abstract void onUse(Player user);
+
+    public void use() {
+        requestUse = true;
+    }
 }

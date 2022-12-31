@@ -79,7 +79,7 @@ public class Player {
                     grabbed.getTransform().setTranslation(point);
                     grabbed.getTransform().setRotation(armRightEnd.getTransform().getRotationAngle());
                     grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, point);
-                    ((GameObjectItem) grabbed).setHoldByPlayer(true);
+                    ((GameObjectItem) grabbed).setHoldPlayer(this);
                     ((GameObjectItem) grabbed).forceUpdateModel(reachDirection.x < 0);
                 }
                 grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, armRightEnd.getWorldCenter());
@@ -363,7 +363,7 @@ public class Player {
             armRightMotor2.setMaximumTorque(0);
             if (grabbingJoint != null) {
                 if (grabbingObject instanceof GameObjectItem) {
-                    ((GameObjectItem) grabbingObject).setHoldByPlayer(false);
+                    ((GameObjectItem) grabbingObject).setHoldPlayer(null);
                     ((GameObjectItem) grabbingObject).forceUpdateModel(((GameObjectItem) grabbingObject).isFlipped());
                 }
                 head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
