@@ -72,7 +72,7 @@ public abstract class GameObject extends Body {
 
     public void onTickAnimation() {
         Vector2 vel = getLinearVelocity().copy();
-        double velLimit = 3;
+        double velLimit = 0.5;
         double rotLimit = Math.PI / 4;
         renderRotationAngle += getDeltaTime() * Math.min(rotLimit, Math.max(-rotLimit, getAngularVelocity()));
         vel.x = Math.min(velLimit, Math.max(-velLimit, vel.x));

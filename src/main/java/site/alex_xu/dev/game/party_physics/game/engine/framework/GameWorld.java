@@ -117,6 +117,7 @@ public class GameWorld {
         objects.add(object);
         objectsIdMap.put(object.getObjectID(), object);
         world.addBody(object);
+        object.getRenderPos().set(object.getTransform().getTranslation());
     }
 
     public void syncObject(Package pkg) {

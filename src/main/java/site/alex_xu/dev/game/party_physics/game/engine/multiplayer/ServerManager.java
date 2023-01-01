@@ -38,7 +38,6 @@ public class ServerManager implements Runnable {
         try {
             while (!socket.isClosed()) {
                 ClientSocket s = socket.accept();
-                System.out.println("New connection from: " + s.getSocket().getRemoteSocketAddress().toString());
                 int id = clientIDCounter++;
                 Client client = new Client(id, this, s);
                 client.thread.start();
