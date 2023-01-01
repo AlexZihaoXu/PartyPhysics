@@ -156,4 +156,8 @@ public class GameWorld {
     public void setUpdateCount(int value) {
         updateCount = value;
     }
+
+    public GameObject getObject(int objID) {
+        return objectsIdMap.get(objID);
+    }
 }

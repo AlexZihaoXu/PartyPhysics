@@ -59,6 +59,9 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         canvas.addMouseMotionListener(this);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+        setMinimumSize(new Dimension(800, 600));
+        setAlwaysOnTop(true);
+
     }
 
     void mainLoop() {

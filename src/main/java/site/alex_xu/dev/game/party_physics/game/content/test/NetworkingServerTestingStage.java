@@ -29,6 +29,7 @@ public class NetworkingServerTestingStage extends Stage {
 
         world.createGround(3, -2, 5, 0.5);
         player = world.createPlayer(0, -10, Color.WHITE);
+        world.createPlayer(0, -10, Color.GREEN);
 
     }
 

@@ -6,6 +6,8 @@ import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectItem;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -115,7 +117,7 @@ public class Player {
         armLeftStart = new GameObjectPlayerLimb(upperCenter.x, upperCenter.y, upperCenter.x - 0.35, upperCenter.y);
         armLeftEnd = new GameObjectPlayerLimb(upperCenter.x - 0.35, upperCenter.y, upperCenter.x - 0.37 - 0.37, upperCenter.y);
 
-        double legGap = 0.04;
+        double legGap = 0.032;
         legLeftStart = new GameObjectPlayerLimb(lowerCenter.x - legGap, lowerCenter.y, lowerCenter.x - legGap, lowerCenter.y + 0.35);
         legLeftEnd = new GameObjectPlayerLimb(lowerCenter.x - legGap, lowerCenter.y + 0.35, lowerCenter.x - legGap, lowerCenter.y + 0.35 + 0.4);
         legRightStart = new GameObjectPlayerLimb(lowerCenter.x + legGap, lowerCenter.y, lowerCenter.x + legGap, lowerCenter.y + 0.35);
@@ -254,9 +256,6 @@ public class Player {
                 footLeft.applyImpulse(new Vector2(-0.2, -0.5));
                 footRight.applyImpulse(new Vector2(0.2, -0.5));
             }
-            double damping = Math.min(300, 1 / Math.abs(body.getTransform().getRotationAngle()));
-            body.setAngularDamping(damping * 3);
-            armRightStart.setAngularDamping(damping);
         } else {
             head.applyForce(Vector2.create(-10, body.getTransform().getRotationAngle() + Math.PI / 2));
             body.applyForce(Vector2.create(-30, body.getTransform().getRotationAngle() + Math.PI / 2));
@@ -264,8 +263,6 @@ public class Player {
             armRightEnd.applyForce(Vector2.create(5, body.getTransform().getRotationAngle()));
             footLeft.applyForce(Vector2.create(20, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.1));
             footRight.applyForce(Vector2.create(20, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.1));
-            body.setAngularDamping(30);
-            armRightStart.setAngularDamping(20);
         }
 
 
@@ -362,10 +359,10 @@ public class Player {
         if (reachDirection.distanceSquared(0, 0) > 0.1) {
             body.applyForce(new Vector2(reachDirection.x * 0.3, reachDirection.y));
             double angle = -reachDirection.getAngleBetween(new Vector2(0, 0));
-            armRightMotor1.setMaximumForce(20);
-            armRightMotor2.setMaximumForce(20);
-            armRightMotor1.setMaximumTorque(20);
-            armRightMotor2.setMaximumTorque(20);
+            armRightMotor1.setMaximumForce(12);
+            armRightMotor2.setMaximumForce(15);
+            armRightMotor1.setMaximumTorque(12);
+            armRightMotor2.setMaximumTorque(15);
 
             double a = 0.5 * (reachDirection.x > 0 ? 1 : -1);
             armRightMotor1.setAngularTarget(angle + a / 2);
@@ -380,13 +377,7 @@ public class Player {
             armRightMotor1.setMaximumTorque(0);
             armRightMotor2.setMaximumTorque(0);
             if (grabbingJoint != null) {
-                if (grabbingObject instanceof GameObjectItem) {
-                    ((GameObjectItem) grabbingObject).setHoldPlayer(null);
-                    ((GameObjectItem) grabbingObject).forceUpdateModel(((GameObjectItem) grabbingObject).isFlipped());
-                }
-                head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
-                grabbingJoint = null;
-                grabbingObject = null;
+                cancelGrabbing();
             }
         }
 
@@ -425,6 +416,16 @@ public class Player {
         punchDirection.x -= punchDirection.x * dt * 25;
         punchDirection.y -= punchDirection.y * dt * 25;
 
+    }
+
+    private void cancelGrabbing() {
+        if (grabbingObject instanceof GameObjectItem) {
+            ((GameObjectItem) grabbingObject).setHoldPlayer(null);
+            ((GameObjectItem) grabbingObject).forceUpdateModel(((GameObjectItem) grabbingObject).isFlipped());
+        }
+        head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
+        grabbingJoint = null;
+        grabbingObject = null;
     }
 
 
@@ -473,5 +474,27 @@ public class Player {
 
     public Vector2 getReachDirection() {
         return reachDirection;
+    }
+
+    public Package createGrabbingSyncPackage() {
+        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_PLAYER_GRAB);
+        pkg.setInteger("player", getID());
+        pkg.setBoolean("grabbing", grabbingJoint != null);
+        if (grabbingJoint != null) {
+            pkg.setInteger("object", grabbingObject.getObjectID());
+        }
+        return pkg;
+    }
+
+    public void syncGrabbingFromPackage(Package pkg) {
+        if (pkg.getBoolean("grabbing")) {
+            int objID = pkg.getInteger("object");
+            if (grabbingJoint != null) {
+                if (objID != grabbingObject.getObjectID()) {
+                    cancelGrabbing();
+                }
+            }
+            tryGrabItem(head.getWorld().getObject(objID), armRightEnd);
+        }
     }
 }

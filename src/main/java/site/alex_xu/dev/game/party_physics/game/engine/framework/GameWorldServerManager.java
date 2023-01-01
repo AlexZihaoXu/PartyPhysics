@@ -68,6 +68,9 @@ public class GameWorldServerManager implements ContactListener<GameObject> {
                 if (!object.isAtRest())
                     server.broadCast(object.createSyncPackage());
             }
+            for (Player player : getWorld().players.values()) {
+                server.broadCast(player.createGrabbingSyncPackage());
+            }
             lastSyncTime = getWorld().getCurrentTime();
         }
         while (!objectCollisionList.isEmpty()) {

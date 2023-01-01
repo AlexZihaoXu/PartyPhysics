@@ -75,6 +75,8 @@ public class GameWorldClientManager {
                     getWorld().getPlayer(pkg.getInteger("id")).setReachDirection(
                             new Vector2(pkg.getFraction("x"), pkg.getFraction("y"))
                     );
+                } else if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_PLAYER_GRAB) {
+                    getWorld().getPlayer(pkg.getInteger("player")).syncGrabbingFromPackage(pkg);
                 } else {
                     packagesQueue.addLast(pkg);
                 }
