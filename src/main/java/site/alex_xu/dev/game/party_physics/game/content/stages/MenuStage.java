@@ -10,6 +10,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
@@ -61,10 +62,12 @@ class Button {
     public void onRender(Renderer renderer) {
         renderer.pushState();
 
+        renderer.setColor(210, 195, 171, (int) (animationRate * 150));
+        renderer.rect(getX(), getY(), width, height);
         renderer.setTextSize(28);
 
         double posOffset = animationRate * 1.2;
-        int colorOffset = (int) (animationRate * 30);
+        int colorOffset = (int) (animationRate * 40);
 
         renderer.setColor(new Color(138, 132, 127));
         renderer.text(title, getX() + 16 + posOffset, getY() + 12 + posOffset);
@@ -93,6 +96,8 @@ public class MenuStage extends Stage {
 
     Player player;
 
+    double xOffset = 0;
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -117,9 +122,9 @@ public class MenuStage extends Stage {
         renderer.clear();
         renderButtons(renderer);
         renderForeGround(renderer);
-
-        getWindow().setAutoSwitchAALevelEnabled(false);
-        getWindow().setAALevel(2);
+//
+//        getWindow().setAutoSwitchAALevelEnabled(false);
+//        getWindow().setAALevel(0);
 
         renderer.popState();
 
@@ -135,7 +140,7 @@ public class MenuStage extends Stage {
 
         String title = "Party Physics!";
         renderer.pushState();
-        renderer.translate(getWidth() * 0.03 + renderer.getTextWidth(title) / 2, getHeight() * 0.1 + renderer.getTextHeight() / 2);
+        renderer.translate(getWidth() * 0.03 + renderer.getTextWidth(title) / 2 + xOffset, getHeight() * 0.1 + renderer.getTextHeight() / 2);
         renderer.rotate(-0.05);
 
         renderer.setColor(new Color(98, 92, 85));
@@ -174,10 +179,10 @@ public class MenuStage extends Stage {
     @Override
     public void onTick() {
         super.onTick();
-        btnPlay.setPos(getWidth() * 0.01 + 40, getHeight() / 2d - 60);
-        btnTutorials.setPos(getWidth() * 0.01 + 40, getHeight() / 2d);
-        btnOptions.setPos(getWidth() * 0.01 + 40, getHeight() / 2d + 60);
-        btnExit.setPos(getWidth() * 0.01 + 40, getHeight() / 2d + 120);
+        btnPlay.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
+        btnTutorials.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);
+        btnOptions.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d + 60);
+        btnExit.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d + 120);
 
         btnPlay.onTick(getDeltaTime(), this);
         btnTutorials.onTick(getDeltaTime(), this);
@@ -187,7 +192,7 @@ public class MenuStage extends Stage {
         world.onTick();
         camera.scale += (Math.min(getWidth(), getHeight()) / 13d - camera.scale) * Math.min(1, getDeltaTime() * 3);
 
-        if (Math.abs(player.getPos().x - camera.getWorldMousePos().x) > 2) {
+        if (Math.abs(player.getPos().x - camera.getWorldMousePos().x) > 3) {
             if (player.getPos().x > camera.getWorldMousePos().x) {
                 player.setMovementX(-1);
             } else {
@@ -198,6 +203,23 @@ public class MenuStage extends Stage {
         } else {
             player.setMovementX(0);
             player.setReachDirection(new Vector2());
+        }
+
+        if (getWidth() > 1200) {
+            xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
+        } else {
+            xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
+        }
+    }
+
+    @Override
+    public void onMousePressed(double x, double y, int button) {
+        super.onMousePressed(x, y, button);
+        if (btnExit.getBounds().contains(x, y)) {
+            int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                getWindow().getJFrame().dispose();
+            }
         }
     }
 }

@@ -3,6 +3,8 @@ package site.alex_xu.dev.game.party_physics.game.graphics;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.*;
 
+import javax.swing.*;
+
 public class PartyPhysicsWindow {
     private static PartyPhysicsWindow INSTANCE = null;
     final ActiveRenderingJFrame activeRenderingFrame;
@@ -18,6 +20,10 @@ public class PartyPhysicsWindow {
 
     private PartyPhysicsWindow() {
         activeRenderingFrame = new ActiveRenderingJFrame("Party Physics!", this);
+    }
+
+    public JFrame getJFrame() {
+        return activeRenderingFrame;
     }
 
     public void start() {
