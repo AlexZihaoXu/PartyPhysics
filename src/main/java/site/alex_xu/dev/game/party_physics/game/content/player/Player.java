@@ -47,10 +47,17 @@ public class Player {
 
     Color color;
 
-    public Player(Color color, double x, double y) {
+    private final int id;
+
+    public Player(Color color, double x, double y, int id) {
         this.color = color;
         this.x = x;
         this.y = y;
+        this.id = id;
+    }
+
+    public int getID() {
+        return id;
     }
 
     private final Vector2 reachDirection = new Vector2(0, 0);
@@ -211,11 +218,11 @@ public class Player {
         this.sneak = sneak;
     }
 
-    public void setMoveDirection(int dx) {
+    public void setMovementX(int dx) {
         moveDx = dx;
     }
 
-    public int getMoveDirection() {
+    public int getMovementX() {
         return moveDx;
     }
 
@@ -439,5 +446,9 @@ public class Player {
             }
         }
         return null;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

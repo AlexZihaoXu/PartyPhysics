@@ -41,10 +41,10 @@ public class PlayerModelTestStage extends Stage {
             world.addObject(new GameObjectBox(-5, 5 - GameObjectBox.size - 0.6 - i));
         }
 
-        player = new Player(new Color(99, 194, 42, 255), -3, -10);
+        player = new Player(new Color(99, 194, 42, 255), -3, -10, 0);
         world.addPlayer(player);
         for (int i = -1; i < 1; i++) {
-            world.addPlayer(new Player(new Color((int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), 255), i * 0.3 + Math.random() *2.5, -10));
+            world.addPlayer(new Player(new Color((int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), (int) (127 + Math.random() * 128), 255), i * 0.3 + Math.random() * 2.5, -10, i + 10));
         }
 
     }
@@ -64,7 +64,7 @@ public class PlayerModelTestStage extends Stage {
         if (isKeyPressed(KeyEvent.VK_D)) {
             direction++;
         }
-        player.setMoveDirection(direction);
+        player.setMovementX(direction);
         if (getMouseButton(1)) {
             Vector2 pos = player.body.getWorldCenter();
             pos = camera.getWorldMousePos().subtract(pos).getNormalized();

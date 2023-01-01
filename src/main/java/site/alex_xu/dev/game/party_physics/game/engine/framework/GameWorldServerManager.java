@@ -3,6 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectWoodPlank;
+import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.ServerManager;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.GameObjectManager;
@@ -14,6 +15,8 @@ import java.awt.*;
 import java.util.LinkedList;
 
 public class GameWorldServerManager {
+
+    private int playerIDCounter = 0;
     private final GameWorld world;
     private final ServerManager server;
     private final LinkedList<Package> packagesQueue = new LinkedList<>();
@@ -37,9 +40,12 @@ public class GameWorldServerManager {
                 break;
             } else {
                 if (pkg.getType() == PackageTypes.HANDSHAKE) {
-                    System.out.println("client request handshake");
                     for (GameObject object : getWorld().getObjects()) {
-                        getServer().getClient(pkg).send(GameObjectManager.getInstance().createCreationPackage(object));
+                        if (!(object instanceof GameObjectPlayerPart))
+                            getServer().getClient(pkg).send(GameObjectManager.getInstance().createCreationPackage(object));
+                    }
+                    for (Player player : getWorld().players.values()) {
+                        getServer().getClient(pkg).send(GameObjectManager.getInstance().createCreationPackage(player));
                     }
                 } else {
                     packagesQueue.addLast(pkg);
@@ -118,17 +124,22 @@ public class GameWorldServerManager {
 
     public Player createPlayer(double x, double y, Color color) {
 
-        Player player = new Player(color, x, y);
+        Player player = new Player(color, x, y, playerIDCounter++);
         getWorld().addPlayer(player);
 
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_PLAYER_CREATE);
-        int colorInt = (((color.getRed() * 256) + color.getGreen()) * 256 + color.getBlue()) * 256 + color.getAlpha();
-        pkg.setInteger("color", colorInt);
-        pkg.setFraction("x", x);
-        pkg.setFraction("y", y);
-        getServer().broadCast(pkg);
+        getServer().broadCast(GameObjectManager.getInstance().createCreationPackage(player));
 
         return player;
+    }
+
+    public void setPlayerMovementX(Player player, int x) {
+        if (player.getMovementX() != x) {
+            player.setMovementX(x);
+            Package pkg = new Package(PackageTypes.GAME_PLAYER_MOVEMENT_X_SET);
+            pkg.setInteger("id", player.getID());
+            pkg.setInteger("x", x);
+            getServer().broadCast(pkg);
+        }
     }
 
 }

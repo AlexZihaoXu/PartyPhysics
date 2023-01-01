@@ -26,9 +26,9 @@ public class ItemTestingStage extends Stage {
         world.init();
         world.addObject(new GameObjectGround(-100, 6, 200, 0.5));
 
-        player = new Player(new Color(0, 0, 0, 255), -3, -10);
+        player = new Player(new Color(0, 0, 0, 255), -3, -10, 0);
         world.addPlayer(player);
-        world.addPlayer(new Player(new Color(176, 167, 0, 255), -3, -10));
+        world.addPlayer(new Player(new Color(176, 167, 0, 255), -3, -10, 1));
         world.addObject(new GameObjectBox(-6, -1));
         world.addObject(new GameObjectBox(-6, 0));
 //        for (int i = -1; i < 2; i++) {
@@ -62,7 +62,7 @@ public class ItemTestingStage extends Stage {
         if (isKeyPressed(KeyEvent.VK_D)) {
             direction++;
         }
-        player.setMoveDirection(direction);
+        player.setMovementX(direction);
         if (getMouseButton(1)) {
             if (player.getHoldItem() != null) {
                 player.getHoldItem().use();

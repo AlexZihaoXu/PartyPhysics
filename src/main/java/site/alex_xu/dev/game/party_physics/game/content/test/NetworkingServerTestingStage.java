@@ -1,5 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.*;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Networking;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
@@ -7,13 +8,14 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class NetworkingServerTestingStage extends Stage {
 
     GameWorldServerManager world = new GameWorldServerManager();
     Camera camera = new Camera();
 
-    Clock clock = new Clock();
+    Player player;
 
     @Override
     public void onLoad() {
@@ -21,6 +23,7 @@ public class NetworkingServerTestingStage extends Stage {
         world.load();
 
         world.createGround(-10, 3, 20, 1);
+        player = world.createPlayer(0, -10, Color.WHITE);
 
     }
 
@@ -35,10 +38,15 @@ public class NetworkingServerTestingStage extends Stage {
         super.onTick();
         world.onTick();
 
-        if (clock.elapsedTime() > 0.2) {
-            clock.reset();
-            world.createBox(Math.random() * 10 - 5, -15);
+        int moveX = 0;
+        if (isKeyPressed(KeyEvent.VK_D)) {
+            moveX++;
         }
+        if (isKeyPressed(KeyEvent.VK_A)) {
+            moveX--;
+        }
+        world.setPlayerMovementX(player, moveX);
+
     }
 
     @Override
@@ -51,6 +59,7 @@ public class NetworkingServerTestingStage extends Stage {
         renderer.setColor(new Color(11, 43, 93));
         renderer.clear();
         camera.render(world.getWorld(), renderer);
+
     }
 
     public static void main(String[] args) {

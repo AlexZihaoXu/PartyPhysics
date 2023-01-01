@@ -25,7 +25,7 @@ public class GameWorld {
     private final Body staticBody = new Body();
     long updateCount = 0;
 
-    ArrayList<Player> players = new ArrayList<>();
+    TreeMap<Integer, Player> players = new TreeMap<>();
 
     public GameWorld() {
     }
@@ -40,7 +40,7 @@ public class GameWorld {
     }
 
     public void addPlayer(Player player) {
-        players.add(player);
+        players.put(player.getID(), player);
         player.initPhysics(this);
     }
 
@@ -74,7 +74,7 @@ public class GameWorld {
                 object.onRender(renderer);
             }
         }
-        for (Player player : players) {
+        for (Player player : players.values()) {
             player.onRender(renderer);
         }
     }
@@ -90,9 +90,9 @@ public class GameWorld {
             for (GameObject object : objects) {
                 object.onPhysicsTick(dt);
             }
-            for (Player player : players) {
+            for (Player player : players.values()) {
                 player.onPhysicsTick(dt, updateCount * dt);
-                for (Player p : players) {
+                for (Player p : players.values()) {
                     if (p != player) {
                         player.tickPlayers(p);
                     }
@@ -108,6 +108,10 @@ public class GameWorld {
             object.onTickAnimation();
         }
 
+    }
+
+    public Player getPlayer(int id) {
+        return players.get(id);
     }
 
     public void addObject(GameObject object) {

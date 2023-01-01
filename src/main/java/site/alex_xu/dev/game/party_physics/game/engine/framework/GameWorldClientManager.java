@@ -1,10 +1,12 @@
 package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.ClientManager;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.GameObjectManager;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 
+import java.awt.*;
 import java.util.LinkedList;
 
 public class GameWorldClientManager {
@@ -51,6 +53,10 @@ public class GameWorldClientManager {
                     getWorld().addObject(obj);
                 } else if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_OBJECT_TRANSFORM) {
                     getWorld().syncObject(pkg);
+                } else if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_PLAYER_CREATE) {
+                    getWorld().addPlayer(GameObjectManager.getInstance().createPlayerFromPackage(pkg));
+                } else if (pkg.getType() == PackageTypes.GAME_PLAYER_MOVEMENT_X_SET) {
+                    getWorld().getPlayer(pkg.getInteger("id")).setMovementX(pkg.getInteger("x"));
                 } else {
                     packagesQueue.addLast(pkg);
                 }
