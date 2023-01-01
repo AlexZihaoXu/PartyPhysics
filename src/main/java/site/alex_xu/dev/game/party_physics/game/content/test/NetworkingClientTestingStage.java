@@ -46,6 +46,8 @@ public class NetworkingClientTestingStage extends Stage {
         renderer.pushState();
         renderer.setColor(new Color(0, 100, 0));
         renderer.text("RX: " + world.getRXPKGSpeed() + " pkg/sec ", 5, 5);
+        renderer.text("Dt: " + String.format("%.3f ms", getDeltaTime()), 5, 25);
+        System.out.printf("%.3f ms", getDeltaTime());
         renderer.popState();
     }
 

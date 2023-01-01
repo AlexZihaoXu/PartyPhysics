@@ -64,7 +64,8 @@ public class GameWorldServerManager implements ContactListener<GameObject> {
         getWorld().onTick();
         if (getWorld().getCurrentTime() - lastSyncTime > 1d / PhysicsSettings.SYNCS_PER_SECOND) {
             for (GameObject object : getWorld().getObjects()) {
-                server.broadCast(object.createSyncPackage());
+                if (!object.isAtRest())
+                    server.broadCast(object.createSyncPackage());
             }
             lastSyncTime = getWorld().getCurrentTime();
         }
