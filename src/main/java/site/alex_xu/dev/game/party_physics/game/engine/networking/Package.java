@@ -11,6 +11,7 @@ public class Package {
     private static final byte TYPE_FRACTION = 1;
     private static final byte TYPE_STRING = 2;
     private static final byte TYPE_BOOLEAN = 3;
+    private int packageSize = 2;
 
     private static final String[] TYPE_NAMES = {"Integer", "Fraction", "String", "Boolean"};
     private final PackageTypes type;
@@ -23,26 +24,35 @@ public class Package {
 
     Package(DataInputStream stream) throws IOException {
 
-            type = PackageTypes.values()[stream.readByte()];
+        type = PackageTypes.values()[stream.readByte()];
 
-            int size = stream.readByte();
-            for (int i = 0; i < size; i++) {
-                int hash = stream.readInt();
-                byte type = stream.readByte();
-                types.put(hash, type);
-                if (type == TYPE_INTEGER) {
-                    data.put(hash, stream.readInt());
-                } else if (type == TYPE_FRACTION) {
-                    data.put(hash, stream.readDouble());
-                } else if (type == TYPE_STRING) {
-                    int length = stream.readInt();
-                    StringBuilder s = new StringBuilder();
-                    for (int j = 0; j < length; j++) {
-                        s.append(stream.readChar());
-                    }
-                    data.put(hash, s.toString());
+        int size = stream.readByte();
+        for (int i = 0; i < size; i++) {
+            int hash = stream.readInt();
+            byte type = stream.readByte();
+            types.put(hash, type);
+            packageSize += Integer.SIZE / Byte.SIZE + 1;
+            if (type == TYPE_INTEGER) {
+                data.put(hash, stream.readInt());
+                packageSize += Integer.SIZE / Byte.SIZE;
+            } else if (type == TYPE_FRACTION) {
+                data.put(hash, stream.readFloat());
+                packageSize += Float.SIZE / Byte.SIZE;
+            } else if (type == TYPE_BOOLEAN) {
+                data.put(hash, stream.readBoolean());
+                packageSize += 1;
+            } else if (type == TYPE_STRING) {
+                int length = stream.readInt();
+                StringBuilder s = new StringBuilder();
+                for (int j = 0; j < length; j++) {
+                    s.append(stream.readChar());
                 }
+                packageSize += s.length() * Character.SIZE / Byte.SIZE;
+                data.put(hash, s.toString());
+            } else {
+                throw new RuntimeException("Unknown type ID found in package " + this.type + " : " + (int) type);
             }
+        }
 
     }
 
@@ -63,7 +73,9 @@ public class Package {
                 if (type == TYPE_INTEGER) {
                     stream.writeInt((int) value);
                 } else if (type == TYPE_FRACTION) {
-                    stream.writeDouble((double) value);
+                    stream.writeFloat((float) value);
+                } else if (type == TYPE_BOOLEAN) {
+                    stream.writeBoolean((boolean) value);
                 } else if (type == TYPE_STRING) {
                     String s = (String) value;
                     stream.writeInt(s.length());
@@ -82,24 +94,36 @@ public class Package {
 
     public void setInteger(String key, int value) {
         int hash = key.hashCode();
+        if (!data.containsKey(hash))
+            packageSize += Integer.SIZE / Byte.SIZE + Integer.SIZE / Byte.SIZE + 1;
         data.put(hash, value);
         types.put(hash, TYPE_INTEGER);
     }
 
-    public void setFraction(String key, double value) {
+    public void setFraction(String key, float value) {
         int hash = key.hashCode();
+        if (!data.containsKey(hash))
+            packageSize += Float.SIZE / Byte.SIZE + Integer.SIZE / Byte.SIZE + 1;
         data.put(hash, value);
         types.put(hash, TYPE_FRACTION);
     }
 
+    public void setFraction(String key, double value) {
+        setFraction(key, (float) value);
+    }
+
     public void setString(String key, String value) {
         int hash = key.hashCode();
+        if (!data.containsKey(hash))
+            packageSize += (value.length() * Character.SIZE) / Byte.SIZE + Integer.SIZE / Byte.SIZE + 1;
         data.put(hash, value);
         types.put(hash, TYPE_STRING);
     }
 
     public void setBoolean(String key, boolean value) {
         int hash = key.hashCode();
+        if (!data.containsKey(hash))
+            packageSize += +Integer.SIZE / Byte.SIZE + 2;
         data.put(hash, value);
         types.put(hash, TYPE_BOOLEAN);
     }
@@ -117,11 +141,15 @@ public class Package {
         }
     }
 
+    public int getPackageSize() {
+        return packageSize;
+    }
+
     public double getFraction(String key) {
         int hash = key.hashCode();
         if (data.containsKey(hash)) {
             if (types.get(hash) == TYPE_FRACTION) {
-                return (double) data.get(hash);
+                return (float) data.get(hash);
             } else {
                 throw new RuntimeException("Type for key " + key + " was " + TYPE_NAMES[types.get(hash)]);
             }

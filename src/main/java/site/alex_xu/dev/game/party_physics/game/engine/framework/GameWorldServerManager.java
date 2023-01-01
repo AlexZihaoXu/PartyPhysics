@@ -167,6 +167,16 @@ public class GameWorldServerManager implements ContactListener<GameObject> {
         getServer().broadCast(pkg);
     }
 
+    public void setPlayerSneak(Player player, boolean sneak) {
+        if (sneak != player.isSneaking()) {
+            player.setSneak(sneak);
+            Package pkg = new Package(PackageTypes.GAME_PLAYER_MOVEMENT_SNEAK);
+            pkg.setInteger("id", player.getID());
+            pkg.setBoolean("sneak", sneak);
+            getServer().broadCast(pkg);
+        }
+    }
+
     @Override
     public void begin(ContactCollisionData<GameObject> collision, Contact contact) {
 

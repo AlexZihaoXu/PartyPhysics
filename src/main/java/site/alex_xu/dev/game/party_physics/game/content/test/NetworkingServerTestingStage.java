@@ -15,6 +15,8 @@ public class NetworkingServerTestingStage extends Stage {
     GameWorldServerManager world = new GameWorldServerManager();
     Camera camera = new Camera();
 
+    Clock clock = new Clock();
+
     Player player;
 
     @Override
@@ -22,8 +24,8 @@ public class NetworkingServerTestingStage extends Stage {
         super.onLoad();
         world.load();
 
-        world.createGround(-10, 3, 20, 1);
-        world.createBox(1, -10);
+        world.createGround(-30, 3, 60, 1);
+
         world.createGround(3, -2, 5, 0.5);
         player = world.createPlayer(0, -10, Color.WHITE);
 
@@ -47,6 +49,12 @@ public class NetworkingServerTestingStage extends Stage {
         if (isKeyPressed(KeyEvent.VK_A)) {
             moveX--;
         }
+
+        if (clock.elapsedTime() > 0.2) {
+            clock.reset();
+            world.createBox(Math.random() * 10 - 5, Math.random() * 3 - 20);
+        }
+
         world.setPlayerMovementX(player, moveX);
 
     }

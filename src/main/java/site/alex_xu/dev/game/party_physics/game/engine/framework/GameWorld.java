@@ -126,7 +126,8 @@ public class GameWorld {
 
     public void syncObject(Package pkg) {
         int id = pkg.getInteger("id");
-        objectsIdMap.get(id).syncFromPackage(pkg);
+        if (objectsIdMap.containsKey(id))
+            objectsIdMap.get(id).syncFromPackage(pkg);
     }
 
     public ArrayList<GameObject> getObjects() {

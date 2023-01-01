@@ -458,4 +458,8 @@ public class Player {
     public ArrayList<GameObjectPlayerPart> getBodyParts() {
         return bodyParts;
     }
+
+    public boolean isSneaking() {
+        return sneak;
+    }
 }

@@ -14,7 +14,10 @@ public class GameWorldClientManager {
 
     private final LinkedList<Package> packagesQueue = new LinkedList<>();
 
-    private final LinkedList<Double> packageRXSpeedCountList = new LinkedList<>();
+    private final LinkedList<Double> packageRXPackageSpeedCountList = new LinkedList<>();
+    private final LinkedList<Integer> packageRXBytesSpeedCountList = new LinkedList<>();
+
+    private int packageRXBytesSpeedSum = 0;
     private final LinkedList<Double> packageTXSpeedCountList = new LinkedList<>();
 
     public GameWorldClientManager(GameWorld world, ClientManager clientManager) {
@@ -51,7 +54,9 @@ public class GameWorldClientManager {
             if (pkg == null) {
                 break;
             } else {
-                packageRXSpeedCountList.add(now);
+                packageRXPackageSpeedCountList.add(now);
+                packageRXBytesSpeedCountList.add(pkg.getPackageSize());
+                packageRXBytesSpeedSum += pkg.getPackageSize();
                 if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE) {
                     GameObject obj = GameObjectManager.getInstance().createFromPackage(pkg);
                     getWorld().addObject(obj);
@@ -63,20 +68,27 @@ public class GameWorldClientManager {
                     getWorld().getPlayer(pkg.getInteger("id")).setMovementX(pkg.getInteger("x"));
                 } else if (pkg.getType() == PackageTypes.GAME_PLAYER_MOVEMENT_JUMP) {
                     getWorld().getPlayer(pkg.getInteger("id")).jump();
-                }else {
+                } else if (pkg.getType() == PackageTypes.GAME_PLAYER_MOVEMENT_SNEAK) {
+                    getWorld().getPlayer(pkg.getInteger("id")).setSneak(pkg.getBoolean("sneak"));
+                } else {
                     packagesQueue.addLast(pkg);
                 }
             }
         }
-        if (!packageRXSpeedCountList.isEmpty())
-            while (now - packageRXSpeedCountList.getFirst() > 1) {
-                packageRXSpeedCountList.removeFirst();
-            }
+
+        while (!packageRXPackageSpeedCountList.isEmpty() && now - packageRXPackageSpeedCountList.getFirst() > 1) {
+            packageRXPackageSpeedCountList.removeFirst();
+            packageRXBytesSpeedSum -= packageRXBytesSpeedCountList.removeFirst();
+        }
 
     }
 
     public int getRXPKGSpeed() {
-        return packageRXSpeedCountList.size();
+        return packageRXPackageSpeedCountList.size();
+    }
+
+    public int getRXBytesSpeed() {
+        return packageRXBytesSpeedSum;
     }
 
     public void onTick() {

@@ -52,7 +52,8 @@ public class ClientSocket {
 
     public void close() {
         try {
-            socket.close();
+            if (socket != null)
+                socket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

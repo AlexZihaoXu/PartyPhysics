@@ -15,5 +15,7 @@ public enum PackageTypes {
     GAME_PLAYER_MOVEMENT_X_SET,
     GAME_PLAYER_MOVEMENT_JUMP,
 
+    GAME_PLAYER_MOVEMENT_SNEAK
+
 
 }
