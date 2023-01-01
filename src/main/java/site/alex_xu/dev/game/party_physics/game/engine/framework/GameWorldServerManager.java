@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.SolvedContact;
+import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.ContactCollisionData;
 import org.dyn4j.world.listener.ContactListener;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
@@ -173,6 +174,18 @@ public class GameWorldServerManager implements ContactListener<GameObject> {
             Package pkg = new Package(PackageTypes.GAME_PLAYER_MOVEMENT_SNEAK);
             pkg.setInteger("id", player.getID());
             pkg.setBoolean("sneak", sneak);
+            getServer().broadCast(pkg);
+        }
+    }
+
+    public void setReachDirection(Player player, Vector2 direction) {
+        Vector2 diff = player.getReachDirection().difference(direction);
+        if (diff.getMagnitude() > 0.1 || Math.toDegrees(diff.getDirection()) > 1) {
+            player.setReachDirection(direction);
+            Package pkg = new Package(PackageTypes.GAME_PLAYER_REACH_DIRECTION_SET);
+            pkg.setInteger("id", player.getID());
+            pkg.setFraction("x", direction.x);
+            pkg.setFraction("y", direction.y);
             getServer().broadCast(pkg);
         }
     }

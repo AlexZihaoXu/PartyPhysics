@@ -1,5 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
+import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.ClientManager;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.GameObjectManager;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
@@ -70,6 +71,10 @@ public class GameWorldClientManager {
                     getWorld().getPlayer(pkg.getInteger("id")).jump();
                 } else if (pkg.getType() == PackageTypes.GAME_PLAYER_MOVEMENT_SNEAK) {
                     getWorld().getPlayer(pkg.getInteger("id")).setSneak(pkg.getBoolean("sneak"));
+                } else if (pkg.getType() == PackageTypes.GAME_PLAYER_REACH_DIRECTION_SET) {
+                    getWorld().getPlayer(pkg.getInteger("id")).setReachDirection(
+                            new Vector2(pkg.getFraction("x"), pkg.getFraction("y"))
+                    );
                 } else {
                     packagesQueue.addLast(pkg);
                 }

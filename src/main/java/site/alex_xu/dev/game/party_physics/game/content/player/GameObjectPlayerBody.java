@@ -55,8 +55,8 @@ public class GameObjectPlayerBody extends GameObjectPlayerPart {
         renderer.setColor(color);
         renderer.translate(getRenderPos());
         renderer.rotate(getRenderRotationAngle());
-        renderer.rect(-w / 2, -h / 2, w, h/2, 0.2);
-        renderer.rect(-w / 2, -0.25, w, h/2 + 0.25, 0.2);
+        renderer.rect(-w / 2, -h / 2, w, h / 2, 0.2);
+        renderer.rect(-w / 2, -0.25, w, h / 2 + 0.25, 0.2);
         renderer.popState();
     }
 }

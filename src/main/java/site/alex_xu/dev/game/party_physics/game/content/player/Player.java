@@ -190,6 +190,7 @@ public class Player {
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             bodyPart.setAngularDamping(20);
         }
+        body.setAngularDamping(30);
 
 
         headBodyJoint.setLimitEnabled(false);
@@ -238,11 +239,13 @@ public class Player {
     public void onPhysicsTick(double dt, double now) {
 
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
-            footLeft.applyForce(new Vector2(0, 60));
-            footRight.applyForce(new Vector2(0, 60));
-            legLeftStart.applyForce(new Vector2(0, -50));
-            legRightStart.applyForce(new Vector2(0, -50));
-            head.applyForce(new Vector2(0, -50));
+            head.applyForce(new Vector2(0, -100));
+            footLeft.applyForce(new Vector2(0, 50));
+            footRight.applyForce(new Vector2(0, 50));
+            head.applyForce(Vector2.create(-10, body.getTransform().getRotationAngle() + Math.PI / 2));
+            body.applyForce(Vector2.create(-60, body.getTransform().getRotationAngle() + Math.PI / 2));
+            footLeft.applyForce(Vector2.create(30, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.1));
+            footRight.applyForce(Vector2.create(30, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.1));
             if (footLeft.getWorldCenter().distanceSquared(footRight.getWorldCenter()) < 0.015) {
                 Vector2 v = footLeft.getWorldCenter().subtract(footRight.getWorldCenter()).getNormalized();
                 footLeft.applyForce(new Vector2(v.x * 0.1, v.y * 0.1));
@@ -251,6 +254,9 @@ public class Player {
                 footLeft.applyImpulse(new Vector2(-0.2, -0.5));
                 footRight.applyImpulse(new Vector2(0.2, -0.5));
             }
+            double damping = Math.min(300, 1 / Math.abs(body.getTransform().getRotationAngle()));
+            body.setAngularDamping(damping * 3);
+            armRightStart.setAngularDamping(damping);
         } else {
             head.applyForce(Vector2.create(-10, body.getTransform().getRotationAngle() + Math.PI / 2));
             body.applyForce(Vector2.create(-30, body.getTransform().getRotationAngle() + Math.PI / 2));
@@ -258,6 +264,8 @@ public class Player {
             armRightEnd.applyForce(Vector2.create(5, body.getTransform().getRotationAngle()));
             footLeft.applyForce(Vector2.create(20, body.getTransform().getRotationAngle() + Math.PI / 2 + 0.1));
             footRight.applyForce(Vector2.create(20, body.getTransform().getRotationAngle() + Math.PI / 2 - 0.1));
+            body.setAngularDamping(30);
+            armRightStart.setAngularDamping(20);
         }
 
 
@@ -268,7 +276,7 @@ public class Player {
                 body.applyForce(new Vector2(50 * moveDx, 0));
             }
             double angle = body.getTransform().getRotationAngle();
-            head.applyForce(Vector2.create(-angle * 30, angle));
+            head.applyForce(Vector2.create(-angle * 15, angle));
             if (sneak) {
                 body.applyForce(new Vector2(0, 120));
                 footLeft.applyForce(new Vector2(0, -30));
@@ -461,5 +469,9 @@ public class Player {
 
     public boolean isSneaking() {
         return sneak;
+    }
+
+    public Vector2 getReachDirection() {
+        return reachDirection;
     }
 }

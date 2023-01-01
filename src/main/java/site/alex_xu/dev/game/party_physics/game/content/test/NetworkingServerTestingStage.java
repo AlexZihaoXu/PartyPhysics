@@ -1,5 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
+import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.*;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Networking;
@@ -56,6 +57,17 @@ public class NetworkingServerTestingStage extends Stage {
             world.createBox(Math.random() * 10 - 5, Math.random() * 3 - 20);
         }
 
+        if (getMouseButton(1)) {
+//            Vector2 mouse = camera.getWorldMousePos();
+//            Vector2 chest = player.body.getWorldPoint(new Vector2(0, -0.2));
+            Vector2 mouse = getMousePos();
+            Vector2 center = new Vector2(getWidth() / 2f, getHeight() / 2f);
+            double angle = mouse.subtract(center).getDirection() - player.body.getTransform().getRotationAngle();
+            world.setReachDirection(player, Vector2.create(1, angle));
+        } else {
+            world.setReachDirection(player, new Vector2());
+        }
+
         world.setPlayerMovementX(player, moveX);
 
     }
@@ -70,11 +82,12 @@ public class NetworkingServerTestingStage extends Stage {
 
     @Override
     public void onRender(Renderer renderer) {
-
-        camera.scale += (50 - camera.scale) * Math.min(1, getDeltaTime() * 5);
-        camera.pos.y += (-2 - camera.pos.y) * Math.min(1, getDeltaTime() * 5);
-
         super.onRender(renderer);
+
+        camera.scale += (70 - camera.scale) * Math.min(1, getDeltaTime() * 5);
+        camera.pos.y += (player.getPos().y - camera.pos.y) * Math.min(1, getDeltaTime());
+        camera.pos.x += (player.getPos().x - camera.pos.x) * Math.min(1, getDeltaTime() * 5);
+
         renderer.setColor(new Color(11, 43, 93));
         renderer.clear();
         camera.render(world.getWorld(), renderer);

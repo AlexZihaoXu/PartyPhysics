@@ -50,7 +50,8 @@ public class Package {
                 packageSize += s.length() * Character.SIZE / Byte.SIZE;
                 data.put(hash, s.toString());
             } else {
-                throw new RuntimeException("Unknown type ID found in package " + this.type + " : " + (int) type);
+                System.err.println("Unknown type ID found in package " + this.type + " : " + (int) type);
+//                throw new RuntimeException("Unknown type ID found in package " + this.type + " : " + (int) type);
             }
         }
 
