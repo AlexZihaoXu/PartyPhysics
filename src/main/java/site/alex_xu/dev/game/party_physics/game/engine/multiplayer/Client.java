@@ -52,4 +52,8 @@ public class Client implements Runnable {
             socket.close();
         }
     }
+
+    public void flush() {
+        socket.flush();
+    }
 }

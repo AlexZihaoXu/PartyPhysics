@@ -13,7 +13,7 @@ public class ClientManager implements Runnable {
     private final LinkedList<Package> packagesQueue = new LinkedList<>();
 
     public ClientManager() {
-        socket = new ClientSocket("localhost", PartyPhysicsGame.SERVER_PORT);
+        socket = new ClientSocket("me.alex-xu.site", PartyPhysicsGame.SERVER_PORT);
     }
 
     public void start() {
@@ -56,5 +56,9 @@ public class ClientManager implements Runnable {
 
     public void send(Package pkg) {
         socket.send(pkg);
+    }
+
+    public void flush() {
+        socket.flush();
     }
 }

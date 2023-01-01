@@ -31,14 +31,22 @@ public class NetworkingClientTestingStage extends Stage {
     @Override
     public void onTick() {
         super.onTick();
-        Package pkg = clientManager.pull();
-        if (pkg != null) {
-            if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE) {
-                world.addObject(GameObjectManager.getInstance().createFromPackage(pkg));
+        while (true) {
+            Package pkg = clientManager.pull();
+            if (pkg == null) {
+                break;
+            } else {
+                if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE) {
+                    world.addObject(GameObjectManager.getInstance().createFromPackage(pkg));
+                } else if (pkg.getType() == PackageTypes.PHYSICS_SYNC_GAME_OBJECT_TRANSFORM) {
+                    world.syncObject(pkg);
+                }
             }
         }
 
         world.onTick();
+
+        clientManager.flush();
     }
 
     @Override

@@ -68,11 +68,18 @@ public class NetworkingServerTestingStage extends Stage {
 
         if (syncClock.elapsedTime() > 0.25) {
             syncClock.reset();
+            int sentCount = 0;
             for (GameObject object : world.getObjects()) {
-                Package syncPackage = object.createSyncPackage();
-                serverManager.broadCast(syncPackage);
+                if (!object.isAtRest()) {
+                    sentCount++;
+                    Package syncPackage = object.createSyncPackage();
+                    serverManager.broadCast(syncPackage);
+                }
             }
+            System.out.println(sentCount);
         }
+
+        serverManager.flush();
     }
 
     @Override

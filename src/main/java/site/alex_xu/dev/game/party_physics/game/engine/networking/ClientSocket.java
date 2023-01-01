@@ -1,8 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.engine.networking;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class ClientSocket {
@@ -10,7 +8,9 @@ public class ClientSocket {
     private int port;
     private Socket socket = null;
     private DataOutputStream outputStream;
+    private BufferedOutputStream bufferedOutputStream;
     private DataInputStream inputStream;
+    private BufferedInputStream bufferedInputStream;
 
     public ClientSocket(String host, int port) {
         this.host = host;
@@ -19,15 +19,19 @@ public class ClientSocket {
 
     public ClientSocket(Socket socket) throws IOException {
         this.socket = socket;
-        outputStream = new DataOutputStream(socket.getOutputStream());
-        inputStream = new DataInputStream(socket.getInputStream());
+        bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
+        outputStream = new DataOutputStream(bufferedOutputStream);
+        bufferedInputStream = new BufferedInputStream(socket.getInputStream());
+        inputStream = new DataInputStream(bufferedInputStream);
     }
 
     public void connect() {
         try {
             Socket socket = new Socket(host, port);
-            outputStream = new DataOutputStream(socket.getOutputStream());
-            inputStream = new DataInputStream(socket.getInputStream());
+            bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
+            outputStream = new DataOutputStream(bufferedOutputStream);
+            bufferedInputStream = new BufferedInputStream(socket.getInputStream());
+            inputStream = new DataInputStream(bufferedInputStream);
             this.socket = socket;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -36,6 +40,14 @@ public class ClientSocket {
 
     public void send(Package pkg) {
         pkg.writeStream(outputStream);
+    }
+
+    public void flush() {
+        try {
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void close() {

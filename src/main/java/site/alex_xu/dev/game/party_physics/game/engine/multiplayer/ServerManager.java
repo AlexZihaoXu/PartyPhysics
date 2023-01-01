@@ -65,4 +65,10 @@ public class ServerManager implements Runnable {
     public Client getClient(Package pkg) {
         return clientsMap.get(pkg.getInteger("clientID"));
     }
+
+    public void flush() {
+        for (Client client : clientsMap.values()) {
+            client.flush();
+        }
+    }
 }

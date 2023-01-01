@@ -5,6 +5,7 @@ import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.World;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
@@ -118,6 +119,11 @@ public class GameWorld {
         world.addBody(object);
     }
 
+    public void syncObject(Package pkg) {
+        int id = pkg.getInteger("id");
+        objectsIdMap.get(id).syncFromPackage(pkg);
+    }
+
     public ArrayList<GameObject> getObjects() {
         return objects;
     }
@@ -135,5 +141,13 @@ public class GameWorld {
         objects.remove(object);
         objectsIdMap.remove(object.getObjectID());
         world.removeBody(object);
+    }
+
+    public int getUpdateCount() {
+        return (int) updateCount;
+    }
+
+    public void setUpdateCount(int value) {
+        updateCount = value;
     }
 }

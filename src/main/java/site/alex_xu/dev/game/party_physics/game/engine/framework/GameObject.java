@@ -30,6 +30,20 @@ public abstract class GameObject extends Body {
         return pkg;
     }
 
+    public void syncFromPackage(Package pkg) {
+        double angle = pkg.getFraction("angle");
+        double x = pkg.getFraction("pos.x");
+        double y = pkg.getFraction("pos.y");
+        double vx = pkg.getFraction("vel.x");
+        double vy = pkg.getFraction("vel.y");
+        double va = pkg.getFraction("vel.a");
+
+        getTransform().setRotation(angle);
+        getTransform().setTranslation(x, y);
+        setLinearVelocity(vx, vy);
+        setAngularVelocity(va);
+    }
+
     public Package createCreationPackage() {
         Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE);
         pkg.setInteger("id", getObjectID());
