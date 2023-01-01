@@ -1,5 +1,9 @@
 package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
+import org.dyn4j.dynamics.contact.Contact;
+import org.dyn4j.dynamics.contact.SolvedContact;
+import org.dyn4j.world.ContactCollisionData;
+import org.dyn4j.world.listener.ContactListener;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectWoodPlank;
@@ -14,12 +18,14 @@ import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import java.awt.*;
 import java.util.LinkedList;
 
-public class GameWorldServerManager {
+public class GameWorldServerManager implements ContactListener<GameObject> {
 
     private int playerIDCounter = 0;
     private final GameWorld world;
     private final ServerManager server;
     private final LinkedList<Package> packagesQueue = new LinkedList<>();
+
+    private final LinkedList<GameObject> objectCollisionList = new LinkedList<>();
 
     private double lastSyncTime = 0;
 
@@ -61,6 +67,17 @@ public class GameWorldServerManager {
                 server.broadCast(object.createSyncPackage());
             }
             lastSyncTime = getWorld().getCurrentTime();
+        }
+        while (!objectCollisionList.isEmpty()) {
+            GameObject object = objectCollisionList.removeFirst();
+            if (object instanceof GameObjectPlayerPart) {
+                Player player = ((GameObjectPlayerPart) object).getPlayer();
+                for (GameObjectPlayerPart bodyPart : player.getBodyParts()) {
+                    getServer().broadCast(bodyPart.createSyncPackage());
+                }
+            } else {
+                getServer().broadCast(object.createSyncPackage());
+            }
         }
         processPackages();
         getServer().flush();
@@ -142,4 +159,46 @@ public class GameWorldServerManager {
         }
     }
 
+    public void doPlayerJump(Player player) {
+        player.jump();
+        Package pkg = new Package(PackageTypes.GAME_PLAYER_MOVEMENT_JUMP);
+        pkg.setInteger("id", player.getID());
+        getServer().broadCast(pkg);
+    }
+
+    @Override
+    public void begin(ContactCollisionData<GameObject> collision, Contact contact) {
+
+    }
+
+    @Override
+    public void persist(ContactCollisionData<GameObject> collision, Contact oldContact, Contact newContact) {
+
+    }
+
+    @Override
+    public void end(ContactCollisionData<GameObject> collision, Contact contact) {
+
+    }
+
+    @Override
+    public void destroyed(ContactCollisionData<GameObject> collision, Contact contact) {
+
+    }
+
+    @Override
+    public void collision(ContactCollisionData<GameObject> collision) {
+        objectCollisionList.add(collision.getBody1());
+        objectCollisionList.add(collision.getBody2());
+    }
+
+    @Override
+    public void preSolve(ContactCollisionData<GameObject> collision, Contact contact) {
+
+    }
+
+    @Override
+    public void postSolve(ContactCollisionData<GameObject> collision, SolvedContact contact) {
+
+    }
 }

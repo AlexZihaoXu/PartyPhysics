@@ -42,6 +42,11 @@ public class NetworkingClientTestingStage extends Stage {
         renderer.setColor(new Color(11, 43, 93));
         renderer.clear();
         camera.render(world.getWorld(), renderer);
+
+        renderer.pushState();
+        renderer.setColor(new Color(0, 100, 0));
+        renderer.text("RX: " + world.getRXPKGSpeed() + " pkg/sec ", 5, 5);
+        renderer.popState();
     }
 
     public static void main(String[] args) {

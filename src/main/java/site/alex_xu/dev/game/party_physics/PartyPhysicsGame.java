@@ -5,7 +5,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Networking;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 
 public class PartyPhysicsGame {
-    public static final String SERVER_ADDRESS = "localhost";
+    public static final String SERVER_ADDRESS = "me.alex-xu.site";
     public static int SERVER_PORT = 2048;
     public static void main(String[] args) {
         Networking.getInstance().init();

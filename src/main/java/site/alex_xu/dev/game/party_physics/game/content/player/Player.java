@@ -48,6 +48,7 @@ public class Player {
     Color color;
 
     private final int id;
+    private double moveDuration = 0;
 
     public Player(Color color, double x, double y, int id) {
         this.color = color;
@@ -297,6 +298,7 @@ public class Player {
 
 
         if (moveDx != 0) {
+            moveDuration += dt;
             rightLegJoint.setLimitEnabled(true);
             rightLegBodyJoint.setLimitEnabled(true);
             rightLegJoint.setReferenceAngle(0);
@@ -307,8 +309,8 @@ public class Player {
             leftLegJoint.setReferenceAngle(0);
             leftLegBodyJoint.setReferenceAngle(0);
             double duration = 0.2;
-            double ratec = Math.cos(now / duration * Math.PI) * 0.5 + 0.5;
-            double rates = Math.sin(now / duration * Math.PI) * 0.5 + 0.5;
+            double ratec = Math.cos(moveDuration / duration * Math.PI) * 0.5 + 0.5;
+            double rates = Math.sin(moveDuration / duration * Math.PI) * 0.5 + 0.5;
             double angle, angle2;
             angle = 0.2 + ratec * 2.2;
             angle2 = rates * 1.8;
@@ -341,6 +343,7 @@ public class Player {
             leftLegJoint.setLimits(angle2 - gap, angle2 + gap);
 
         } else {
+            moveDuration = 0;
             rightLegJoint.setLimitEnabled(false);
             rightLegBodyJoint.setLimitEnabled(false);
             leftLegJoint.setLimitEnabled(false);
@@ -450,5 +453,9 @@ public class Player {
 
     public Color getColor() {
         return color;
+    }
+
+    public ArrayList<GameObjectPlayerPart> getBodyParts() {
+        return bodyParts;
     }
 }

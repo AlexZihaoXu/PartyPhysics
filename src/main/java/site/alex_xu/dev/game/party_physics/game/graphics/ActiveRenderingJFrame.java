@@ -155,7 +155,11 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
                 this.bufferStrategy.show();
                 videoDt = videoDtClock.elapsedTime();
             }
-            Thread.yield();
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

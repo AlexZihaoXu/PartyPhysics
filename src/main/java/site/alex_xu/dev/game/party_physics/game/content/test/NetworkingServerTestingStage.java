@@ -50,6 +50,14 @@ public class NetworkingServerTestingStage extends Stage {
     }
 
     @Override
+    public void onKeyPressed(int keyCode) {
+        super.onKeyPressed(keyCode);
+        if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_SPACE) {
+            world.doPlayerJump(player);
+        }
+    }
+
+    @Override
     public void onRender(Renderer renderer) {
 
         camera.scale += (50 - camera.scale) * Math.min(1, getDeltaTime() * 5);
