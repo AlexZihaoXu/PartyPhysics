@@ -49,8 +49,9 @@ public class NetworkingServerTestingStage extends Stage {
         if (isKeyPressed(KeyEvent.VK_A)) {
             moveX--;
         }
+        world.setPlayerSneak(player, isKeyPressed(KeyEvent.VK_S));
 
-        if (clock.elapsedTime() > 0.2) {
+        if (clock.elapsedTime() > 1) {
             clock.reset();
             world.createBox(Math.random() * 10 - 5, Math.random() * 3 - 20);
         }
