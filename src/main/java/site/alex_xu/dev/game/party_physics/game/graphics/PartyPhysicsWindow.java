@@ -134,4 +134,9 @@ public class PartyPhysicsWindow {
     public boolean isRunning() {
         return activeRenderingFrame.running;
     }
+
+    public void close() {
+        this.getJFrame().dispose();
+        this.activeRenderingFrame.running = false;
+    }
 }

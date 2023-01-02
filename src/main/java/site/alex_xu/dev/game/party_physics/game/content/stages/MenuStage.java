@@ -386,7 +386,7 @@ public class MenuStage extends Stage {
                 btnExit.onClick();
                 int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
-                    getWindow().getJFrame().dispose();
+                    getWindow().close();
                 }
             }
             if (btnOptions.getBounds().contains(x, y)) {
