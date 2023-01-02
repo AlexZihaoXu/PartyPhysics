@@ -7,6 +7,8 @@ import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
+import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
+import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayer;
 import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -17,6 +19,10 @@ import java.awt.geom.Rectangle2D;
 class Button {
     private final String title;
     private Vector2 pos = new Vector2();
+
+    SoundPlayer player;
+
+    private boolean hovered = false;
     private final double width = 220;
     private final double height = 50;
 
@@ -29,6 +35,7 @@ class Button {
 
     public Button(String title) {
         this.title = title;
+
     }
 
     public void setPos(Vector2 pos) {
@@ -51,12 +58,27 @@ class Button {
         Vector2 pos = stage.getMousePos();
         if (getBounds().contains(pos.x, pos.y)) {
             animationProgress += dt * 5;
+            if (!hovered) {
+                hovered = true;
+                this.onHover();
+            }
         } else {
+            hovered = false;
             animationProgress -= dt * 5;
         }
         animationProgress = Math.max(0, Math.min(1, animationProgress));
         double x = 1 - animationProgress;
         animationRate = Math.max(0, Math.min(1, 1 + (x * x * x * (x - 2))));
+    }
+
+    private void onHover() {
+        if (player != null) {
+            player.dispose();
+        }
+        player = new SoundPlayer();
+        player.setSound(SoundManager.getInstance().get("sounds/ui/menu-btn-hover.wav"));
+        player.setVolume(0.5f);
+        player.play();
     }
 
     public void onRender(Renderer renderer) {
@@ -98,6 +120,9 @@ public class MenuStage extends Stage {
 
     double xOffset = 0;
 
+    SoundPlayer bgmMuffledPlayer = new SoundPlayer();
+    SoundPlayer bgmPurePlayer = new SoundPlayer();
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -105,6 +130,15 @@ public class MenuStage extends Stage {
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
         player = new Player(Color.WHITE, 0, -20, 0);
         world.addPlayer(player);
+        bgmMuffledPlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-muffled.wav"));
+        bgmPurePlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-original.wav"));
+
+        bgmPurePlayer.setVolume(1);
+        bgmMuffledPlayer.setVolume(0);
+
+        bgmMuffledPlayer.play();
+        bgmPurePlayer.play();
+
     }
 
     @Override
@@ -198,11 +232,14 @@ public class MenuStage extends Stage {
             } else {
                 player.setMovementX(1);
             }
-            Vector2 direction = player.getPos().subtract(camera.getWorldMousePos());
-            player.setReachDirection(Vector2.create(-1, direction.getDirection()));
         } else {
             player.setMovementX(0);
+        }
+        if (player.getPos().distance(camera.getWorldMousePos()) < 1) {
             player.setReachDirection(new Vector2());
+        } else {
+            Vector2 direction = player.getPos().subtract(camera.getWorldMousePos());
+            player.setReachDirection(Vector2.create(-1, direction.getDirection()));
         }
 
         if (getWidth() > 1200) {
@@ -210,16 +247,21 @@ public class MenuStage extends Stage {
         } else {
             xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
         }
+
     }
 
     @Override
     public void onMousePressed(double x, double y, int button) {
         super.onMousePressed(x, y, button);
         if (btnExit.getBounds().contains(x, y)) {
+            bgmPurePlayer.setVolume(0.1f);
+            bgmMuffledPlayer.setVolume(0.9f);
             int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
                 getWindow().getJFrame().dispose();
             }
+            bgmPurePlayer.setVolume(0.9f);
+            bgmMuffledPlayer.setVolume(0.1f);
         }
     }
 }
