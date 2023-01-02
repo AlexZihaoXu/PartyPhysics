@@ -9,6 +9,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
 import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayer;
+import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayerGroup;
 import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -19,8 +20,7 @@ import java.awt.geom.Rectangle2D;
 class Button {
     private final String title;
     private Vector2 pos = new Vector2();
-
-    SoundPlayer player;
+    static SoundPlayerGroup group = new SoundPlayerGroup();
 
     private boolean hovered = false;
     private final double width = 220;
@@ -72,13 +72,7 @@ class Button {
     }
 
     private void onHover() {
-        if (player != null) {
-            player.dispose();
-        }
-        player = new SoundPlayer();
-        player.setSound(SoundManager.getInstance().get("sounds/ui/menu-btn-hover.wav"));
-        player.setVolume(0.5f);
-        player.play();
+        group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-hover.wav"));
     }
 
     public void onRender(Renderer renderer) {
@@ -123,6 +117,9 @@ public class MenuStage extends Stage {
     SoundPlayer bgmMuffledPlayer = new SoundPlayer();
     SoundPlayer bgmPurePlayer = new SoundPlayer();
 
+    double muffleShift = 1;
+    double muffleShiftTarget = 0.5;
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -133,8 +130,11 @@ public class MenuStage extends Stage {
         bgmMuffledPlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-muffled.wav"));
         bgmPurePlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-original.wav"));
 
-        bgmPurePlayer.setVolume(1);
-        bgmMuffledPlayer.setVolume(0);
+        bgmPurePlayer.setVolume(0);
+        bgmMuffledPlayer.setVolume(1);
+
+        bgmMuffledPlayer.init();
+        bgmPurePlayer.init();
 
         bgmMuffledPlayer.play();
         bgmPurePlayer.play();
@@ -248,20 +248,27 @@ public class MenuStage extends Stage {
             xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
         }
 
+        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1 , getDeltaTime() * 3);
+        bgmMuffledPlayer.setVolume(muffleShift);
+        bgmPurePlayer.setVolume(1 - muffleShift);
+
+        if (bgmPurePlayer.isFinished()) {
+            bgmPurePlayer.play();
+            bgmMuffledPlayer.play();
+        }
+
     }
 
     @Override
     public void onMousePressed(double x, double y, int button) {
         super.onMousePressed(x, y, button);
         if (btnExit.getBounds().contains(x, y)) {
-            bgmPurePlayer.setVolume(0.1f);
-            bgmMuffledPlayer.setVolume(0.9f);
+            muffleShiftTarget = 1;
             int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
+            muffleShiftTarget = 0.5;
             if (result == JOptionPane.OK_OPTION) {
                 getWindow().getJFrame().dispose();
             }
-            bgmPurePlayer.setVolume(0.9f);
-            bgmMuffledPlayer.setVolume(0.1f);
         }
     }
 }

@@ -130,4 +130,8 @@ public class PartyPhysicsWindow {
     public double getVideoDt() {
         return activeRenderingFrame.videoDt;
     }
+
+    public boolean isRunning() {
+        return activeRenderingFrame.running;
+    }
 }

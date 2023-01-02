@@ -164,6 +164,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
                 throw new RuntimeException(e);
             }
         }
+        running = false;
     }
 
 
