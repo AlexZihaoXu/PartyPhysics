@@ -122,13 +122,14 @@ public class SoundPlayer {
         playThread.resetStream();
     }
 
-    public void init() {
-        if (playThread == null) {
-            playThread = new PlayThread();
-            playThread.player = this;
-            thread = new Thread(playThread);
-            thread.start();
+    public void ready() {
+        if (playThread != null) {
+            playThread.exit = true;
         }
+        playThread = new PlayThread();
+        playThread.player = this;
+        thread = new Thread(playThread);
+        thread.start();
     }
 
     public void dispose() {

@@ -8,22 +8,31 @@ public class SoundPlayerGroup {
     }
 
     public SoundPlayerGroup() {
-        this(512);
+        this(32);
     }
 
     double volume = 1;
 
+    int lastIndex = 0;
+
     public void play(Sound sound) {
+        int index = lastIndex;
+
         for (int i = 0; i < players.length; i++) {
-            if (players[i] == null) {
-                players[i] = new SoundPlayer();
+            index++;
+            if (index >= players.length)
+                index = 0;
+            if (players[index] == null) {
+                players[index] = new SoundPlayer();
             }
-            if (players[i].isFinished()) {
-                players[i].setSound(sound);
-                players[i].setVolume(volume);
-                players[i].play();
+            if (players[index].isFinished()) {
+                players[index].setSound(sound);
+                players[index].setVolume(volume);
+                players[index].play();
+                lastIndex = index;
                 return;
             }
+
         }
     }
 

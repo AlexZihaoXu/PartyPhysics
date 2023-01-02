@@ -18,9 +18,9 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 class Button {
+    static SoundPlayerGroup group;
     private final String title;
     private Vector2 pos = new Vector2();
-    static SoundPlayerGroup group = new SoundPlayerGroup();
 
     private boolean hovered = false;
     private final double width = 220;
@@ -60,7 +60,7 @@ class Button {
             animationProgress += dt * 5;
             if (!hovered) {
                 hovered = true;
-                this.onHover();
+                this.onMouseOver();
             }
         } else {
             hovered = false;
@@ -71,8 +71,12 @@ class Button {
         animationRate = Math.max(0, Math.min(1, 1 + (x * x * x * (x - 2))));
     }
 
-    private void onHover() {
-        group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-hover.wav"));
+    private void onMouseOver() {
+        group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-over.wav"));
+    }
+
+    void onClick() {
+        group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-click.wav"));
     }
 
     public void onRender(Renderer renderer) {
@@ -101,11 +105,13 @@ class Button {
 }
 
 public class MenuStage extends Stage {
+    SoundPlayerGroup group = new SoundPlayerGroup();
 
     Button btnPlay = new Button("PLAY");
     Button btnOptions = new Button("OPTIONS");
     Button btnTutorials = new Button("TUTORIAL");
     Button btnExit = new Button("EXIT");
+    Button btnBack = new Button("< back");
 
     GameWorld world = new GameWorld();
     Camera camera = new Camera();
@@ -118,11 +124,24 @@ public class MenuStage extends Stage {
     SoundPlayer bgmPurePlayer = new SoundPlayer();
 
     double muffleShift = 1;
-    double muffleShiftTarget = 0.5;
+    double muffleShiftTarget = 0;
+
+    double menuShift = 0;
+    double menuShiftProgress = 0;
+
+    double masterVolume = 1;
+
+    boolean atOptions = false;
+
+    Rectangle2D.Double volumeBarBounds = new Rectangle2D.Double();
+
+    boolean adjustingVolumeBar = false;
+    boolean mouseOverVolumeBar = false;
 
     @Override
     public void onLoad() {
         super.onLoad();
+        Button.group = group;
         world.init();
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
         player = new Player(Color.WHITE, 0, -20, 0);
@@ -133,8 +152,8 @@ public class MenuStage extends Stage {
         bgmPurePlayer.setVolume(0);
         bgmMuffledPlayer.setVolume(1);
 
-        bgmMuffledPlayer.init();
-        bgmPurePlayer.init();
+        bgmMuffledPlayer.ready();
+        bgmPurePlayer.ready();
 
         bgmMuffledPlayer.play();
         bgmPurePlayer.play();
@@ -208,23 +227,79 @@ public class MenuStage extends Stage {
         btnTutorials.onRender(renderer);
         btnOptions.onRender(renderer);
         btnExit.onRender(renderer);
+
+        btnBack.onRender(renderer);
+
+        Vector2 pos = new Vector2(menuShift + xOffset + getWidth() * 1.01 + 260, getHeight() / 2d - 100);
+        renderer.pushState();
+        renderer.setTextSize(28);
+        renderer.setColor(new Color(98, 92, 85));
+        renderer.text("OPTIONS", pos.x + 2, pos.y + 2);
+        renderer.setColor(new Color(38, 34, 25));
+        renderer.text("OPTIONS", pos.x, pos.y);
+
+        renderer.setTextSize(17);
+        pos.x += 25;
+        pos.y += 50;
+        renderer.setColor(new Color(98, 92, 85));
+        renderer.text(String.format("Background Music: %2d%%", (int) (masterVolume * 100)), pos.x + 2, pos.y + 2);
+        renderer.setColor(new Color(38, 34, 25));
+        renderer.text(String.format("Background Music: %2d%%", (int) (masterVolume * 100)), pos.x, pos.y);
+
+        double length = 250;
+        renderer.setColor(new Color(98, 92, 85));
+        renderer.setLineWidth(1.5);
+        pos.y += 25;
+        pos.x += 4;
+
+        renderer.setColor(new Color(98, 92, 85));
+        renderer.rect(pos.x + 2, pos.y + 2, length, 10);
+        renderer.setColor(new Color(138, 132, 127));
+        renderer.rect(pos.x, pos.y, length, 10);
+        if (mouseOverVolumeBar || adjustingVolumeBar) {
+            renderer.setColor(new Color(154, 134, 121));
+        } else {
+            renderer.setColor(new Color(140, 125, 113));
+        }
+        renderer.rect(pos.x, pos.y, length * masterVolume, 10);
+
+        renderer.setColor(new Color(98, 92, 85));
+        renderer.rect(pos.x + (length * masterVolume - 2) + 2, pos.y - 2, 4, 18);
+        if (mouseOverVolumeBar || adjustingVolumeBar) {
+            renderer.setColor(new Color(152, 118, 93));
+        } else {
+            renderer.setColor(new Color(128, 107, 91));
+        }
+        renderer.rect(pos.x + (length * masterVolume - 2), pos.y - 4, 4, 18);
+
+        volumeBarBounds = new Rectangle2D.Double(pos.x, pos.y-4, length, 18);
+
+        renderer.popState();
     }
 
     @Override
     public void onTick() {
         super.onTick();
-        btnPlay.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
-        btnTutorials.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);
-        btnOptions.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d + 60);
-        btnExit.setPos(xOffset + getWidth() * 0.01 + 40, getHeight() / 2d + 120);
+
+        muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
+
+        btnPlay.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
+        btnTutorials.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);
+        btnOptions.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d + 60);
+        btnExit.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d + 120);
+
+        btnBack.setPos(menuShift + xOffset + getWidth() * 1.01 + 40, getHeight() / 2d - 80);
 
         btnPlay.onTick(getDeltaTime(), this);
         btnTutorials.onTick(getDeltaTime(), this);
         btnOptions.onTick(getDeltaTime(), this);
         btnExit.onTick(getDeltaTime(), this);
 
+        btnBack.onTick(getDeltaTime(), this);
+
         world.onTick();
         camera.scale += (Math.min(getWidth(), getHeight()) / 13d - camera.scale) * Math.min(1, getDeltaTime() * 3);
+        camera.pos.x = -menuShift * 0.003;
 
         if (Math.abs(player.getPos().x - camera.getWorldMousePos().x) > 3) {
             if (player.getPos().x > camera.getWorldMousePos().x) {
@@ -248,27 +323,96 @@ public class MenuStage extends Stage {
             xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
         }
 
-        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1 , getDeltaTime() * 3);
-        bgmMuffledPlayer.setVolume(muffleShift);
-        bgmPurePlayer.setVolume(1 - muffleShift);
+        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 1.5);
+        bgmMuffledPlayer.setVolume((muffleShift) * masterVolume);
+        bgmPurePlayer.setVolume((1 - muffleShift) * masterVolume);
 
         if (bgmPurePlayer.isFinished()) {
-            bgmPurePlayer.play();
+
+
+            bgmPurePlayer.dispose();
+            bgmMuffledPlayer.dispose();
+
+            bgmMuffledPlayer = new SoundPlayer();
+            bgmPurePlayer = new SoundPlayer();
+
+            bgmMuffledPlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-muffled.wav"));
+            bgmPurePlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-original.wav"));
+
+            bgmPurePlayer.setVolume(0);
+            bgmMuffledPlayer.setVolume(1);
+
+            bgmMuffledPlayer.ready();
+            bgmPurePlayer.ready();
+
             bgmMuffledPlayer.play();
+            bgmPurePlayer.play();
         }
 
+        if (atOptions) {
+            menuShiftProgress += getDeltaTime();
+        } else {
+            menuShiftProgress -= getDeltaTime();
+        }
+        menuShiftProgress = Math.min(1, Math.max(0, menuShiftProgress));
+        {
+            double n = Math.sin(menuShiftProgress * Math.PI / 2);
+            menuShift = getWidth() * (-(n * n * n * n));
+        }
+
+        if (adjustingVolumeBar) {
+            masterVolume = Math.max(0, Math.min(1, (getMouseX() - volumeBarBounds.getX()) / volumeBarBounds.getWidth()));
+        }
+        if (volumeBarBounds.contains(getMouseX(), getMouseY())) {
+            if (!mouseOverVolumeBar){
+                mouseOverVolumeBar = true;
+                group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-over.wav"));
+            }
+        } else {
+            mouseOverVolumeBar = false;
+        }
     }
 
     @Override
     public void onMousePressed(double x, double y, int button) {
         super.onMousePressed(x, y, button);
-        if (btnExit.getBounds().contains(x, y)) {
-            muffleShiftTarget = 1;
-            int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
-            muffleShiftTarget = 0.5;
-            if (result == JOptionPane.OK_OPTION) {
-                getWindow().getJFrame().dispose();
+        if (atOptions) {
+            if (btnBack.getBounds().contains(x, y)) {
+                btnBack.onClick();
+                atOptions = false;
             }
+        } else {
+            if (btnExit.getBounds().contains(x, y)) {
+                btnExit.onClick();
+                int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
+                    getWindow().getJFrame().dispose();
+                }
+            }
+            if (btnOptions.getBounds().contains(x, y)) {
+                btnOptions.onClick();
+                atOptions = true;
+            }
+
+            if (btnPlay.getBounds().contains(x, y)) {
+                btnPlay.onClick();
+            }
+            if (btnTutorials.getBounds().contains(x, y)) {
+                btnTutorials.onClick();
+            }
+        }
+        if (volumeBarBounds.contains(x, y)) {
+            adjustingVolumeBar = true;
+            group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-click.wav"));
+        }
+    }
+
+    @Override
+    public void onMouseReleased(double x, double y, int button) {
+        super.onMouseReleased(x, y, button);
+        if (adjustingVolumeBar) {
+            adjustingVolumeBar = false;
+            group.play(SoundManager.getInstance().get("sounds/ui/menu-btn-click.wav"));
         }
     }
 }
