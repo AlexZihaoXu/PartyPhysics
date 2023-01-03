@@ -11,7 +11,8 @@ public class SoundSource {
 
     static HashSet<SoundSource> sources = new HashSet<>();
 
-    private IntBuffer ptrInt = IntBuffer.allocate(1);
+    private final int[] ptrInt = new int[1];
+    private final float[] ptrFloat = new float[1];
     private boolean playable = true;
     private int source;
 
@@ -106,13 +107,15 @@ public class SoundSource {
 
     public void play() {
         if (isPlayable()) {
-            al.alSourcePlay(source);
+            if (!isPlaying())
+                al.alSourcePlay(source);
         }
     }
 
     public void pause() {
         if (isPlayable()) {
-            al.alSourcePause(source);
+            if (!isPaused())
+                al.alSourcePause(source);
         }
     }
 
@@ -124,8 +127,8 @@ public class SoundSource {
 
     private int getState() {
         if (isPlayable()) {
-            al.alGetSourcei(source, ALConstants.AL_SOURCE_STATE, ptrInt);
-            return ptrInt.get();
+            al.alGetSourcei(source, ALConstants.AL_SOURCE_STATE, ptrInt, 0);
+            return ptrInt[0];
         }
         return -1;
     }
@@ -141,6 +144,41 @@ public class SoundSource {
     public boolean isPaused() {
         return getState() == AL.AL_PAUSED;
     }
+
+    public double getSecondOffset() {
+        if (isPlayable()) {
+            al.alGetSourcef(source, AL.AL_SEC_OFFSET, ptrFloat, 0);
+            return ptrFloat[0];
+        }
+        return 0;
+    }
+
+    public void setSecondOffset(double offset) {
+        if (isPlayable()) {
+            boolean shouldPlayAfter = isPlaying();
+            pause();
+            al.alSourcef(source, AL.AL_SEC_OFFSET, (float) offset);
+            if (shouldPlayAfter)
+                play();
+        }
+    }
+
+    public double getProgress() {
+        if (isPlayable()) {
+            if (isPlaying()) {
+                return getSecondOffset() / getLength();
+            }
+        }
+        return 0;
+    }
+
+    public double getLength() {
+        if (isPlayable()) {
+            return sound.getLength();
+        }
+        return 0;
+    }
+
     public void delete() {
         if (isPlayable()) {
             al.alDeleteSources(1, ptrSource, 0);
