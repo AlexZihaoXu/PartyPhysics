@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.dyn4j', name: 'dyn4j', version: '4.2.0'
+    implementation fileTree(dir: './libs', include: '**/*.jar')
 }
 
 test {

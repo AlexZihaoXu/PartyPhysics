@@ -195,7 +195,7 @@ public class Player {
         body.setAngularDamping(30);
 
 
-        headBodyJoint.setLimitEnabled(false);
+        headBodyJoint.setLimitsEnabled(false);
 
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             bodyPart.color = this.color;
@@ -304,15 +304,15 @@ public class Player {
 
         if (moveDx != 0) {
             moveDuration += dt;
-            rightLegJoint.setLimitEnabled(true);
-            rightLegBodyJoint.setLimitEnabled(true);
-            rightLegJoint.setReferenceAngle(0);
-            rightLegBodyJoint.setReferenceAngle(0);
+            rightLegJoint.setLimitsEnabled(true);
+            rightLegBodyJoint.setLimitsEnabled(true);
+            rightLegJoint.setLimitsReferenceAngle(0);
+            rightLegBodyJoint.setLimitsReferenceAngle(0);
 
-            leftLegJoint.setLimitEnabled(true);
-            leftLegBodyJoint.setLimitEnabled(true);
-            leftLegJoint.setReferenceAngle(0);
-            leftLegBodyJoint.setReferenceAngle(0);
+            leftLegJoint.setLimitsEnabled(true);
+            leftLegBodyJoint.setLimitsEnabled(true);
+            leftLegJoint.setLimitsReferenceAngle(0);
+            leftLegBodyJoint.setLimitsReferenceAngle(0);
             double duration = 0.2;
             double ratec = Math.cos(moveDuration / duration * Math.PI) * 0.5 + 0.5;
             double rates = Math.sin(moveDuration / duration * Math.PI) * 0.5 + 0.5;
@@ -349,10 +349,10 @@ public class Player {
 
         } else {
             moveDuration = 0;
-            rightLegJoint.setLimitEnabled(false);
-            rightLegBodyJoint.setLimitEnabled(false);
-            leftLegJoint.setLimitEnabled(false);
-            leftLegBodyJoint.setLimitEnabled(false);
+            rightLegJoint.setLimitsEnabled(false);
+            rightLegBodyJoint.setLimitsEnabled(false);
+            leftLegJoint.setLimitsEnabled(false);
+            leftLegBodyJoint.setLimitsEnabled(false);
         }
         double armDamping = 5;
 

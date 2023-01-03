@@ -33,7 +33,11 @@ public class LevelSlideBar {
         renderer.setColor(95, 90, 82);
         renderer.rect(pos.x + 2, pos.y + 2, width, height);
 
-        renderer.setColor(169, 158, 147);
+        if (isMouseOver()) {
+            renderer.setColor(175, 163, 149);
+        } else {
+            renderer.setColor(169, 158, 147);
+        }
         renderer.rect(pos.x, pos.y, width, height);
 
         bounds.setRect(pos.x, pos.y - 4, width, height + 8);
@@ -44,7 +48,11 @@ public class LevelSlideBar {
         }
         renderer.setColor(95, 90, 82);
         renderer.rect(pos.x + (width - 4) / (levelCount - 1) * selectedLevel + 2, pos.y - 2, 4, height + 8);
-        renderer.setColor(128, 107, 91);
+        if (isMouseOver()) {
+            renderer.setColor(147, 120, 91);
+        } else {
+            renderer.setColor(128, 107, 91);
+        }
         renderer.rect(pos.x + (width - 4) / (levelCount - 1) * selectedLevel, pos.y - 4, 4, height + 8);
 
 
