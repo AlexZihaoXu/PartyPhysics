@@ -35,7 +35,6 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
     boolean autoSwitchAALevel = true;
 
 
-
     ActiveRenderingJFrame(String title, PartyPhysicsWindow window) {
         super(title);
         partyPhysicsWindow = window;
@@ -111,7 +110,6 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
             lastTickTime = now;
 
 
-
             partyPhysicsWindow.onTick();
 
             Clock videoDtClock = new Clock();
@@ -165,6 +163,8 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
             }
         }
         running = false;
+
+
     }
 
 

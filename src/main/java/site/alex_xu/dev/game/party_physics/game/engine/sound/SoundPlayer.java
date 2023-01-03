@@ -1,13 +1,18 @@
 package site.alex_xu.dev.game.party_physics.game.engine.sound;
 
-import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
-
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class SoundPlayer {
-    private static class PlayThread implements Runnable {
+    static boolean shouldClose = false;
+
+    int posBytes = 0;
+    public int getPosInBytes() {
+        return posBytes;
+    }
+
+    static class PlayThread implements Runnable {
 
         SoundPlayer player;
         boolean exit = false;
@@ -18,15 +23,22 @@ public class SoundPlayer {
 
         final Object lock = new Object();
 
+        int length = 0;
+        byte[] buffer = new byte[8000];
+
         @Override
         public void run() {
             try {
                 player.line.start();
                 resetStream();
                 SourceDataLine line = player.line;
-                int numBytesRead = 0;
-                byte[] buffer = new byte[line.getBufferSize()];
+                int numBytesRead;
                 while (noNeedToExit()) {
+
+                    long now = System.currentTimeMillis();
+                    long intervalSize = 25;
+                    long waitUntilTime = (now / intervalSize + 1) * intervalSize;
+                    Thread.sleep(waitUntilTime - now);
                     synchronized (lock) {
                         numBytesRead = stream.read(buffer, 0, buffer.length);
                     }
@@ -35,14 +47,17 @@ public class SoundPlayer {
                         try {
                             line.write(buffer, 0, numBytesRead);
                         } catch (IllegalArgumentException ignored) {
-                            Thread.sleep(5);
+                            Thread.sleep(5 - System.currentTimeMillis() % 5);
                         }
                     } else {
                         finished = true;
                         while (finished && noNeedToExit()) {
-                            Thread.sleep(5);
+                            Thread.sleep(5 - System.currentTimeMillis() % 5);
                         }
                     }
+
+                    player.progress = Math.max(0, Math.min(1, 1 - (stream.available() / (double) length)));
+                    player.posBytes = (int) (length - stream.available());
                 }
 
                 try {
@@ -70,12 +85,15 @@ public class SoundPlayer {
                     }
                 }
                 stream = new ByteArrayInputStream(player.sound.data);
+                length = stream.available();
                 finished = false;
             }
         }
 
+
+
         private boolean noNeedToExit() {
-            return PartyPhysicsWindow.getInstance().isRunning() && !exit;
+            return !shouldClose && !exit;
         }
     }
 
@@ -87,6 +105,9 @@ public class SoundPlayer {
     SourceDataLine line = null;
 
     FloatControl volumeControl;
+
+    double progress = 0;
+
     double volume = 1;
 
     public SoundPlayer() {
@@ -138,6 +159,23 @@ public class SoundPlayer {
         }
     }
 
+    public double getProgress() {
+        return progress;
+    }
+    public void setPosInBytes(int posBytes) {
+        synchronized (this.playThread.lock) {
+            if (this.playThread.stream != null) {
+                try {
+                    playThread.stream.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            playThread.stream = new ByteArrayInputStream(sound.data, posBytes, sound.data.length - posBytes);
+            playThread.length = sound.data.length;
+            playThread.finished = false;
+        }
+    }
     public void setVolume(double value) {
         if (volumeControl == null) {
             volumeControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);

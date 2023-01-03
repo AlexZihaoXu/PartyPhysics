@@ -10,6 +10,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
 import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayer;
 import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayerGroup;
+import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayerSyncer;
 import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -138,6 +139,8 @@ public class MenuStage extends Stage {
     boolean adjustingVolumeBar = false;
     boolean mouseOverVolumeBar = false;
 
+    SoundPlayerSyncer backgroundMusicSyncer;
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -158,6 +161,7 @@ public class MenuStage extends Stage {
         bgmMuffledPlayer.play();
         bgmPurePlayer.play();
 
+        backgroundMusicSyncer = new SoundPlayerSyncer(bgmMuffledPlayer, bgmPurePlayer);
     }
 
     @Override
@@ -281,6 +285,8 @@ public class MenuStage extends Stage {
     public void onTick() {
         super.onTick();
 
+        backgroundMusicSyncer.sync();
+
         muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
 
         btnPlay.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
@@ -328,23 +334,6 @@ public class MenuStage extends Stage {
         bgmPurePlayer.setVolume((1 - muffleShift) * masterVolume);
 
         if (bgmPurePlayer.isFinished()) {
-
-
-            bgmPurePlayer.dispose();
-            bgmMuffledPlayer.dispose();
-
-            bgmMuffledPlayer = new SoundPlayer();
-            bgmPurePlayer = new SoundPlayer();
-
-            bgmMuffledPlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-muffled.wav"));
-            bgmPurePlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-original.wav"));
-
-            bgmPurePlayer.setVolume(0);
-            bgmMuffledPlayer.setVolume(1);
-
-            bgmMuffledPlayer.ready();
-            bgmPurePlayer.ready();
-
             bgmMuffledPlayer.play();
             bgmPurePlayer.play();
         }

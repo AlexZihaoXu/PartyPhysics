@@ -45,4 +45,8 @@ public class SoundManager {
         return cache.get(path);
     }
 
+    public void cleanup() {
+        SoundPlayer.shouldClose = true;
+    }
+
 }
