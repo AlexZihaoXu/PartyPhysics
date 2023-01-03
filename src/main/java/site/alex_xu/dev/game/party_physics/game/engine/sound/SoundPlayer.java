@@ -8,6 +8,7 @@ public class SoundPlayer {
     static boolean shouldClose = false;
 
     int posBytes = 0;
+
     public int getPosInBytes() {
         return posBytes;
     }
@@ -91,7 +92,6 @@ public class SoundPlayer {
         }
 
 
-
         private boolean noNeedToExit() {
             return !shouldClose && !exit;
         }
@@ -162,6 +162,7 @@ public class SoundPlayer {
     public double getProgress() {
         return progress;
     }
+
     public void setPosInBytes(int posBytes) {
         synchronized (this.playThread.lock) {
             if (this.playThread.stream != null) {
@@ -176,13 +177,17 @@ public class SoundPlayer {
             playThread.finished = false;
         }
     }
+
     public void setVolume(double value) {
-        if (volumeControl == null) {
-            volumeControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+        try {
+            if (volumeControl == null) {
+                volumeControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+            }
+            value = Math.min(1, Math.max(0, value));
+            float v = Math.min(volumeControl.getMaximum(), Math.max(volumeControl.getMinimum(), 20.0f * (float) Math.log10(value)));
+            volumeControl.setValue(v);
+        } catch (NullPointerException ignored) {
         }
-        value = Math.min(1, Math.max(0, value));
-        float v = Math.min(volumeControl.getMaximum(), Math.max(volumeControl.getMinimum(), 20.0f * (float) Math.log10(value)));
-        volumeControl.setValue(v);
         this.volume = value;
     }
 

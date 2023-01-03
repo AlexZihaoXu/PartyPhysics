@@ -36,6 +36,10 @@ public class SoundPlayerGroup {
         }
     }
 
+    public void play(String path) {
+        play(SoundManager.getInstance().get(path));
+    }
+
     public void setVolume(double volume) {
         this.volume = volume;
         for (SoundPlayer player : players) {

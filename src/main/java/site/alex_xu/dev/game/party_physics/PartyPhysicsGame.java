@@ -1,6 +1,6 @@
 package site.alex_xu.dev.game.party_physics;
 
-import site.alex_xu.dev.game.party_physics.game.content.stages.MenuStage;
+import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Networking;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 

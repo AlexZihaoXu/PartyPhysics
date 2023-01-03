@@ -2,17 +2,15 @@ package site.alex_xu.dev.game.party_physics.game.engine.sound;
 
 
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SoundManager {
     private static SoundManager INSTANCE = null;
     private final HashMap<String, Sound> cache = new HashMap<>();
 
-
+    private final SoundPlayerGroup playerGroupUI = new SoundPlayerGroup(32);
     public static SoundManager getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new SoundManager();
@@ -47,6 +45,10 @@ public class SoundManager {
 
     public void cleanup() {
         SoundPlayer.shouldClose = true;
+        playerGroupUI.dispose();
     }
 
+    public SoundPlayerGroup getUIPlayerGroup() {
+        return playerGroupUI;
+    }
 }
