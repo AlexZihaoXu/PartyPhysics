@@ -24,7 +24,7 @@ public class SoundPlayer {
         final Object lock = new Object();
 
         int length = 0;
-        byte[] buffer = new byte[8000];
+        byte[] buffer = new byte[16000];
 
         @Override
         public void run() {
@@ -36,7 +36,7 @@ public class SoundPlayer {
                 while (noNeedToExit()) {
 
                     long now = System.currentTimeMillis();
-                    long intervalSize = 25;
+                    long intervalSize = 50;
                     long waitUntilTime = (now / intervalSize + 1) * intervalSize;
                     Thread.sleep(waitUntilTime - now);
                     synchronized (lock) {

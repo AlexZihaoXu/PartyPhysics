@@ -288,6 +288,13 @@ public class MenuStage extends Stage {
         backgroundMusicSyncer.sync();
 
         muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
+        if (getWindow().getJFrame().isActive()) {
+            backgroundMusicSyncer.syncing = bgmPurePlayer;
+            backgroundMusicSyncer.synced = bgmMuffledPlayer;
+        } else {
+            backgroundMusicSyncer.syncing = bgmMuffledPlayer;
+            backgroundMusicSyncer.synced = bgmPurePlayer;
+        }
 
         btnPlay.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
         btnTutorials.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);

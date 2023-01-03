@@ -5,7 +5,7 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 import java.util.LinkedList;
 
 public class SoundPlayerSyncer {
-    SoundPlayer synced, syncing;
+    public SoundPlayer synced, syncing;
     Clock timer = new Clock();
     boolean succeed = false;
 
