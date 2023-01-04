@@ -2,7 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.content.ui;
 
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
@@ -62,11 +62,11 @@ public class Button {
     }
 
     private void onMouseOver() {
-        SoundManager.getInstance().getUIPlayerGroup().play(SoundManager.getInstance().get("sounds/ui/mouse-over-0.wav"));
+        SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-over-0.wav");
     }
 
     public void onClick() {
-        SoundManager.getInstance().getUIPlayerGroup().play(SoundManager.getInstance().get("sounds/ui/mouse-click-0.wav"));
+        SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");
     }
 
     public void onRender(Renderer renderer) {

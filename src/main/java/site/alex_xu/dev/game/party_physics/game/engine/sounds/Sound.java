@@ -2,16 +2,19 @@ package site.alex_xu.dev.game.party_physics.game.engine.sounds;
 
 import com.jogamp.openal.AL;
 import com.jogamp.openal.util.ALut;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.ResourceManager;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Sound {
 
+    private static final HashMap<String, Sound> cache = new HashMap<>();
     static HashSet<Sound> sounds = new HashSet<>();
     private boolean playable = true;
     private boolean deleted = false;
@@ -31,6 +34,13 @@ public class Sound {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public static Sound get(String path) {
+        if (!cache.containsKey(path)) {
+            cache.put(path, new Sound(ResourceManager.get(path)));
+        }
+        return cache.get(path);
     }
 
     Sound(InputStream stream) {

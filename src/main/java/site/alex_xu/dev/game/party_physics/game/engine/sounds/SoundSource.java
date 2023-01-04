@@ -38,7 +38,7 @@ public class SoundSource {
         return deleted;
     }
 
-    SoundSource() {
+    public SoundSource() {
         SoundSystem.getInstance().init();
 
         al = SoundSystem.getInstance().al;
@@ -187,4 +187,7 @@ public class SoundSource {
         }
     }
 
+    public void setSound(String path) {
+        setSound(Sound.get(path));
+    }
 }

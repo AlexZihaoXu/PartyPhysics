@@ -2,7 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.*;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 
 import javax.swing.*;
 
@@ -29,12 +29,14 @@ public class PartyPhysicsWindow {
 
     public void start() {
         try {
+            SoundSystem.getInstance().init();
             onSetup();
             activeRenderingFrame.mainLoop();
             activeRenderingFrame.running = false;
         } catch (IllegalStateException ignored) {
         } finally {
             onDestroy();
+            SoundSystem.getInstance().cleanup();
         }
     }
 
@@ -44,7 +46,6 @@ public class PartyPhysicsWindow {
 
     public void onDestroy() {
         stage.onOffload();
-        SoundManager.getInstance().cleanup();
     }
 
     public void onRender(Renderer renderer) {

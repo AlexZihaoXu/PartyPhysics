@@ -1,7 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.ui;
 
 import org.dyn4j.geometry.Vector2;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
@@ -73,7 +73,7 @@ public class SlideBar {
         if (button == 1) {
             if (getBounds().contains(x, y)) {
                 inUse = true;
-                SoundManager.getInstance().getUIPlayerGroup().play("sounds/ui/mouse-click-0.wav");
+                SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");
             }
         }
     }
@@ -82,13 +82,13 @@ public class SlideBar {
         if (button == 1) {
             if (inUse) {
                 inUse = false;
-                SoundManager.getInstance().getUIPlayerGroup().play("sounds/ui/mouse-click-0.wav");
+                SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");
             }
         }
     }
 
     private void onMouseOver() {
-        SoundManager.getInstance().getUIPlayerGroup().play("sounds/ui/mouse-over-0.wav");
+        SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-over-0.wav");
     }
 
     public Rectangle2D getBounds() {

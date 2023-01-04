@@ -9,19 +9,16 @@ import site.alex_xu.dev.game.party_physics.game.content.ui.OptionsPane;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundManager;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayer;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayerGroup;
-import site.alex_xu.dev.game.party_physics.game.engine.sound.SoundPlayerSyncer;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.Sound;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
 public class MenuStage extends Stage {
-    SoundPlayerGroup group = new SoundPlayerGroup();
 
     site.alex_xu.dev.game.party_physics.game.content.ui.Button btnPlay = new site.alex_xu.dev.game.party_physics.game.content.ui.Button("PLAY");
     site.alex_xu.dev.game.party_physics.game.content.ui.Button btnOptions = new site.alex_xu.dev.game.party_physics.game.content.ui.Button("OPTIONS");
@@ -36,9 +33,6 @@ public class MenuStage extends Stage {
 
     double xOffset = 0;
 
-    SoundPlayer bgmMuffledPlayer = new SoundPlayer();
-    SoundPlayer bgmPurePlayer = new SoundPlayer();
-
     double muffleShift = 1;
     double muffleShiftTarget = 0;
 
@@ -49,9 +43,10 @@ public class MenuStage extends Stage {
 
     boolean atOptions = false;
 
-    SoundPlayerSyncer backgroundMusicSyncer;
-
     OptionsPane optionsPane = new OptionsPane();
+
+    SoundSource bgmRaw = new SoundSource();
+    SoundSource bgmMuffled = new SoundSource();
 
     @Override
     public void onLoad() {
@@ -60,19 +55,16 @@ public class MenuStage extends Stage {
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
         player = new Player(Color.WHITE, 0, -20, 0);
         world.addPlayer(player);
-        bgmMuffledPlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-muffled.wav"));
-        bgmPurePlayer.setSound(SoundManager.getInstance().get("sounds/bgm-0-original.wav"));
 
-        bgmPurePlayer.setVolume(0);
-        bgmMuffledPlayer.setVolume(1);
+        Sound sound = Sound.get("sounds/bgm-0.wav");
+        bgmRaw.setSound(sound);
+        bgmMuffled.setSound(sound.getMuffled());
 
-        bgmMuffledPlayer.ready();
-        bgmPurePlayer.ready();
+        bgmRaw.setGain(0);
+        bgmMuffled.setGain(0);
 
-        bgmMuffledPlayer.play();
-        bgmPurePlayer.play();
-
-        backgroundMusicSyncer = new SoundPlayerSyncer(bgmMuffledPlayer, bgmPurePlayer);
+        bgmRaw.play();
+        bgmMuffled.play();
     }
 
     @Override
@@ -153,11 +145,10 @@ public class MenuStage extends Stage {
     public void onTick() {
         super.onTick();
 
-        backgroundMusicSyncer.sync();
         optionsPane.onTick();
 
         masterVolume = GameSettings.getInstance().volumeMaster;
-        SoundManager.getInstance().getUIPlayerGroup().setVolume(masterVolume * GameSettings.getInstance().volumeUI);
+        SoundSystem.getInstance().getUISourceGroup().setGain(masterVolume * GameSettings.getInstance().volumeUI);
 
         if (GameSettings.getInstance().antiAliasingLevel == -1) {
             getWindow().setAutoSwitchAALevelEnabled(true);
@@ -167,13 +158,6 @@ public class MenuStage extends Stage {
         }
 
         muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
-        if (getWindow().getJFrame().isActive()) {
-            backgroundMusicSyncer.syncing = bgmPurePlayer;
-            backgroundMusicSyncer.synced = bgmMuffledPlayer;
-        } else {
-            backgroundMusicSyncer.syncing = bgmMuffledPlayer;
-            backgroundMusicSyncer.synced = bgmPurePlayer;
-        }
 
         btnPlay.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
         btnTutorials.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);
@@ -217,13 +201,8 @@ public class MenuStage extends Stage {
 
         muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 1.5);
         double bgmVolume = GameSettings.getInstance().volumeBackgroundMusic;
-        bgmMuffledPlayer.setVolume((muffleShift) * masterVolume * bgmVolume);
-        bgmPurePlayer.setVolume((1 - muffleShift) * masterVolume * bgmVolume);
-
-        if (bgmPurePlayer.isFinished()) {
-            bgmMuffledPlayer.play();
-            bgmPurePlayer.play();
-        }
+        bgmMuffled.setGain((muffleShift) * masterVolume * bgmVolume);
+        bgmRaw.setGain((1 - muffleShift) * masterVolume * bgmVolume);
 
         if (atOptions) {
             menuShiftProgress += getDeltaTime();
@@ -234,6 +213,22 @@ public class MenuStage extends Stage {
         {
             double n = Math.sin(menuShiftProgress * Math.PI / 2);
             menuShift = getWidth() * (-(n * n * n * n));
+        }
+
+        if (Math.abs(bgmMuffled.getSecondOffset() - bgmRaw.getSecondOffset()) > 0.02) {
+            if (muffleShiftTarget < 0.5) {
+                bgmMuffled.setSecondOffset(bgmRaw.getSecondOffset());
+            } else {
+                bgmRaw.setSecondOffset(bgmMuffled.getSecondOffset());
+            }
+        }
+
+        if (bgmMuffled.isStopped() || bgmRaw.isStopped()) {
+            bgmMuffled.stop();
+            bgmRaw.stop();
+
+            bgmMuffled.play();
+            bgmRaw.play();
         }
 
     }

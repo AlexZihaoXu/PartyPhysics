@@ -23,11 +23,19 @@ public class SoundSystem {
     private boolean initialized = false;
     AL al;
 
+    private SourceGroup sourceGroupUI;
+
+    public SourceGroup getUISourceGroup() {
+        return sourceGroupUI;
+    }
+
     public void init() {
         if (initialized) return;
 
         ALut.alutInit();
         al = ALFactory.getAL();
+
+        sourceGroupUI = new SourceGroup();
 
         initialized = true;
 
