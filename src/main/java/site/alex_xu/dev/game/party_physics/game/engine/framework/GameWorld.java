@@ -40,8 +40,8 @@ public class GameWorld {
     }
 
     public void addPlayer(Player player) {
-        players.put(player.getID(), player);
         player.initPhysics(this);
+        players.put(player.getID(), player);
     }
 
     public Body getStaticBody() {

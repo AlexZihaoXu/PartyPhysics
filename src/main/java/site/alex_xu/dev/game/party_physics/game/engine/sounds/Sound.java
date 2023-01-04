@@ -28,6 +28,14 @@ public class Sound {
 
     private boolean isMuffled = false;
 
+    public static void preload(String path) {
+        if (!cache.containsKey(path)) {
+            Sound sound = new Sound(ResourceManager.get(path));
+            cache.put(path, sound);
+            sound.getMuffled();
+        }
+    }
+
     public boolean isPlayable() {
         return playable && !deleted;
     }
@@ -37,9 +45,7 @@ public class Sound {
     }
 
     public static Sound get(String path) {
-        if (!cache.containsKey(path)) {
-            cache.put(path, new Sound(ResourceManager.get(path)));
-        }
+        preload(path);
         return cache.get(path);
     }
 

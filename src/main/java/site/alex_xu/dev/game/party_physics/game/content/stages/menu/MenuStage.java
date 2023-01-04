@@ -14,6 +14,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
+import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,6 +33,8 @@ public class MenuStage extends Stage {
 
     Player player;
 
+    double zoomProgress = 0.01;
+
     double xOffset = 0;
 
     double muffleShift = 1;
@@ -41,11 +44,16 @@ public class MenuStage extends Stage {
 
     double masterVolume = 1;
 
-    boolean atOptions = false;
+    boolean atSecondPage = false;
+    boolean secondPageAtOptions = false;
 
     OptionsPane optionsPane = new OptionsPane();
 
+    PlayPage playPage = new PlayPage(this);
+
     SoundSource bgm = new SoundSource();
+
+    Clock timer = new Clock();
 
     @Override
     public void onLoad() {
@@ -58,8 +66,6 @@ public class MenuStage extends Stage {
 
         world.init();
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
-        player = new Player(Color.WHITE, 0, -20, 0);
-        world.addPlayer(player);
     }
 
     @Override
@@ -74,6 +80,19 @@ public class MenuStage extends Stage {
 
         renderer.pushState();
 
+        renderer.translate(getWidth() / 2, getHeight() / 2);
+        double zoom;
+        {
+            zoomProgress += Math.min(0.1, getDeltaTime());
+            zoomProgress = Math.min(1, zoomProgress);
+
+            double x = 1 - zoomProgress;
+            zoom = 1 - x * x * x;
+
+        }
+        renderer.scale(zoom);
+        renderer.translate(-getWidth() / 2, -getHeight() / 2);
+
         renderer.setFont(Font.get("fonts/bulkypix.ttf"));
 
         renderer.setColor(new Color(211, 196, 172));
@@ -81,12 +100,8 @@ public class MenuStage extends Stage {
         renderBackground(renderer);
         renderer.setColor(new Color(211, 196, 172, 120));
         renderer.clear();
-        renderButtons(renderer);
+        renderUIComponents(renderer);
         renderForeGround(renderer);
-//
-//        getWindow().setAutoSwitchAALevelEnabled(false);
-//        getWindow().setAALevel(0);
-
         renderer.popState();
 
     }
@@ -130,7 +145,7 @@ public class MenuStage extends Stage {
         renderer.popState();
     }
 
-    public void renderButtons(Renderer renderer) {
+    public void renderUIComponents(Renderer renderer) {
         btnPlay.onRender(renderer);
         btnTutorials.onRender(renderer);
         btnOptions.onRender(renderer);
@@ -138,8 +153,24 @@ public class MenuStage extends Stage {
 
         btnBack.onRender(renderer);
 
-        optionsPane.setPos(menuShift + xOffset + getWidth() * 1.01 + 260, getHeight() / 2d - 100);
+        optionsPane.setPos(menuShift + xOffset + getWidth() * 1.01 + 260, getHeight() / 2d - 100 - getHeight() * (secondPageAtOptions ? 0 : 1));
         optionsPane.onRender(renderer);
+
+        double x1 = menuShift + xOffset + getWidth() * 1.01 + 260;
+        double x2 = menuShift + getWidth() * 1.5 - 200;
+        playPage.setPos(Math.max(x1, x2), getHeight() / 2d - 100 - getHeight() * (secondPageAtOptions ? 1 : 0));
+        playPage.onRender(renderer);
+
+    }
+
+    @Override
+    public void onMouseMove(double x, double y) {
+        super.onMouseMove(x, y);
+
+        if (timer.elapsedTime() > 1.5 && player == null) {
+            player = new Player(Color.WHITE, 0, -20, 0);
+            world.addPlayer(player);
+        }
     }
 
     @Override
@@ -147,6 +178,7 @@ public class MenuStage extends Stage {
         super.onTick();
 
         optionsPane.onTick();
+        playPage.onTick();
 
         masterVolume = GameSettings.getInstance().volumeMaster;
         SoundSystem.getInstance().getUISourceGroup().setVolume(masterVolume * GameSettings.getInstance().volumeUI);
@@ -177,20 +209,23 @@ public class MenuStage extends Stage {
         camera.scale += (Math.min(getWidth(), getHeight()) / 13d - camera.scale) * Math.min(1, getDeltaTime() * 3);
         camera.pos.x = -menuShift * 0.003;
 
-        if (Math.abs(player.getPos().x - camera.getWorldMousePos().x) > 3) {
-            if (player.getPos().x > camera.getWorldMousePos().x) {
-                player.setMovementX(-1);
+        if (player != null){
+            if (Math.abs(player.getPos().x - camera.getWorldMousePos().x) > 3) {
+                if (player.getPos().x > camera.getWorldMousePos().x) {
+                    player.setMovementX(-1);
+                } else {
+                    player.setMovementX(1);
+                }
             } else {
-                player.setMovementX(1);
+                player.setMovementX(0);
             }
-        } else {
-            player.setMovementX(0);
-        }
-        if (player.getPos().distance(camera.getWorldMousePos()) < 1) {
-            player.setReachDirection(new Vector2());
-        } else {
-            Vector2 direction = player.getPos().subtract(camera.getWorldMousePos());
-            player.setReachDirection(Vector2.create(-1, direction.getDirection()));
+            if (player.getPos().distance(camera.getWorldMousePos()) < 1) {
+                player.setReachDirection(new Vector2());
+            } else {
+                Vector2 direction = player.getPos().subtract(camera.getWorldMousePos());
+                player.setReachDirection(Vector2.create(-1, direction.getDirection()));
+            }
+
         }
 
         if (getWidth() > 1200) {
@@ -202,7 +237,7 @@ public class MenuStage extends Stage {
         double bgmVolume = GameSettings.getInstance().volumeBackgroundMusic;
         bgm.setVolume(bgmVolume);
 
-        if (atOptions) {
+        if (atSecondPage) {
             menuShiftProgress += getDeltaTime();
         } else {
             menuShiftProgress -= getDeltaTime();
@@ -215,7 +250,7 @@ public class MenuStage extends Stage {
 
         double muffleShiftTarget;
         if (getWindow().getJFrame().isActive()) {
-            if (atOptions) {
+            if (atSecondPage) {
                 muffleShiftTarget = 0.65;
             } else {
                 muffleShiftTarget = 0;
@@ -224,9 +259,11 @@ public class MenuStage extends Stage {
             muffleShiftTarget = 1;
         }
 
-        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 1.5);
-        SoundSystem.getInstance().setMasterMuffle(muffleShift);
-
+        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 3);
+        bgm.setMufflePercentage(muffleShift);
+        double muffle = SoundSystem.getInstance().getMasterMuffle() + getDeltaTime() * (getWindow().getJFrame().isActive() ? -1 : 1);
+        muffle = Math.max(0, Math.min(1, muffle));
+        SoundSystem.getInstance().setMasterMuffle(muffle);
 
         if (bgm.isStopped()) {
             bgm.play();
@@ -239,10 +276,10 @@ public class MenuStage extends Stage {
         super.onMousePressed(x, y, button);
         optionsPane.onMousePressed(x, y, button);
         if (button == 1) {
-            if (atOptions) {
+            if (atSecondPage) {
                 if (btnBack.getBounds().contains(x, y)) {
                     btnBack.onClick();
-                    atOptions = false;
+                    atSecondPage = false;
                 }
             } else {
                 if (btnExit.getBounds().contains(x, y)) {
@@ -254,11 +291,13 @@ public class MenuStage extends Stage {
                 }
                 if (btnOptions.getBounds().contains(x, y)) {
                     btnOptions.onClick();
-                    atOptions = true;
+                    atSecondPage = true;
+                    secondPageAtOptions = true;
                 }
-
                 if (btnPlay.getBounds().contains(x, y)) {
                     btnPlay.onClick();
+                    atSecondPage = true;
+                    secondPageAtOptions = false;
                 }
                 if (btnTutorials.getBounds().contains(x, y)) {
                     btnTutorials.onClick();
@@ -277,7 +316,7 @@ public class MenuStage extends Stage {
     public void onKeyPressed(int keyCode) {
         super.onKeyPressed(keyCode);
         if (keyCode == KeyEvent.VK_ESCAPE) {
-            atOptions = false;
+            atSecondPage = false;
         }
     }
 }
