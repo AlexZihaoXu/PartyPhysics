@@ -4,9 +4,8 @@ package site.alex_xu.dev.game.party_physics.game.engine.sounds;
 import com.jogamp.openal.AL;
 import com.jogamp.openal.ALFactory;
 import com.jogamp.openal.util.ALut;
+import site.alex_xu.dev.game.party_physics.game.content.GameSettings;
 
-import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class SoundSystem {
@@ -24,14 +23,31 @@ public class SoundSystem {
     AL al;
     private boolean muffleEverything = false;
 
-    public void setMuffleEverything(boolean muffleEverything) {
-        this.muffleEverything = muffleEverything;
+    private double masterVolume = 1;
+
+    private double masterMuffle = 0;
+
+    public void setMasterVolume(double masterVolume) {
+        GameSettings.getInstance().volumeMaster = masterVolume;
+        for (BaseSoundSource source : BaseSoundSource.sources) {
+            source.updateVolume();
+        }
     }
 
-    public boolean isEverythingMuffled() {
-        return muffleEverything;
+    public double getMasterMuffle() {
+        return masterMuffle;
     }
 
+    public void setMasterMuffle(double masterMuffle) {
+        this.masterMuffle = masterMuffle;
+        for (SoundSource source : SoundSource.sources) {
+            source.updateVolume();
+        }
+    }
+
+    public double getMasterVolume() {
+        return GameSettings.getInstance().volumeMaster;
+    }
     private SourceGroup sourceGroupUI;
 
     public SourceGroup getUISourceGroup() {
@@ -53,8 +69,8 @@ public class SoundSystem {
 
     public void cleanup() {
         if (initialized) {
-            ArrayList<SoundSource> sources = new ArrayList<>(SoundSource.sources);
-            for (SoundSource source : sources) {
+            ArrayList<BaseSoundSource> sources = new ArrayList<>(BaseSoundSource.sources);
+            for (BaseSoundSource source : sources) {
                 source.delete();
             }
 
@@ -68,5 +84,4 @@ public class SoundSystem {
             initialized = false;
         }
     }
-
 }

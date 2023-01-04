@@ -84,7 +84,7 @@ public class Sound {
         sounds.add(this);
     }
 
-    public Sound getMuffled() {
+    Sound getMuffled() {
         if (this.isMuffled)
             return this;
 

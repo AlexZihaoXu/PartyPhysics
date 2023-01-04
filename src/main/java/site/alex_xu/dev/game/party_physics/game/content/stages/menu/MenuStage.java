@@ -17,6 +17,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class MenuStage extends Stage {
 
@@ -34,7 +35,6 @@ public class MenuStage extends Stage {
     double xOffset = 0;
 
     double muffleShift = 1;
-    double muffleShiftTarget = 0;
 
     double menuShift = 0;
     double menuShiftProgress = 0;
@@ -45,21 +45,16 @@ public class MenuStage extends Stage {
 
     OptionsPane optionsPane = new OptionsPane();
 
-    SoundSource bgmRaw = new SoundSource();
-    SoundSource bgmMuffled = new SoundSource();
+    SoundSource bgm = new SoundSource();
 
     @Override
     public void onLoad() {
         super.onLoad();
         Sound sound = Sound.get("sounds/bgm-0.wav");
-        bgmRaw.setSound(sound);
-        bgmMuffled.setSound(sound.getMuffled());
+        bgm.setSound(sound);
+        bgm.setVolume(1);
 
-        bgmRaw.setGain(0);
-        bgmMuffled.setGain(0);
-
-        bgmRaw.play();
-        bgmMuffled.play();
+        bgm.play();
 
         world.init();
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
@@ -70,8 +65,7 @@ public class MenuStage extends Stage {
     @Override
     public void onOffload() {
         super.onOffload();
-        bgmRaw.delete();
-        bgmMuffled.delete();
+        bgm.delete();
     }
 
     @Override
@@ -155,7 +149,7 @@ public class MenuStage extends Stage {
         optionsPane.onTick();
 
         masterVolume = GameSettings.getInstance().volumeMaster;
-        SoundSystem.getInstance().getUISourceGroup().setGain(masterVolume * GameSettings.getInstance().volumeUI);
+        SoundSystem.getInstance().getUISourceGroup().setVolume(masterVolume * GameSettings.getInstance().volumeUI);
 
         if (GameSettings.getInstance().antiAliasingLevel == -1) {
             getWindow().setAutoSwitchAALevelEnabled(true);
@@ -164,7 +158,6 @@ public class MenuStage extends Stage {
             getWindow().setAALevel(GameSettings.getInstance().antiAliasingLevel);
         }
 
-        muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
 
         btnPlay.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
         btnTutorials.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);
@@ -206,10 +199,8 @@ public class MenuStage extends Stage {
             xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
         }
 
-        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 1.5);
         double bgmVolume = GameSettings.getInstance().volumeBackgroundMusic;
-        bgmMuffled.setGain((muffleShift) * masterVolume * bgmVolume);
-        bgmRaw.setGain((1 - muffleShift) * masterVolume * bgmVolume);
+        bgm.setVolume(bgmVolume);
 
         if (atOptions) {
             menuShiftProgress += getDeltaTime();
@@ -222,24 +213,23 @@ public class MenuStage extends Stage {
             menuShift = getWidth() * (-(n * n * n * n));
         }
 
-
-        if (Math.abs(bgmMuffled.getSecondOffset() - bgmRaw.getSecondOffset()) > 0.02) {
-            if (muffleShiftTarget < 0.5) {
-                bgmMuffled.setSecondOffset(bgmRaw.getSecondOffset());
+        double muffleShiftTarget;
+        if (getWindow().getJFrame().isActive()) {
+            if (atOptions) {
+                muffleShiftTarget = 0.65;
             } else {
-                bgmRaw.setSecondOffset(bgmMuffled.getSecondOffset());
+                muffleShiftTarget = 0;
             }
+        } else {
+            muffleShiftTarget = 1;
         }
 
-        SoundSystem.getInstance().setMuffleEverything(muffleShiftTarget > 0.5);
+        muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 1.5);
+        SoundSystem.getInstance().setMasterMuffle(muffleShift);
 
 
-        if (bgmMuffled.isStopped() || bgmRaw.isStopped()) {
-            bgmMuffled.stop();
-            bgmRaw.stop();
-
-            bgmMuffled.play();
-            bgmRaw.play();
+        if (bgm.isStopped()) {
+            bgm.play();
         }
 
     }
@@ -249,7 +239,6 @@ public class MenuStage extends Stage {
         super.onMousePressed(x, y, button);
         optionsPane.onMousePressed(x, y, button);
         if (button == 1) {
-
             if (atOptions) {
                 if (btnBack.getBounds().contains(x, y)) {
                     btnBack.onClick();
@@ -282,5 +271,13 @@ public class MenuStage extends Stage {
     public void onMouseReleased(double x, double y, int button) {
         super.onMouseReleased(x, y, button);
         optionsPane.onMouseReleased(x, y, button);
+    }
+
+    @Override
+    public void onKeyPressed(int keyCode) {
+        super.onKeyPressed(keyCode);
+        if (keyCode == KeyEvent.VK_ESCAPE) {
+            atOptions = false;
+        }
     }
 }

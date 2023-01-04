@@ -28,7 +28,7 @@ public class OptionsPane {
         renderer.setTextSize(28);
         renderer.setColor(new Color(98, 92, 85));
         renderer.text("OPTIONS", pos.x + 2, pos.y + 2);
-        renderer.setColor(new Color(38, 34, 25));
+        renderer.setColor(new Color(49, 44, 34));
         renderer.text("OPTIONS", pos.x, pos.y);
 
         renderer.setTextSize(17);
@@ -39,9 +39,9 @@ public class OptionsPane {
 
         {
             double masterVolume = GameSettings.getInstance().volumeMaster;
-            renderer.setColor(new Color(98, 92, 85));
+            renderer.setColor(new Color(128, 120, 108));
             renderer.text(String.format("Master Volume: %2d%%", (int) Math.round(masterVolume * 100)), pos.x + 2, pos.y + 2);
-            renderer.setColor(new Color(38, 34, 25));
+            renderer.setColor(new Color(49, 44, 34));
             renderer.text(String.format("Master Volume: %2d%%", (int) Math.round(masterVolume * 100)), pos.x, pos.y);
 
             slideBarMasterVolume.pos.set(pos);
@@ -53,9 +53,9 @@ public class OptionsPane {
         pos.y += 55;
         {
             double backgroundVolume = GameSettings.getInstance().volumeBackgroundMusic;
-            renderer.setColor(new Color(98, 92, 85));
+            renderer.setColor(new Color(128, 120, 108));
             renderer.text(String.format("Background Music: %2d%%", (int) Math.round(backgroundVolume * 100)), pos.x + 2, pos.y + 2);
-            renderer.setColor(new Color(38, 34, 25));
+            renderer.setColor(new Color(49, 44, 34));
             renderer.text(String.format("Background Music: %2d%%", (int) Math.round(backgroundVolume * 100)), pos.x, pos.y);
 
             slideBarBackgroundVolume.pos.set(pos);
@@ -66,9 +66,9 @@ public class OptionsPane {
         pos.y += 55;
         {
             double uiVolume = GameSettings.getInstance().volumeUI;
-            renderer.setColor(new Color(98, 92, 85));
+            renderer.setColor(new Color(128, 120, 108));
             renderer.text(String.format("UI Volume: %2d%%", (int) Math.round(uiVolume * 100)), pos.x + 2, pos.y + 2);
-            renderer.setColor(new Color(38, 34, 25));
+            renderer.setColor(new Color(49, 44, 34));
             renderer.text(String.format("UI Volume: %2d%%", (int) Math.round(uiVolume * 100)), pos.x, pos.y);
 
             slideBarUIVolume.pos.set(pos);
@@ -98,9 +98,9 @@ public class OptionsPane {
                 }
             }
 
-            renderer.setColor(new Color(98, 92, 85));
+            renderer.setColor(new Color(128, 120, 108));
             renderer.text("Antialiasing: " + aaLevelString, pos.x + 2, pos.y + 2);
-            renderer.setColor(new Color(38, 34, 25));
+            renderer.setColor(new Color(49, 44, 34));
             renderer.text("Antialiasing: " + aaLevelString, pos.x, pos.y);
             slideBarAntiAliasing.pos.set(pos);
             slideBarAntiAliasing.pos.y += 30;
