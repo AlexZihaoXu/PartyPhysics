@@ -51,11 +51,6 @@ public class MenuStage extends Stage {
     @Override
     public void onLoad() {
         super.onLoad();
-        world.init();
-        world.addObject(new GameObjectGround(-60, 4, 120, 1));
-        player = new Player(Color.WHITE, 0, -20, 0);
-        world.addPlayer(player);
-
         Sound sound = Sound.get("sounds/bgm-0.wav");
         bgmRaw.setSound(sound);
         bgmMuffled.setSound(sound.getMuffled());
@@ -65,6 +60,18 @@ public class MenuStage extends Stage {
 
         bgmRaw.play();
         bgmMuffled.play();
+
+        world.init();
+        world.addObject(new GameObjectGround(-60, 4, 120, 1));
+        player = new Player(Color.WHITE, 0, -20, 0);
+        world.addPlayer(player);
+    }
+
+    @Override
+    public void onOffload() {
+        super.onOffload();
+        bgmRaw.delete();
+        bgmMuffled.delete();
     }
 
     @Override
@@ -215,6 +222,7 @@ public class MenuStage extends Stage {
             menuShift = getWidth() * (-(n * n * n * n));
         }
 
+
         if (Math.abs(bgmMuffled.getSecondOffset() - bgmRaw.getSecondOffset()) > 0.02) {
             if (muffleShiftTarget < 0.5) {
                 bgmMuffled.setSecondOffset(bgmRaw.getSecondOffset());
@@ -222,6 +230,9 @@ public class MenuStage extends Stage {
                 bgmRaw.setSecondOffset(bgmMuffled.getSecondOffset());
             }
         }
+
+        SoundSystem.getInstance().setMuffleEverything(muffleShiftTarget > 0.5);
+
 
         if (bgmMuffled.isStopped() || bgmRaw.isStopped()) {
             bgmMuffled.stop();

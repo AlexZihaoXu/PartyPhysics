@@ -17,6 +17,8 @@ public class SourceGroup {
     }
 
     public void play(Sound sound) {
+        if (SoundSystem.getInstance().isEverythingMuffled())
+            sound = sound.getMuffled();
         for (int i = 0; i < sources.length; i++) {
             if (sources[index] == null) {
                 sources[index] = new SoundSource();

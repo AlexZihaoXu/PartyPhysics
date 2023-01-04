@@ -22,6 +22,15 @@ public class SoundSystem {
 
     private boolean initialized = false;
     AL al;
+    private boolean muffleEverything = false;
+
+    public void setMuffleEverything(boolean muffleEverything) {
+        this.muffleEverything = muffleEverything;
+    }
+
+    public boolean isEverythingMuffled() {
+        return muffleEverything;
+    }
 
     private SourceGroup sourceGroupUI;
 
