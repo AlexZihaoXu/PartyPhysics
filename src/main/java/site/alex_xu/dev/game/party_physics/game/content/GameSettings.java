@@ -11,9 +11,9 @@ public class GameSettings {
     }
 
     public double volumeMaster = 1;
-    public double volumeBackgroundMusic = 1 / 3d;
+    public double volumeBackgroundMusic = 1;
 
-    public double volumeUI = 2 / 3d;
+    public double volumeUI = 1;
 
     public int antiAliasingLevel = 0;
 

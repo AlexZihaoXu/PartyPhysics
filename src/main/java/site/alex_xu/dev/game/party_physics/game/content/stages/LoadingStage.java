@@ -8,6 +8,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class LoadingStage extends Stage implements Runnable {
     private boolean finishedLoading = false;

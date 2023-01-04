@@ -83,11 +83,11 @@ public class MenuStage extends Stage {
         renderer.translate(getWidth() / 2, getHeight() / 2);
         double zoom;
         {
-            zoomProgress += Math.min(0.1, getDeltaTime());
+            zoomProgress += Math.min(0.05, getDeltaTime());
             zoomProgress = Math.min(1, zoomProgress);
 
             double x = 1 - zoomProgress;
-            zoom = 1 - x * x * x;
+            zoom = 1 - x * x * x * x * x;
 
         }
         renderer.scale(zoom);
