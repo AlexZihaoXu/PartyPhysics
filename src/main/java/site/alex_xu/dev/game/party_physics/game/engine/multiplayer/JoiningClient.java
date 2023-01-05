@@ -6,9 +6,14 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class JoiningClient implements ServerClientType {
+
+    private static final HashSet<JoiningClient> unclosedClients = new HashSet<>();
     private ClientSocket socket;
     private boolean socketShouldClose = false;
 
@@ -26,7 +31,6 @@ public class JoiningClient implements ServerClientType {
 
     public JoiningClient(String ip) {
         this.ip = ip;
-
     }
 
 
@@ -40,7 +44,7 @@ public class JoiningClient implements ServerClientType {
             socket = new ClientSocket(ip, PartyPhysicsGame.SERVER_PORT);
             socket.connect();
             isConnected = true;
-            System.out.println("is connected");
+            unclosedClients.add(this);
             recvThread.start();
 
         } catch (Exception e) {
@@ -60,10 +64,13 @@ public class JoiningClient implements ServerClientType {
                 }
                 Thread.yield();
             }
-            System.out.println("normal shutdown");
         } catch (Exception e) {
-            crashLog = e.getMessage();
-            e.printStackTrace();
+            if (!(
+                    e instanceof SocketException && e.getMessage().toLowerCase().contains("socket closed")
+            )) {
+                crashLog = e.getMessage();
+                e.printStackTrace();
+            }
         } finally {
             shutdown();
         }
@@ -83,6 +90,7 @@ public class JoiningClient implements ServerClientType {
         socketShouldClose = true;
         if (!socket.isClosed())
             socket.close();
+        unclosedClients.remove(this);
     }
 
     public boolean isClosed() {
@@ -115,5 +123,17 @@ public class JoiningClient implements ServerClientType {
 
     public boolean isConnecting() {
         return connecting;
+    }
+
+    public void tick() {
+
+        flush();
+    }
+
+    public static void cleanup() {
+        ArrayList<JoiningClient> clients = new ArrayList<>(unclosedClients);
+        for (JoiningClient client : clients) {
+            client.shutdown();
+        }
     }
 }

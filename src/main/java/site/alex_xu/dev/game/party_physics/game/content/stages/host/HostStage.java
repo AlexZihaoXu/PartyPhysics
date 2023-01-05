@@ -4,6 +4,7 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
+import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingClient;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingServer;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
@@ -141,9 +142,20 @@ public class HostStage extends Stage {
             renderer.translate(20, 0);
 
             pos.y += 30;
-            drawFieldText(renderer, "EMPTY*", pos);
-            pos.y += 30;
-            drawFieldText(renderer, "(no one has joined yet)", pos);
+            if (this.hostingServer.getClients().size() == 0) {
+                drawFieldText(renderer, "EMPTY*", pos);
+                pos.y += 30;
+                drawFieldText(renderer, "(no one has joined yet)", pos);
+            } else {
+                for (HostingClient client : this.hostingServer.getClients()) {
+                    String text = client.getName() == null ? "connecting..." : client.getName();
+                    drawFieldText(renderer, text, pos);
+                    drawFieldInfo(renderer,
+                            "[" + client.getSocket().getSocket().getRemoteSocketAddress().toString() + "]"
+                            , pos.x + renderer.getTextWidth(text) + 40, pos.y + 1);
+                    pos.y += 30;
+                }
+            }
 
             renderer.popState();
         }
@@ -156,6 +168,10 @@ public class HostStage extends Stage {
 
     private void drawFieldText(Renderer renderer, String text, Vector2 pos) {
         drawFieldText(renderer, text, pos.x, pos.y);
+    }
+
+    private void drawFieldInfo(Renderer renderer, String text, Vector2 pos) {
+        drawFieldInfo(renderer, text, pos.x, pos.y);
     }
 
     private void drawFieldTitle(Renderer renderer, String title, double x, double y) {
@@ -173,6 +189,16 @@ public class HostStage extends Stage {
         renderer.setColor(159, 149, 133);
         renderer.text(text, x + 2, y + 2);
         renderer.setColor(73, 66, 51);
+        renderer.text(text, x, y);
+    }
+
+
+    private void drawFieldInfo(Renderer renderer, String text, double x, double y) {
+        renderer.setFont("fonts/bulkypix.ttf");
+        renderer.setTextSize(14);
+        renderer.setColor(new Color(168, 158, 141));
+        renderer.text(text, x + 2, y + 2);
+        renderer.setColor(new Color(101, 93, 72));
         renderer.text(text, x, y);
     }
 
@@ -198,6 +224,7 @@ public class HostStage extends Stage {
             new Thread(this::showLog, "ShowLogThread").start();
         }
 
+        hostingServer.tick();
     }
 
     private void showLog() {

@@ -126,6 +126,14 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    public void tick() {
+
+    }
+
+    public HashSet<HostingClient> getClients() {
+        return clients;
+    }
+
     public void broadcast(Package pkg) {
         for (HostingClient client : clients) {
             client.send(pkg);

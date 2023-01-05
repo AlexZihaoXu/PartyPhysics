@@ -5,6 +5,8 @@ import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.JoiningClient;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
@@ -39,6 +41,12 @@ public class JoinStage extends Stage {
             xOffset = 0;
         }
 
+        {
+            Package pkg = new Package(PackageTypes.HANDSHAKE);
+            pkg.setString("name", name);
+
+            client.send(pkg);
+        }
     }
 
     @Override
@@ -88,6 +96,8 @@ public class JoinStage extends Stage {
     public void onTick() {
         super.onTick();
 
+        client.tick();
+
         if (getWidth() > 1200) {
             xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
         } else {
@@ -114,7 +124,6 @@ public class JoinStage extends Stage {
                 getWindow().getJFrame(), "You have left the game.\n" + (log == null ? "" : log), "Left the game", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE
         );
     }
-
 
     @Override
     public void onMousePressed(double x, double y, int button) {

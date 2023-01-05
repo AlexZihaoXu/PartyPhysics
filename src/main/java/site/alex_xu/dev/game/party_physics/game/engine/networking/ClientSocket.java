@@ -58,7 +58,6 @@ public class ClientSocket {
             inputStream.close();
             bufferedOutputStream.close();
             outputStream.close();
-            System.out.println("Stream closed");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
