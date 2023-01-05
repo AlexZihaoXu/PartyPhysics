@@ -6,16 +6,17 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
+import java.io.EOFException;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 
-public class JoiningClient implements ServerClientType {
+public class JoiningClient implements ServerClientType, ClientEventHandler {
 
     private static final HashSet<JoiningClient> unclosedClients = new HashSet<>();
     private ClientSocket socket;
     private boolean socketShouldClose = false;
+
+    private final TreeMap<Integer, Client> clients = new TreeMap<>();
 
     private String crashLog = null;
     private boolean isConnected = false;
@@ -38,6 +39,10 @@ public class JoiningClient implements ServerClientType {
 
     private double latency = 0;
 
+    private Client ownClient = null;
+
+    private String name;
+
     public JoiningClient(String ip) {
         this.ip = ip;
     }
@@ -45,6 +50,10 @@ public class JoiningClient implements ServerClientType {
 
     public boolean isConnected() {
         return isConnected && !isClosed();
+    }
+
+    public Client getOwnClient() {
+        return ownClient;
     }
 
     public void connect() {
@@ -77,12 +86,20 @@ public class JoiningClient implements ServerClientType {
             if (!(
                     e instanceof SocketException && e.getMessage().toLowerCase().contains("socket closed")
             )) {
-                crashLog = e.getMessage();
-                e.printStackTrace();
+                if (e instanceof EOFException) {
+                    crashLog = "Server closed.";
+                } else {
+                    crashLog = e.getMessage();
+                    e.printStackTrace();
+                }
             }
         } finally {
             shutdown();
         }
+    }
+
+    public Collection<Client> getClients() {
+        return clients.values();
     }
 
     public void send(Package pkg) {
@@ -152,15 +169,46 @@ public class JoiningClient implements ServerClientType {
         flush();
     }
 
+    public Client getClient(int id) {
+        if (clients.containsKey(id)) {
+            return clients.get(id);
+        }
+        return null;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void processPackage(Package pkg) {
         if (pkg.getType() == PackageTypes.HANDSHAKE) {
+            Client client = new Client(pkg.getInteger("id"), name);
             hostName = pkg.getString("name");
+            clients.put(0, new Client(0, hostName));
+            clients.put(client.getID(), client);
         } else if (pkg.getType() == PackageTypes.PONG) {
             double lastTime = pkg.getFraction("time");
             latency = (pingClock.elapsedTime() - lastTime) * 1000;
             Package lpkg = new Package(PackageTypes.CLIENT_UPDATE_LATENCY);
             lpkg.setFraction("latency", latency);
+            if (getOwnClient() != null) {
+                getOwnClient().latency = latency;
+            }
             send(lpkg);
+        } else if (pkg.getType() == PackageTypes.CLIENT_UPDATE_LATENCY) {
+            getClient(pkg.getInteger("id")).latency = pkg.getFraction("latency");
+        } else if (pkg.getType() == PackageTypes.CLIENT_JOIN) {
+            Client client = new Client(pkg.getInteger("id"), pkg.getString("name"));
+            clients.put(client.getID(), client);
+            onClientJoin(client);
+        } else if (pkg.getType() == PackageTypes.CLIENT_LEAVE) {
+            Client client = getClient(pkg.getInteger("id"));
+            onClientLeave(client);
+            clients.remove(client.getID());
         }
     }
 
@@ -173,5 +221,15 @@ public class JoiningClient implements ServerClientType {
 
     public String getHostName() {
         return hostName;
+    }
+
+    @Override
+    public void onClientJoin(Client client) {
+        System.out.println(client.getName() + " joined.");
+    }
+
+    @Override
+    public void onClientLeave(Client client) {
+        System.out.println(client.getName() + " left.");
     }
 }

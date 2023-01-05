@@ -5,6 +5,8 @@ public enum PackageTypes {
     PING,
     PONG,
 
+    CLIENT_JOIN,
+    CLIENT_LEAVE,
     CLIENT_UPDATE_LATENCY,
 
     CONNECTION_LOST,

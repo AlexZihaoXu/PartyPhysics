@@ -8,9 +8,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.ServerSocket;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 
 public class HostingServer implements ServerClientType {
 
@@ -24,9 +22,9 @@ public class HostingServer implements ServerClientType {
 
     final LinkedList<Package> recvQueue = new LinkedList<>();
 
-    private final HashSet<HostingClient> clients = new HashSet<>();
+    private final TreeMap<Integer, HostingClient> hostingClients = new TreeMap<>();
 
-    private final HashSet<HostingClient> joinedClient = new HashSet<>();
+    private final TreeMap<Integer, Client> joinedClients = new TreeMap<>();
 
     public String getServerCrashLog() {
         return serverCrashLog;
@@ -41,7 +39,7 @@ public class HostingServer implements ServerClientType {
         return serverCrashLog != null;
     }
 
-    private String name;
+    private final String name;
 
     public HostingServer(String name) {
         this.name = name;
@@ -52,24 +50,49 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    public void kickClient(int id) {
+        if (hostingClients.containsKey(id)) {
+            HostingClient client = hostingClients.get(id);
+            if (joinedClients.containsKey(id)) {
+                client.onClientLeave(getClient(client));
+            }
+            joinedClients.remove(id);
+            hostingClients.remove(id);
+            client.shutdown();
+        }
+    }
+
+    public void kickClient(Client client) {
+        kickClient(client.getID());
+    }
+
+    public void kickClient(HostingClient client) {
+        kickClient(client.getID());
+
+    }
+
     private void mainLoop() {
         try {
             serverSocket = new ServerSocket(PartyPhysicsGame.SERVER_PORT);
             ServerSocket serverSocket = this.serverSocket;
-            System.out.println("Server listening at port: " + PartyPhysicsGame.SERVER_PORT);
+            System.out.println("Server listening on port: " + PartyPhysicsGame.SERVER_PORT);
             while (serverRunning) {
                 serverSocket.getSocket().setSoTimeout(250);
-                ArrayList<HostingClient> clients = new ArrayList<>(this.clients);
+                ArrayList<HostingClient> clients = new ArrayList<>(this.hostingClients.values());
                 for (HostingClient client : clients) {
                     if (client.isClosed()) {
-                        this.clients.remove(client);
-                        this.joinedClient.remove(client);
+                        kickClient(client);
                     }
                 }
                 try {
                     ClientSocket socket = serverSocket.accept();
+
+                    int id = (int) (Math.random() * 100) * 100;
+                    while (hostingClients.containsKey(id)) {
+                        id++;
+                    }
                     socket.getSocket().setSoTimeout(3 * 60 * 1000); // 1 min timeout
-                    this.clients.add(new HostingClient(this, socket));
+                    this.hostingClients.put(id, new HostingClient(this, socket, id));
                 } catch (SocketTimeoutException ignored) {
                 }
                 Thread.yield();
@@ -94,13 +117,16 @@ public class HostingServer implements ServerClientType {
     }
 
     void joinClient(HostingClient client) {
-        joinedClient.add(client);
+
+        Client clt = new Client(client.getID(), client.getName());
+        joinedClients.put(clt.getID(), clt);
 
         Package pkg = new Package(PackageTypes.HANDSHAKE);
         pkg.setString("name", name);
-
+        pkg.setInteger("id", client.getID());
         client.send(pkg);
 
+        client.onClientJoin(clt);
     }
 
     public void launch() {
@@ -114,7 +140,7 @@ public class HostingServer implements ServerClientType {
         serverRunning = false;
         if (serverSocket != null)
             serverSocket.close();
-        for (HostingClient client : clients) {
+        for (HostingClient client : hostingClients.values()) {
             client.shutdown();
 
         }
@@ -123,7 +149,7 @@ public class HostingServer implements ServerClientType {
 
     @Override
     public void flush() {
-        for (HostingClient client : clients) {
+        for (HostingClient client : hostingClients.values()) {
             client.flush();
         }
     }
@@ -152,13 +178,35 @@ public class HostingServer implements ServerClientType {
         return name;
     }
 
-    public HashSet<HostingClient> getClients() {
-        return clients;
+    public Collection<HostingClient> getHostingClients() {
+        return hostingClients.values();
     }
 
     public void broadcast(Package pkg) {
-        for (HostingClient client : clients) {
+        for (HostingClient client : hostingClients.values()) {
             client.send(pkg);
         }
+    }
+
+    public Client getClient(int id) {
+        if (joinedClients.containsKey(id)) {
+            return joinedClients.get(id);
+        }
+        return null;
+    }
+
+    public Client getClient(HostingClient hostingClient) {
+        return getClient(hostingClient.getID());
+    }
+
+    public HostingClient getHostingClient(int id) {
+        if (hostingClients.containsKey(id)) {
+            return hostingClients.get(id);
+        }
+        return null;
+    }
+
+    public HostingClient getHostingClient(Client client) {
+        return getHostingClient(client.getID());
     }
 }

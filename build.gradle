@@ -2,6 +2,10 @@ plugins {
     id 'java'
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << "-Xlint:unchecked"
+}
+
 group 'site.alex_xu.dev.game.party_physics'
 version '1.0-SNAPSHOT'
 

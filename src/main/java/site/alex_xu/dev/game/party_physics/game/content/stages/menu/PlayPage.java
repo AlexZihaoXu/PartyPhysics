@@ -305,6 +305,7 @@ class PlayPage {
                         if (name == null) {
                             client.shutdown();
                         } else {
+                            client.setName(name);
                             JoinStage joinStage = new JoinStage(stage.bgm, client, name);
                             stage.getWindow().changeStage(joinStage);
                         }

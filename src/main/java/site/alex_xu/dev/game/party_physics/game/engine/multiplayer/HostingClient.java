@@ -8,7 +8,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
 
-public class HostingClient {
+public class HostingClient implements ClientEventHandler {
 
     private final ClientSocket socket;
     private final Thread hostingClientThread;
@@ -21,11 +21,18 @@ public class HostingClient {
 
     private String clientName = null;
 
+    private final int id;
+
+    public int getID() {
+        return id;
+    }
+
     public String getName() {
         return clientName;
     }
 
-    public HostingClient(HostingServer server, ClientSocket socket) {
+    public HostingClient(HostingServer server, ClientSocket socket, int id) {
+        this.id = id;
         this.socket = socket;
         this.server = server;
         hostingClientThread = new Thread(this::receivingLoop, "HostingClient-Thread (" + socket.getSocket().getRemoteSocketAddress() + ")");
@@ -84,18 +91,31 @@ public class HostingClient {
         }
     }
 
+    private void handShake(Package pkg) {
+        log("Set player name to " + pkg.getString("name") + ".");
+        clientName = pkg.getString("name");
+        log("Joined game with id: " + getID() + ".");
+
+        server.joinClient(this);
+    }
+
     private void onPackageReceived(Package pkg) {
 
         if (pkg.getType() == PackageTypes.HANDSHAKE) {
-            log("Set player name to " + pkg.getString("name"));
-            clientName = pkg.getString("name");
-            server.joinClient(this);
+            handShake(pkg);
         } else if (pkg.getType() == PackageTypes.PING) {
             Package reply = new Package(PackageTypes.PONG);
             reply.setFraction("time", pkg.getFraction("time"));
             send(reply);
         } else if (pkg.getType() == PackageTypes.CLIENT_UPDATE_LATENCY) {
             latency = pkg.getFraction("latency");
+            server.getClient(this).latency = latency;
+            Package lpkg = new Package(PackageTypes.CLIENT_UPDATE_LATENCY);
+            lpkg.setInteger("id", getID());
+            lpkg.setFraction("latency", latency);
+            for (HostingClient clt : server.getHostingClients()) {
+                clt.send(lpkg);
+            }
         }
 
         synchronized (server.recvQueue) {
@@ -109,5 +129,32 @@ public class HostingClient {
 
     public void flush() {
         socket.flush();
+    }
+
+    @Override
+    public void onClientJoin(Client client) {
+        if (client.getID() == getID()) {
+            Package joinPkg = client.createJoinPackage();
+            HostingClient hostingClient = server.getHostingClient(client);
+            for (HostingClient clt : server.getHostingClients()) {
+                if (clt.getID() != getID()) {
+                    clt.send(joinPkg);
+                    Package pkg = server.getClient(clt).createJoinPackage();
+                    hostingClient.send(pkg);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onClientLeave(Client client) {
+        if (client.getID() == getID()) {
+            Package leavePackage = client.createLeavePackage();
+            for (HostingClient clt : server.getHostingClients()) {
+                if (clt.getID() != getID()) {
+                    clt.send(leavePackage);
+                }
+            }
+        }
     }
 }

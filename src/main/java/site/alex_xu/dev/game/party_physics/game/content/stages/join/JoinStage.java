@@ -1,9 +1,11 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.join;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
+import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.Client;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.JoiningClient;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
@@ -14,7 +16,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import javax.swing.*;
 import java.awt.*;
 
-public class JoinStage extends Stage {
+public class JoinStage extends MultiplayerStage {
 
     SoundSource bgm;
     JoiningClient client;
@@ -90,6 +92,25 @@ public class JoinStage extends Stage {
         renderer.popState();
 
         //
+        Vector2 pos = new Vector2(xOffset + 250, getHeight() * 0.2 + 40);
+        drawFieldTitle(renderer, "Joined Players:", pos);
+        for (Client client : client.getClients()) {
+            pos.y += 30;
+            String text = client.getName();
+            drawFieldText(renderer, text, pos);
+            double rawX = pos.x;
+            double width = renderer.getTextWidth(text) + 20;
+            pos.x = Math.max(pos.x + 100, pos.x + width);
+
+            if (client.getID() == 0) {
+                drawFieldInfo(renderer, "[HOST]", pos);
+            } else {
+                drawFieldInfo(renderer, String.format("[%.1f", client.getLatency()) + "ms]", pos);
+            }
+
+            pos.x = rawX;
+        }
+
     }
 
     @Override
@@ -139,29 +160,4 @@ public class JoinStage extends Stage {
         }
     }
 
-    private void drawFieldTitle(Renderer renderer, String title, Vector2 pos) {
-        drawFieldTitle(renderer, title, pos.x, pos.y);
-    }
-
-    private void drawFieldText(Renderer renderer, String text, Vector2 pos) {
-        drawFieldText(renderer, text, pos.x, pos.y);
-    }
-
-    private void drawFieldTitle(Renderer renderer, String title, double x, double y) {
-        renderer.setFont("fonts/bulkypix.ttf");
-        renderer.setTextSize(20);
-        renderer.setColor(128, 120, 108);
-        renderer.text(title, x + 2, y + 2);
-        renderer.setColor(49, 44, 34);
-        renderer.text(title, x, y);
-    }
-
-    private void drawFieldText(Renderer renderer, String text, double x, double y) {
-        renderer.setFont("fonts/bulkypix.ttf");
-        renderer.setTextSize(16);
-        renderer.setColor(159, 149, 133);
-        renderer.text(text, x + 2, y + 2);
-        renderer.setColor(73, 66, 51);
-        renderer.text(text, x, y);
-    }
 }

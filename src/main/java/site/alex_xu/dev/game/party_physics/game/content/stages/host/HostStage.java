@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.host;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
@@ -16,7 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-public class HostStage extends Stage {
+public class HostStage extends MultiplayerStage {
 
     SoundSource bgm;
     Button btnBack = new Button("< menu");
@@ -38,7 +39,7 @@ public class HostStage extends Stage {
                 InetAddress[] addresses = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
                 ArrayList<String> addrs = new ArrayList<>();
                 for (InetAddress address : addresses) {
-                    if (address.getHostAddress().contains(":")) continue; // IPV6
+                    if (address.getHostAddress().contains(":")) continue; // IPV6 (removed)
                     addrs.add(address.getHostAddress());
                 }
                 String[] newAddrs = new String[addrs.size()];
@@ -149,63 +150,27 @@ public class HostStage extends Stage {
                     "[HOST]"
                     , pos.x + renderer.getTextWidth(text) + 40, pos.y + 1);
             pos.y += 30;
-            if (this.hostingServer.getClients().size() == 0) {
+            if (this.hostingServer.getHostingClients().size() == 0) {
                 pos.y += 10;
                 drawFieldInfo(renderer, "(waiting for other players to join)", pos);
             } else {
-                for (HostingClient client : this.hostingServer.getClients()) {
+                for (HostingClient client : this.hostingServer.getHostingClients()) {
                     text = client.getName() == null ? "connecting..." : client.getName();
                     drawFieldText(renderer, text, pos);
+                    double rawX = pos.x;
+                    pos.y += 1;
+                    pos.x = Math.max(pos.x + 100, pos.x + renderer.getTextWidth(text));
                     drawFieldInfo(renderer,
-                            "[" + client.getSocket().getSocket().getRemoteSocketAddress().toString() + "][" + String.format("%.1f", client.getLatency()) + "ms]"
-                            , pos.x + renderer.getTextWidth(text) + 40, pos.y + 1);
-                    pos.y += 30;
+                            "[" + client.getSocket().getSocket().getRemoteSocketAddress().toString() + "] [" + String.format("%.1f", client.getLatency()) + "ms]"
+                            , pos);
+                    pos.x = rawX;
+                    pos.y += 29;
                 }
             }
 
             renderer.popState();
         }
 
-    }
-
-    private void drawFieldTitle(Renderer renderer, String title, Vector2 pos) {
-        drawFieldTitle(renderer, title, pos.x, pos.y);
-    }
-
-    private void drawFieldText(Renderer renderer, String text, Vector2 pos) {
-        drawFieldText(renderer, text, pos.x, pos.y);
-    }
-
-    private void drawFieldInfo(Renderer renderer, String text, Vector2 pos) {
-        drawFieldInfo(renderer, text, pos.x, pos.y);
-    }
-
-    private void drawFieldTitle(Renderer renderer, String title, double x, double y) {
-        renderer.setFont("fonts/bulkypix.ttf");
-        renderer.setTextSize(20);
-        renderer.setColor(128, 120, 108);
-        renderer.text(title, x + 2, y + 2);
-        renderer.setColor(49, 44, 34);
-        renderer.text(title, x, y);
-    }
-
-    private void drawFieldText(Renderer renderer, String text, double x, double y) {
-        renderer.setFont("fonts/bulkypix.ttf");
-        renderer.setTextSize(16);
-        renderer.setColor(159, 149, 133);
-        renderer.text(text, x + 2, y + 2);
-        renderer.setColor(73, 66, 51);
-        renderer.text(text, x, y);
-    }
-
-
-    private void drawFieldInfo(Renderer renderer, String text, double x, double y) {
-        renderer.setFont("fonts/bulkypix.ttf");
-        renderer.setTextSize(14);
-        renderer.setColor(new Color(168, 158, 141));
-        renderer.text(text, x + 2, y + 2);
-        renderer.setColor(new Color(101, 93, 72));
-        renderer.text(text, x, y);
     }
 
     @Override
