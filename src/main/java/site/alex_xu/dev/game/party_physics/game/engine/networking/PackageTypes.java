@@ -3,6 +3,9 @@ package site.alex_xu.dev.game.party_physics.game.engine.networking;
 public enum PackageTypes {
     HANDSHAKE, // The very first package that will be sent to share basic information such as player's name
     PING,
+    PONG,
+
+    CLIENT_UPDATE_LATENCY,
 
     CONNECTION_LOST,
 

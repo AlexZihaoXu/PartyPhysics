@@ -4,6 +4,7 @@ import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
+import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -29,7 +30,13 @@ public class JoiningClient implements ServerClientType {
 
     private final String ip;
 
+    private final Clock pingClock = new Clock();
+
+    private final Clock pingClockTimer = new Clock();
+
     private boolean connecting = false;
+
+    private double latency = 0;
 
     public JoiningClient(String ip) {
         this.ip = ip;
@@ -129,6 +136,13 @@ public class JoiningClient implements ServerClientType {
 
     public void tick() {
 
+        if (pingClockTimer.elapsedTime() > 1) {
+            Package pkg = new Package(PackageTypes.PING);
+            pkg.setFraction("time", pingClock.elapsedTime());
+            send(pkg);
+            pingClockTimer.reset();
+        }
+
         while (!recvQueueIn.isEmpty()) {
             Package pkg = recvQueueIn.removeFirst();
             processPackage(pkg);
@@ -139,9 +153,14 @@ public class JoiningClient implements ServerClientType {
     }
 
     public void processPackage(Package pkg) {
-        System.out.println(pkg);
         if (pkg.getType() == PackageTypes.HANDSHAKE) {
             hostName = pkg.getString("name");
+        } else if (pkg.getType() == PackageTypes.PONG) {
+            double lastTime = pkg.getFraction("time");
+            latency = (pingClock.elapsedTime() - lastTime) * 1000;
+            Package lpkg = new Package(PackageTypes.CLIENT_UPDATE_LATENCY);
+            lpkg.setFraction("latency", latency);
+            send(lpkg);
         }
     }
 

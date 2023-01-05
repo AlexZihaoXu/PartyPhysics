@@ -157,7 +157,7 @@ public class HostStage extends Stage {
                     text = client.getName() == null ? "connecting..." : client.getName();
                     drawFieldText(renderer, text, pos);
                     drawFieldInfo(renderer,
-                            "[" + client.getSocket().getSocket().getRemoteSocketAddress().toString() + "]"
+                            "[" + client.getSocket().getSocket().getRemoteSocketAddress().toString() + "][" + String.format("%.1f", client.getLatency()) + "ms]"
                             , pos.x + renderer.getTextWidth(text) + 40, pos.y + 1);
                     pos.y += 30;
                 }

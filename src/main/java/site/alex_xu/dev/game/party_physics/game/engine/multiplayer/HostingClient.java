@@ -17,6 +17,8 @@ public class HostingClient {
 
     private boolean socketShouldStop = false;
 
+    private double latency = 0;
+
     private String clientName = null;
 
     public String getName() {
@@ -88,11 +90,21 @@ public class HostingClient {
             log("Set player name to " + pkg.getString("name"));
             clientName = pkg.getString("name");
             server.joinClient(this);
+        } else if (pkg.getType() == PackageTypes.PING) {
+            Package reply = new Package(PackageTypes.PONG);
+            reply.setFraction("time", pkg.getFraction("time"));
+            send(reply);
+        } else if (pkg.getType() == PackageTypes.CLIENT_UPDATE_LATENCY) {
+            latency = pkg.getFraction("latency");
         }
 
         synchronized (server.recvQueue) {
             server.recvQueue.addLast(pkg);
         }
+    }
+
+    public double getLatency() {
+        return latency;
     }
 
     public void flush() {
