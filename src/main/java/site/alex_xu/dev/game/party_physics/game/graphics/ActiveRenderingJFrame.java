@@ -59,7 +59,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         setMinimumSize(new Dimension(800, 600));
-        setAlwaysOnTop(true);
+        setAlwaysOnTop(false);
 
     }
 

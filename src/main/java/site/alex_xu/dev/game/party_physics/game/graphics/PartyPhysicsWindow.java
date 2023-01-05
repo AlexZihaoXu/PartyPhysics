@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.graphics;
 
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.*;
+import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingServer;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 
 import javax.swing.*;
@@ -37,6 +38,7 @@ public class PartyPhysicsWindow {
         } finally {
             onDestroy();
             SoundSystem.getInstance().cleanup();
+            HostingServer.cleanup();
         }
     }
 

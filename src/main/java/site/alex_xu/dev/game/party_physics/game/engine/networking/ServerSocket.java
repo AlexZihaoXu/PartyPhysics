@@ -7,15 +7,13 @@ public class ServerSocket {
 
     java.net.ServerSocket socket;
 
-    public ServerSocket(int port) {
-        try {
-            this.socket = new java.net.ServerSocket(port);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public ServerSocket(int port) throws IOException {
+        this.socket = new java.net.ServerSocket(port);
     }
 
-
+    public java.net.ServerSocket getSocket() {
+        return socket;
+    }
     public boolean isClosed() {
         return socket.isClosed();
     }

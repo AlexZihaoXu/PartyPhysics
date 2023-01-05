@@ -52,6 +52,8 @@ public class Player {
     private final int id;
     private double moveDuration = 0;
 
+    private boolean loaded = false;
+
     public Player(Color color, double x, double y, int id) {
         this.color = color;
         this.x = x;
@@ -200,6 +202,8 @@ public class Player {
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             bodyPart.color = this.color;
         }
+
+        loaded = true;
     }
 
     public void punch(Vector2 direction) {
@@ -496,5 +500,9 @@ public class Player {
             }
             tryGrabItem(head.getWorld().getObject(objID), armRightEnd);
         }
+    }
+
+    public boolean isLoaded() {
+        return loaded;
     }
 }

@@ -14,20 +14,20 @@ import java.util.LinkedList;
 public class Renderer {
 
     private static final class State {
+
         Color color;
         AffineTransform trans;
         RenderingHints hints;
         Composite composite;
-
         Font font;
 
         double lineWidth = 1;
 
+
     }
-
     private final Graphics2D g;
-    private final LinkedList<State> states = new LinkedList<>();
 
+    private final LinkedList<State> states = new LinkedList<>();
     private final int width, height;
 
     private double lineWidth = 1;
@@ -46,7 +46,11 @@ public class Renderer {
         setRenderHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     }
 
+
     // Setters
+    public void setFont(String path) {
+        setFont(Font.get(path));
+    }
 
     public void setColor(Color color) {
         g.setColor(color);

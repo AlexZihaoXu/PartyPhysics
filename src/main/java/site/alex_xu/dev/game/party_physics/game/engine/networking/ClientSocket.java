@@ -54,6 +54,11 @@ public class ClientSocket {
         try {
             if (socket != null)
                 socket.close();
+            bufferedInputStream.close();
+            inputStream.close();
+            bufferedOutputStream.close();
+            outputStream.close();
+            System.out.println("Stream closed");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

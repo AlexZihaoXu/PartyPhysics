@@ -3,6 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.content.ui;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
+import site.alex_xu.dev.game.party_physics.game.graphics.Font;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
@@ -71,6 +72,8 @@ public class Button {
 
     public void onRender(Renderer renderer) {
         renderer.pushState();
+
+        renderer.setFont(Font.get("fonts/bulkypix.ttf"));
 
         renderer.setColor(210, 195, 171, (int) (animationRate * 150));
         renderer.rect(getX(), getY(), width, height);

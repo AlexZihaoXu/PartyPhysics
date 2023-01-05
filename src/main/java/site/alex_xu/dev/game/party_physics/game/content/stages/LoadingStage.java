@@ -75,8 +75,11 @@ public class LoadingStage extends Stage implements Runnable {
             renderer.setColor(new Color(183, 183, 183));
             renderer.rect(55, 5, getWidth() - 100, 30);
 
-            renderer.setColor(new Color(56, 56, 56));
+            renderer.setColor(new Color(110, 110, 110));
             renderer.rect(50, 0, getWidth() - 100, 30);
+
+            renderer.setColor(new Color(56, 56, 56));
+            renderer.rect(50, 0, (getWidth() - 100) * displayProgress, 30);
 
             renderer.setFont(Font.get("fonts/bulkypix.ttf"));
 
@@ -114,10 +117,10 @@ public class LoadingStage extends Stage implements Runnable {
     @Override
     public void run() {
         String[] soundsToLoad = {
+                "sounds/ui/mouse-over-0.wav",
+                "sounds/ui/mouse-click-0.wav",
                 "sounds/bgm-0.wav",
                 "sounds/bgm-1.wav",
-                "sounds/ui/mouse-click-0.wav",
-                "sounds/ui/mouse-over-0.wav",
         };
 
         for (int i = 0; i < soundsToLoad.length; i++) {

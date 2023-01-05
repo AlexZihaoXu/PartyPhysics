@@ -19,6 +19,7 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.ConcurrentModificationException;
 
 public class MenuStage extends Stage {
 
@@ -47,22 +48,27 @@ public class MenuStage extends Stage {
     boolean atSecondPage = false;
     boolean secondPageAtOptions = false;
 
+    boolean isLocked = false;
+
     OptionsPane optionsPane = new OptionsPane();
 
     PlayPage playPage = new PlayPage(this);
 
-    SoundSource bgm = new SoundSource();
+    public SoundSource bgm;
 
     Clock timer = new Clock();
 
     @Override
     public void onLoad() {
         super.onLoad();
-        Sound sound = Sound.get("sounds/bgm-0.wav");
-        bgm.setSound(sound);
-        bgm.setVolume(1);
+        if (bgm == null) {
+            bgm = new SoundSource();
+            Sound sound = Sound.get("sounds/bgm-0.wav");
+            bgm.setSound(sound);
+            bgm.setVolume(1);
+            bgm.play();
+        }
 
-        bgm.play();
 
         world.init();
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
@@ -71,7 +77,6 @@ public class MenuStage extends Stage {
     @Override
     public void onOffload() {
         super.onOffload();
-        bgm.delete();
     }
 
     @Override
@@ -100,8 +105,8 @@ public class MenuStage extends Stage {
         renderBackground(renderer);
         renderer.setColor(new Color(211, 196, 172, 120));
         renderer.clear();
-        renderUIComponents(renderer);
         renderForeGround(renderer);
+        renderUIComponents(renderer);
         renderer.popState();
 
     }
@@ -169,13 +174,17 @@ public class MenuStage extends Stage {
 
         if (timer.elapsedTime() > 1.5 && player == null) {
             player = new Player(Color.WHITE, 0, -20, 0);
-            world.addPlayer(player);
+
         }
     }
 
     @Override
     public void onTick() {
         super.onTick();
+
+        if (player != null && !player.isLoaded()) {
+            world.addPlayer(player);
+        }
 
         optionsPane.onTick();
         playPage.onTick();
@@ -205,11 +214,15 @@ public class MenuStage extends Stage {
 
         btnBack.onTick(getDeltaTime(), this);
 
-        world.onTick();
+        try {
+            world.onTick();
+        } catch (ConcurrentModificationException ignored) {
+            System.err.println("WARNING: ConcurrentModification when ticking simulated world!");
+        }
         camera.scale += (Math.min(getWidth(), getHeight()) / 13d - camera.scale) * Math.min(1, getDeltaTime() * 3);
         camera.pos.x = -menuShift * 0.003;
 
-        if (player != null){
+        if (player != null && player.isLoaded()) {
             if (Math.abs(player.getPos().x - camera.getWorldMousePos().x) > 3) {
                 if (player.getPos().x > camera.getWorldMousePos().x) {
                     player.setMovementX(-1);
@@ -271,52 +284,61 @@ public class MenuStage extends Stage {
 
     }
 
+    public void setLocked(boolean locked) {
+        isLocked = locked;
+    }
+
     @Override
     public void onMousePressed(double x, double y, int button) {
         super.onMousePressed(x, y, button);
-        optionsPane.onMousePressed(x, y, button);
-        if (button == 1) {
-            if (atSecondPage) {
-                if (btnBack.getBounds().contains(x, y)) {
-                    btnBack.onClick();
-                    atSecondPage = false;
-                }
-            } else {
-                if (btnExit.getBounds().contains(x, y)) {
-                    btnExit.onClick();
-                    int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
-                    if (result == JOptionPane.OK_OPTION) {
-                        getWindow().close();
+        if (!isLocked)
+            optionsPane.onMousePressed(x, y, button);
+        playPage.onMousePressed(x, y, button);
+        if (!isLocked)
+            if (button == 1) {
+                if (atSecondPage) {
+                    if (btnBack.getBounds().contains(x, y)) {
+                        btnBack.onClick();
+                        atSecondPage = false;
+                    }
+                } else {
+                    if (btnExit.getBounds().contains(x, y)) {
+                        btnExit.onClick();
+                        int result = JOptionPane.showConfirmDialog(getWindow().getJFrame(), "Are you sure you want to exit?", "Exit game", JOptionPane.OK_CANCEL_OPTION);
+                        if (result == JOptionPane.OK_OPTION) {
+                            getWindow().close();
+                        }
+                    }
+                    if (btnOptions.getBounds().contains(x, y)) {
+                        btnOptions.onClick();
+                        atSecondPage = true;
+                        secondPageAtOptions = true;
+                    }
+                    if (btnPlay.getBounds().contains(x, y)) {
+                        btnPlay.onClick();
+                        atSecondPage = true;
+                        secondPageAtOptions = false;
+                    }
+                    if (btnTutorials.getBounds().contains(x, y)) {
+                        btnTutorials.onClick();
                     }
                 }
-                if (btnOptions.getBounds().contains(x, y)) {
-                    btnOptions.onClick();
-                    atSecondPage = true;
-                    secondPageAtOptions = true;
-                }
-                if (btnPlay.getBounds().contains(x, y)) {
-                    btnPlay.onClick();
-                    atSecondPage = true;
-                    secondPageAtOptions = false;
-                }
-                if (btnTutorials.getBounds().contains(x, y)) {
-                    btnTutorials.onClick();
-                }
             }
-        }
     }
 
     @Override
     public void onMouseReleased(double x, double y, int button) {
         super.onMouseReleased(x, y, button);
-        optionsPane.onMouseReleased(x, y, button);
+        if (!isLocked)
+            optionsPane.onMouseReleased(x, y, button);
     }
 
     @Override
     public void onKeyPressed(int keyCode) {
         super.onKeyPressed(keyCode);
-        if (keyCode == KeyEvent.VK_ESCAPE) {
-            atSecondPage = false;
-        }
+        if (!isLocked)
+            if (keyCode == KeyEvent.VK_ESCAPE) {
+                atSecondPage = false;
+            }
     }
 }
