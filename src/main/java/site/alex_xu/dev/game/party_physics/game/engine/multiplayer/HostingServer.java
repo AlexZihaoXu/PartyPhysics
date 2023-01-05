@@ -3,6 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ServerSocket;
 
 import java.net.SocketException;
@@ -25,6 +26,8 @@ public class HostingServer implements ServerClientType {
 
     private final HashSet<HostingClient> clients = new HashSet<>();
 
+    private final HashSet<HostingClient> joinedClient = new HashSet<>();
+
     public String getServerCrashLog() {
         return serverCrashLog;
     }
@@ -38,7 +41,10 @@ public class HostingServer implements ServerClientType {
         return serverCrashLog != null;
     }
 
-    public HostingServer() {
+    private String name;
+
+    public HostingServer(String name) {
+        this.name = name;
         servers.add(this);
         if (!shutdownHookAdded) {
             Runtime.getRuntime().addShutdownHook(new Thread(HostingServer::cleanup, "HostingServerShutdownHook"));
@@ -57,6 +63,7 @@ public class HostingServer implements ServerClientType {
                 for (HostingClient client : clients) {
                     if (client.isClosed()) {
                         this.clients.remove(client);
+                        this.joinedClient.remove(client);
                     }
                 }
                 try {
@@ -86,6 +93,16 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    void joinClient(HostingClient client) {
+        joinedClient.add(client);
+
+        Package pkg = new Package(PackageTypes.HANDSHAKE);
+        pkg.setString("name", name);
+
+        client.send(pkg);
+
+    }
+
     public void launch() {
         if (serverRunning)
             throw new IllegalStateException("Server is already running!");
@@ -99,6 +116,7 @@ public class HostingServer implements ServerClientType {
             serverSocket.close();
         for (HostingClient client : clients) {
             client.shutdown();
+
         }
         servers.remove(this);
     }
@@ -127,7 +145,11 @@ public class HostingServer implements ServerClientType {
     }
 
     public void tick() {
+        flush();
+    }
 
+    public String getName() {
+        return name;
     }
 
     public HashSet<HostingClient> getClients() {

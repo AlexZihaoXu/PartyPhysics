@@ -259,7 +259,14 @@ class PlayPage {
         if (button == 1 && switchingStage == null) {
             if (hostBound.contains(x, y)) {
                 SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");
-                switchingStage = new HostStage(getStage().bgm);
+                String input = JOptionPane.showInputDialog(
+                        getStage().getWindow().getJFrame(),
+                        "Please enter your player name:",
+                        "Set player name",
+                        JOptionPane.PLAIN_MESSAGE
+                );
+                if (input != null)
+                    switchingStage = new HostStage(input, getStage().bgm);
             }
             if (joinBound.contains(x, y)) {
                 SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");
@@ -289,21 +296,18 @@ class PlayPage {
                         );
                     } else {
                         String name = null;
-                        while (name == null) {
-                            name = JOptionPane.showInputDialog(
-                                    getStage().getWindow().getJFrame(),
-                                    "Please enter your player name:",
-                                    "Set player name",
-                                    JOptionPane.PLAIN_MESSAGE
-                            );
-                            if (name == null) {
-                                JOptionPane.showConfirmDialog(
-                                        stage.getWindow().getJFrame(), "Please enter a name!", "Set player name", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE
-                                );
-                            }
+                        name = JOptionPane.showInputDialog(
+                                getStage().getWindow().getJFrame(),
+                                "Please enter your player name:",
+                                "Set player name",
+                                JOptionPane.PLAIN_MESSAGE
+                        );
+                        if (name == null) {
+                            client.shutdown();
+                        } else {
+                            JoinStage joinStage = new JoinStage(stage.bgm, client, name);
+                            stage.getWindow().changeStage(joinStage);
                         }
-                        JoinStage joinStage = new JoinStage(stage.bgm, client, name);
-                        stage.getWindow().changeStage(joinStage);
                     }
                     getStage().setLocked(false);
                 }

@@ -79,7 +79,7 @@ public class JoinStage extends Stage {
     }
 
     public void renderUIComponents(Renderer renderer) {
-        String title = "XXX's Game";
+        String title = client.getHostName() == null ? "Connecting ... " : client.getHostName() + "'s Game";
 
         renderer.pushState();
         renderer.translate(xOffset + 300, getHeight() * 0.2);

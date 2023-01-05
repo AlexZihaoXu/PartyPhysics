@@ -3,9 +3,8 @@ package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 
-import java.io.EOFException;
-import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,7 +19,10 @@ public class JoiningClient implements ServerClientType {
     private String crashLog = null;
     private boolean isConnected = false;
 
-    private final LinkedList<Package> recvQueue = new LinkedList<>();
+    private String hostName = null;
+
+    private final LinkedList<Package> recvQueueIn = new LinkedList<>();
+    private final LinkedList<Package> recvQueueOut = new LinkedList<>();
     private final LinkedList<Package> sendQueue = new LinkedList<>();
 
     private final Thread recvThread = new Thread(this::recvLoop, "JoiningClientRecvThread");
@@ -58,9 +60,9 @@ public class JoiningClient implements ServerClientType {
     private void recvLoop() {
         try {
             while (!socketShouldClose && !socket.isClosed()) {
-
-                synchronized (recvQueue) {
-                    recvQueue.addLast(socket.pull());
+                Package pkg = socket.pull();
+                synchronized (recvQueueIn) {
+                    recvQueueIn.addLast(pkg);
                 }
                 Thread.yield();
             }
@@ -109,11 +111,11 @@ public class JoiningClient implements ServerClientType {
 
     @Override
     public Package pull() {
-        synchronized (recvQueue) {
-            if (recvQueue.isEmpty()) {
+        synchronized (recvQueueIn) {
+            if (recvQueueIn.isEmpty()) {
                 return null;
             }
-            return recvQueue.removeFirst();
+            return recvQueueIn.removeFirst();
         }
     }
 
@@ -127,7 +129,20 @@ public class JoiningClient implements ServerClientType {
 
     public void tick() {
 
+        while (!recvQueueIn.isEmpty()) {
+            Package pkg = recvQueueIn.removeFirst();
+            processPackage(pkg);
+            recvQueueOut.addLast(pkg);
+        }
+
         flush();
+    }
+
+    public void processPackage(Package pkg) {
+        System.out.println(pkg);
+        if (pkg.getType() == PackageTypes.HANDSHAKE) {
+            hostName = pkg.getString("name");
+        }
     }
 
     public static void cleanup() {
@@ -135,5 +150,9 @@ public class JoiningClient implements ServerClientType {
         for (JoiningClient client : clients) {
             client.shutdown();
         }
+    }
+
+    public String getHostName() {
+        return hostName;
     }
 }

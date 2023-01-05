@@ -30,7 +30,7 @@ public class HostStage extends Stage {
 
     private String crashLog = null;
 
-    private final HostingServer hostingServer = new HostingServer();
+    private final HostingServer hostingServer;
 
     private final Thread ipAddressUpdateThread = new Thread(() -> {
         while (!ipAddressUpdateThreadShouldStop) {
@@ -54,8 +54,9 @@ public class HostStage extends Stage {
         }
     });
 
-    public HostStage(SoundSource bgmSource) {
+    public HostStage(String name, SoundSource bgmSource) {
         this.bgm = bgmSource;
+        hostingServer = new HostingServer(name);
     }
 
     @Override
@@ -142,13 +143,18 @@ public class HostStage extends Stage {
             renderer.translate(20, 0);
 
             pos.y += 30;
+            String text = hostingServer.getName();
+            drawFieldText(renderer, text, pos);
+            drawFieldInfo(renderer,
+                    "[HOST]"
+                    , pos.x + renderer.getTextWidth(text) + 40, pos.y + 1);
+            pos.y += 30;
             if (this.hostingServer.getClients().size() == 0) {
-                drawFieldText(renderer, "EMPTY*", pos);
-                pos.y += 30;
-                drawFieldText(renderer, "(no one has joined yet)", pos);
+                pos.y += 10;
+                drawFieldInfo(renderer, "(waiting for other players to join)", pos);
             } else {
                 for (HostingClient client : this.hostingServer.getClients()) {
-                    String text = client.getName() == null ? "connecting..." : client.getName();
+                    text = client.getName() == null ? "connecting..." : client.getName();
                     drawFieldText(renderer, text, pos);
                     drawFieldInfo(renderer,
                             "[" + client.getSocket().getSocket().getRemoteSocketAddress().toString() + "]"

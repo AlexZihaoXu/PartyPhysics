@@ -10,7 +10,6 @@ import java.net.SocketException;
 
 public class HostingClient {
 
-
     private final ClientSocket socket;
     private final Thread hostingClientThread;
 
@@ -68,8 +67,8 @@ public class HostingClient {
         } catch (IOException e) {
             if (!(
                     e instanceof SocketException && (
-                            e.getMessage().toLowerCase().contains("socket closed")||
-                            e.getMessage().toLowerCase().contains("connection reset")
+                            e.getMessage().toLowerCase().contains("socket closed") ||
+                                    e.getMessage().toLowerCase().contains("connection reset")
                     ) ||
                             e instanceof EOFException
             ))
@@ -88,6 +87,7 @@ public class HostingClient {
         if (pkg.getType() == PackageTypes.HANDSHAKE) {
             log("Set player name to " + pkg.getString("name"));
             clientName = pkg.getString("name");
+            server.joinClient(this);
         }
 
         synchronized (server.recvQueue) {
