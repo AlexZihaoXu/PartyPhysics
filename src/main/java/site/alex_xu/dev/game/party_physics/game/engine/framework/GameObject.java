@@ -38,8 +38,11 @@ public abstract class GameObject extends Body {
         double vy = pkg.getFraction("vel.y");
         double va = pkg.getFraction("vel.a");
 
+        double rx = getTransform().getTranslationX();
+        double ry = getTransform().getTranslationY();
+
         getTransform().setRotation(angle);
-        getTransform().setTranslation(x, y);
+        getTransform().setTranslation((x + rx) / 2, (y + ry) / 2);
         setLinearVelocity(vx, vy);
         setAngularVelocity(va);
     }
