@@ -195,10 +195,10 @@ public class HostStage extends MultiplayerStage {
     public void onTick() {
         super.onTick();
 
-//        if (clock.elapsedTime() > 1.5) {
-//            clock.reset();
-//            server.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
-//        }
+        if (clock.elapsedTime() > 1.5) {
+            clock.reset();
+            server.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
+        }
 
         if (getWidth() > 1200) {
             xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
