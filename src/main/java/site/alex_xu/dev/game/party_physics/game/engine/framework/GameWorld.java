@@ -162,6 +162,10 @@ public class GameWorld {
         return object.world == this;
     }
 
+    public boolean hasObject(int id) {
+        return objectsIdMap.containsKey(id);
+    }
+
     public void removeObject(GameObject object) {
         if (object.world != this) {
             if (object.world == null)

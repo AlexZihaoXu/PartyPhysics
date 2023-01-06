@@ -1,5 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync;
 
+import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
@@ -19,12 +20,51 @@ import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ServerSideWorldSyncer implements ClientEventHandler {
+
+    private static class ObjectState {
+        public Vector2 pos = new Vector2();
+        public Vector2 vel = new Vector2();
+        public double angle;
+        public double angularVel;
+
+        public ObjectState(GameObject object) {
+            pos.set(object.getTransform().getTranslation());
+            vel.set(object.getLinearVelocity());
+            angle = object.getTransform().getRotationAngle();
+            angularVel = object.getAngularVelocity();
+        }
+
+        public boolean checkUpdate(GameObject object) {
+            boolean shouldUpdate = false;
+
+            double maxOffset = 0.1;
+            double velOffset = 0.5;
+            double angleOffset = 0.1;
+            double angleVelOffset = Math.PI / 90;
+            if (object.getTransform().getTranslation().copy().subtract(pos).getMagnitude() > maxOffset)
+                shouldUpdate = true;
+            else if (object.getLinearVelocity().copy().subtract(vel).getMagnitude() > velOffset)
+                shouldUpdate = true;
+            else if (Math.abs(angle - object.getTransform().getRotationAngle()) > angleOffset)
+                shouldUpdate = true;
+            else if (Math.abs(angularVel - object.getAngularVelocity()) > angleVelOffset)
+                shouldUpdate = true;
+
+            if (shouldUpdate) {
+                pos.set(object.getTransform().getTranslation());
+                vel.set(object.getLinearVelocity());
+                angle = object.getTransform().getRotationAngle();
+                angularVel = object.getAngularVelocity();
+            }
+            return shouldUpdate;
+        }
+    }
+
+    private final TreeMap<Integer, ObjectState> objectStates = new TreeMap<>();
+
     private final HostingServer server;
     private GameWorld world = null;
 
@@ -59,11 +99,37 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         if (world != null) {
             world.onTick();
 
+
             if (forceSyncClock.elapsedTime() > 1d / PhysicsSettings.SYNCS_PER_SECOND) {
+                HashSet<GameObject> updated = new HashSet<>();
 
                 for (GameObject object : world.getObjects()) {
-                    if (!object.isAtRest())
-                        broadcast(object.createSyncPackage());
+                    if (!objectStates.containsKey(object.getObjectID()))
+                        updated.add(object);
+                }
+
+                for (int id : objectStates.keySet()) {
+                    ObjectState state = objectStates.get(id);
+                    if (state.checkUpdate(world.getObject(id))) {
+                        updated.add(world.getObject(id));
+                    }
+                }
+
+                for (GameObject object : updated) {
+                    broadcast(object.createSyncPackage());
+                    if (!objectStates.containsKey(object.getObjectID())) {
+                        objectStates.put(object.getObjectID(), new ObjectState(object));
+                    }
+                }
+
+                ArrayList<Integer> removed = new ArrayList<>();
+                for (int id : objectStates.keySet()) {
+                    if (!world.hasObject(id)) {
+                        removed.add(id);
+                    }
+                }
+                for (Integer id : removed) {
+                    objectStates.remove(id);
                 }
 
                 forceSyncClock.reset();
