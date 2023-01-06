@@ -1,6 +1,5 @@
 package site.alex_xu.dev.game.party_physics.game.engine.networking;
 
-import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 
@@ -42,7 +41,7 @@ public class GameObjectManager {
     }
 
     public Package createCreationPackage(Player player) {
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_PLAYER_CREATE);
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_ADD_PLAYER);
         Color color = player.getColor();
         pkg.setInteger("id", player.head.getObjectID());
         pkg.setInteger("playerID", player.getID());

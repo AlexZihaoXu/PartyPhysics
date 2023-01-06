@@ -11,6 +11,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -42,6 +43,15 @@ public class GameWorld {
     public void addPlayer(Player player) {
         player.initPhysics(this);
         players.put(player.getID(), player);
+    }
+
+    public void removePlayer(Player player) {
+        player.offloadPhysics(this);
+        players.remove(player.getID());
+    }
+
+    public boolean hasPlayer(int id) {
+        return players.containsKey(id);
     }
 
     public Body getStaticBody() {
@@ -159,5 +169,9 @@ public class GameWorld {
 
     public GameObject getObject(int objID) {
         return objectsIdMap.get(objID);
+    }
+
+    public Collection<Player> getPlayers() {
+        return players.values();
     }
 }

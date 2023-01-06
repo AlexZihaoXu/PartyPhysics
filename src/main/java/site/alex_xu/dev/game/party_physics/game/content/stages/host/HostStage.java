@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.host;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
@@ -77,7 +78,6 @@ public class HostStage extends MultiplayerStage {
 
         hostingServer.launch();
 
-        hostingServer.getWorldSyncer().syncCreateWorld();
         hostingServer.getWorldSyncer().syncAddGround(-50, 2.5, 100, 1);
     }
 
@@ -108,7 +108,14 @@ public class HostStage extends MultiplayerStage {
         renderer.setColor(210, 195, 171);
         renderer.clear();
 
-        camera.scale = 50;
+        if (hostingServer.getSyncedWorld() != null && hostingServer.getSyncedWorld().hasPlayer(0)) {
+            Player player = hostingServer.getSyncedWorld().getPlayer(0);
+            camera.scale += (Math.min(getWidth(), getHeight()) / 14d - camera.scale) * Math.min(1, getDeltaTime() * 3);
+            camera.pos.x += (player.getPos().x - camera.pos.x) * Math.min(1, getDeltaTime() * 2);
+            camera.pos.y += (player.getPos().y - camera.pos.y) * Math.min(1, getDeltaTime());
+        } else {
+            camera.scale += (45 - camera.scale) * Math.min(1, getDeltaTime() * 5);
+        }
         camera.render(hostingServer.getSyncedWorld(), renderer);
 
         btnBack.setPos(50 + xOffset, 50);

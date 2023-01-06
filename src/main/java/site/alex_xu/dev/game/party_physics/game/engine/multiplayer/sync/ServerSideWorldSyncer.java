@@ -2,6 +2,9 @@ package site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync;
 
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
+import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
+import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.Client;
@@ -14,18 +17,31 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 public class ServerSideWorldSyncer implements ClientEventHandler {
     private final HostingServer server;
     private GameWorld world = null;
 
+    private final ArrayList<Color> randomColors = new ArrayList<>();
     private final LinkedList<Package> sendQueue = new LinkedList<>();
 
     private final Clock forceSyncClock = new Clock();
 
+    private LocalPlayerController localPlayerController;
+
     public ServerSideWorldSyncer(HostingServer server) {
         this.server = server;
+        randomColors.add(new Color(190, 51, 51));
+        randomColors.add(new Color(211, 203, 85));
+        randomColors.add(new Color(118, 169, 83));
+        randomColors.add(new Color(77, 190, 174));
+        randomColors.add(new Color(65, 154, 218));
+        randomColors.add(new Color(132, 77, 218));
+        randomColors.add(new Color(187, 65, 192));
     }
 
     public HostingServer getServer() {
@@ -33,7 +49,6 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     }
 
     public void broadcast(Package pkg) {
-        pkg.setBoolean("sync", true);
         sendQueue.addLast(pkg);
     }
 
@@ -53,9 +68,22 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
 
         }
 
+        if (getLocalPlayerController() != null) {
+            LocalPlayerController controller = getLocalPlayerController();
+            while (true) {
+                Package pkg = controller.pull();
+                if (pkg == null) break;
+                server.broadcast(pkg);
+            }
+        }
+
         while (!sendQueue.isEmpty()) {
             server.broadcast(sendQueue.removeFirst());
         }
+    }
+
+    public LocalPlayerController getLocalPlayerController() {
+        return localPlayerController;
     }
 
     public void handlePackage(Package pkg) {
@@ -75,12 +103,16 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     public void initializeClient(HostingClient client) {
         if (world != null) {
             Package pkg = new Package(PackageTypes.WORLD_SYNC_CREATE);
-            pkg.setBoolean("sync", true);
             client.send(pkg);
             for (GameObject object : world.getObjects()) {
+                if (object instanceof GameObjectPlayerPart)
+                    continue;
                 pkg = GameObjectManager.getInstance().createCreationPackage(object);
-                pkg.setBoolean("sync", true);
                 client.send(pkg);
+            }
+            for (Player player : world.getPlayers()) {
+                Package ppkg = GameObjectManager.getInstance().createCreationPackage(player);
+                client.send(ppkg);
             }
         }
     }
@@ -108,13 +140,40 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world.addObject(box);
     }
 
+    public void syncAddPlayer(double x, double y, Color color, Client client) {
+        GameWorld world = getWorld();
+        Player player = new Player(color, x, y, client.getID());
+        world.addPlayer(player);
+
+        Package pkg = GameObjectManager.getInstance().createCreationPackage(player);
+        broadcast(pkg);
+    }
+
+    public void syncRemovePlayer(Player player) {
+        GameWorld world = getWorld();
+        world.removePlayer(player);
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_REMOVE_PLAYER);
+        pkg.setInteger("id", player.getID());
+        randomColors.add(player.getColor());
+        broadcast(pkg);
+    }
+
     @Override
     public void onClientJoin(Client client) {
-        initializeClient(server.getHostingClient(client));
+        if (client.getID() != 0)
+            initializeClient(server.getHostingClient(client));
+
+        int index = (int) (Math.random() * randomColors.size());
+        Color color = randomColors.remove(index);
+        syncAddPlayer(index / 5d, -2, color, client);
+
+        if (client.getID() == 0) {
+            localPlayerController = new LocalPlayerController(getWorld().getPlayer(0));
+        }
     }
 
     @Override
     public void onClientLeave(Client client) {
-
+        syncRemovePlayer(getWorld().getPlayer(client.getID()));
     }
 }

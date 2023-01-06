@@ -104,6 +104,18 @@ public class Player {
         return touchGround && (head.getCurrentTime() - lastTouchGroundTime < 20.0 / PhysicsSettings.TICKS_PER_SECOND);
     }
 
+    public void offloadPhysics(GameWorld world) {
+        for (Joint<GameObject> joint : joints) {
+            world.getSimulatedWorld().removeJoint(joint);
+        }
+        for (GameObjectPlayerPart bodyPart : bodyParts) {
+            world.removeObject(bodyPart);
+        }
+        if (grabbingJoint != null) {
+            world.getSimulatedWorld().removeJoint(grabbingJoint);
+        }
+    }
+
     public void initPhysics(GameWorld world) {
         double x = this.x;
         double y = this.y;
@@ -481,7 +493,7 @@ public class Player {
     }
 
     public Package createGrabbingSyncPackage() {
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_PLAYER_GRAB);
+        Package pkg = new Package(PackageTypes.PLAYER_SYNC_GRAB_ITEM);
         pkg.setInteger("player", getID());
         pkg.setBoolean("grabbing", grabbingJoint != null);
         if (grabbingJoint != null) {

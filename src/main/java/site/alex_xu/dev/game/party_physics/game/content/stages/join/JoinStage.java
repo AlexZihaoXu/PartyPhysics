@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.join;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
@@ -78,7 +79,14 @@ public class JoinStage extends MultiplayerStage {
         renderer.clear();
 
         if (client.getSyncedWorld() != null) {
-            camera.scale = 40;
+            if (client.getSyncedWorld() != null && client.getSyncedWorld().hasPlayer(client.getOwnClient().getID())) {
+                Player player = client.getSyncedWorld().getPlayer(client.getOwnClient().getID());
+                camera.scale += (Math.min(getWidth(), getHeight()) / 14d - camera.scale) * Math.min(1, getDeltaTime() * 3);
+                camera.pos.x += (player.getPos().x - camera.pos.x) * Math.min(1, getDeltaTime() * 2);
+                camera.pos.y += (player.getPos().y - camera.pos.y) * Math.min(1, getDeltaTime());
+            } else {
+                camera.scale += (45 - camera.scale) * Math.min(1, getDeltaTime() * 5);
+            }
             camera.render(client.getSyncedWorld(), renderer);
         }
 

@@ -73,6 +73,7 @@ public class HostingServer implements ServerClientType {
             HostingClient client = hostingClients.get(id);
             if (joinedClients.containsKey(id)) {
                 client.onClientLeave(getClient(client));
+                worldSyncer.onClientLeave(getClient(client));
             }
             joinedClients.remove(id);
             hostingClients.remove(id);
@@ -153,7 +154,12 @@ public class HostingServer implements ServerClientType {
             throw new IllegalStateException("Server is already running!");
         serverRunning = true;
         serverThread.start();
+
+        Client client = new Client(0, name);
+        joinedClients.put(client.getID(), client);
         worldSyncer = new ServerSideWorldSyncer(this);
+        worldSyncer.onClientJoin(client);
+
     }
 
     public void shutdown() {
