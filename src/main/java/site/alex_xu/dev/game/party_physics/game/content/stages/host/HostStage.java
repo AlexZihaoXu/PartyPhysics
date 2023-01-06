@@ -4,12 +4,14 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingClient;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingServer;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
+import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,6 +62,8 @@ public class HostStage extends MultiplayerStage {
         hostingServer = new HostingServer(name);
     }
 
+    Clock clock = new Clock();
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -72,7 +76,12 @@ public class HostStage extends MultiplayerStage {
         }
 
         hostingServer.launch();
+
+        hostingServer.getWorldSyncer().syncCreateWorld();
+        hostingServer.getWorldSyncer().syncAddGround(-50, 2.5, 100, 1);
     }
+
+    Camera camera = new Camera();
 
     @Override
     public void onOffload() {
@@ -98,6 +107,9 @@ public class HostStage extends MultiplayerStage {
 
         renderer.setColor(210, 195, 171);
         renderer.clear();
+
+        camera.scale = 50;
+        camera.render(hostingServer.getSyncedWorld(), renderer);
 
         btnBack.setPos(50 + xOffset, 50);
         btnBack.onRender(renderer);
@@ -148,7 +160,7 @@ public class HostStage extends MultiplayerStage {
             drawFieldText(renderer, text, pos);
             drawFieldInfo(renderer,
                     "[HOST]"
-                    , pos.x + renderer.getTextWidth(text) + 40, pos.y + 1);
+                    , Math.max(pos.x + 100, pos.x + renderer.getTextWidth(text)), pos.y + 1);
             pos.y += 30;
             if (this.hostingServer.getHostingClients().size() == 0) {
                 pos.y += 10;
@@ -176,6 +188,11 @@ public class HostStage extends MultiplayerStage {
     @Override
     public void onTick() {
         super.onTick();
+
+        if (clock.elapsedTime() > 1.5) {
+            clock.reset();
+            hostingServer.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
+        }
 
         if (getWidth() > 1200) {
             xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);

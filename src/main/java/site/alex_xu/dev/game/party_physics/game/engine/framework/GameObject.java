@@ -17,7 +17,7 @@ public abstract class GameObject extends Body {
     }
 
     public Package createSyncPackage() {
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_TRANSFORM);
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_OBJECT_STATE);
 
         pkg.setInteger("id", objectID);
         pkg.setFraction("angle", getTransform().getRotationAngle());
@@ -45,7 +45,7 @@ public abstract class GameObject extends Body {
     }
 
     public Package createCreationPackage() {
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE);
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_ADD_OBJECT);
         pkg.setInteger("id", getObjectID());
         pkg.setFraction("pos.x", getTransform().getTranslationX());
         pkg.setFraction("pos.y", getTransform().getTranslationY());

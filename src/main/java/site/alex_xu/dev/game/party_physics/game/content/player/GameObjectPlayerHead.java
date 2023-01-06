@@ -1,18 +1,14 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
-import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Mass;
-import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
-
-import java.awt.*;
 
 public class GameObjectPlayerHead extends GameObjectPlayerPart {
     static final double r = 0.22;
@@ -31,7 +27,7 @@ public class GameObjectPlayerHead extends GameObjectPlayerPart {
 
     @Override
     public Package createCreationPackage() {
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE);
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_ADD_OBJECT);
 
         pkg.setInteger("id", getObjectID());
         pkg.setFraction("pos.x", getTransform().getTranslationX());

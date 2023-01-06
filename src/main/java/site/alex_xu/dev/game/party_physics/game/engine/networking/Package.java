@@ -185,6 +185,10 @@ public class Package {
         }
     }
 
+    public boolean hasKey(String key) {
+        return data.containsKey(key.hashCode());
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();

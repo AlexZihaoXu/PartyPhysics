@@ -1,6 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
+import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ClientSideWorldSyncer;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
@@ -43,10 +45,11 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
 
     private String name;
 
+    private ClientSideWorldSyncer worldSyncer;
+
     public JoiningClient(String ip) {
         this.ip = ip;
     }
-
 
     public boolean isConnected() {
         return isConnected && !isClosed();
@@ -54,6 +57,17 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
 
     public Client getOwnClient() {
         return ownClient;
+    }
+
+
+    public ClientSideWorldSyncer getWorldSyncer() {
+        return worldSyncer;
+    }
+
+    public GameWorld getSyncedWorld() {
+        if (getWorldSyncer() == null)
+            return null;
+        return getWorldSyncer().getWorld();
     }
 
     public void connect() {
@@ -129,17 +143,17 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
             while (!sendQueue.isEmpty()) {
                 socket.send(sendQueue.removeFirst());
             }
-            socket.flush();
+            socket.transfer();
         }
     }
 
     @Override
     public Package pull() {
         synchronized (recvQueueIn) {
-            if (recvQueueIn.isEmpty()) {
+            if (recvQueueOut.isEmpty()) {
                 return null;
             }
-            return recvQueueIn.removeFirst();
+            return recvQueueOut.removeFirst();
         }
     }
 
@@ -160,10 +174,19 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
             pingClockTimer.reset();
         }
 
-        while (!recvQueueIn.isEmpty()) {
-            Package pkg = recvQueueIn.removeFirst();
-            processPackage(pkg);
-            recvQueueOut.addLast(pkg);
+        synchronized (recvQueueIn){
+            while (!recvQueueIn.isEmpty()) {
+                Package pkg = recvQueueIn.removeFirst();
+                processPackage(pkg);
+                if (getWorldSyncer() != null) {
+                    getWorldSyncer().handlePackage(pkg);
+                }
+                recvQueueOut.addLast(pkg);
+            }
+        }
+
+        if (getWorldSyncer() != null) {
+            getWorldSyncer().tick();
         }
 
         flush();
@@ -186,10 +209,12 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
 
     public void processPackage(Package pkg) {
         if (pkg.getType() == PackageTypes.HANDSHAKE) {
+            worldSyncer = new ClientSideWorldSyncer(this);
             Client client = new Client(pkg.getInteger("id"), name);
             hostName = pkg.getString("name");
             clients.put(0, new Client(0, hostName));
             clients.put(client.getID(), client);
+            ownClient = client;
         } else if (pkg.getType() == PackageTypes.PONG) {
             double lastTime = pkg.getFraction("time");
             latency = (pingClock.elapsedTime() - lastTime) * 1000;

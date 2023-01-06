@@ -4,6 +4,7 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.Client;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.JoiningClient;
@@ -33,6 +34,8 @@ public class JoinStage extends MultiplayerStage {
 
     private double xOffset = 0;
     private double enterProgress = 0;
+
+    private Camera camera = new Camera();
 
     @Override
     public void onLoad() {
@@ -73,6 +76,11 @@ public class JoinStage extends MultiplayerStage {
 
         renderer.setColor(210, 195, 171);
         renderer.clear();
+
+        if (client.getSyncedWorld() != null) {
+            camera.scale = 40;
+            camera.render(client.getSyncedWorld(), renderer);
+        }
 
         btnBack.setPos(50 + xOffset, 50);
         btnBack.onRender(renderer);

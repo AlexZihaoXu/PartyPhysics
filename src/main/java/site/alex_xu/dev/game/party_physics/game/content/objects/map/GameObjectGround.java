@@ -32,7 +32,7 @@ public class GameObjectGround extends GameObject {
 
     @Override
     public Package createCreationPackage() {
-        Package pkg = new Package(PackageTypes.PHYSICS_SYNC_GAME_OBJECT_CREATE);
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_ADD_OBJECT);
         pkg.setFraction("x", x);
         pkg.setFraction("y", y);
         pkg.setFraction("w", width);

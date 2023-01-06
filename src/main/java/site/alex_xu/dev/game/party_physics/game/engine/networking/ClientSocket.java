@@ -2,6 +2,9 @@ package site.alex_xu.dev.game.party_physics.game.engine.networking;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ConcurrentModificationException;
+import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientSocket {
     private String host;
@@ -11,6 +14,11 @@ public class ClientSocket {
     private BufferedOutputStream bufferedOutputStream;
     private DataInputStream inputStream;
     private BufferedInputStream bufferedInputStream;
+
+    private final ReentrantLock writeLock = new ReentrantLock();
+    private final ReentrantLock readLock = new ReentrantLock();
+
+    private final LinkedList<Package> sendQueue = new LinkedList<>();
 
     public ClientSocket(String host, int port) {
         this.host = host;
@@ -39,10 +47,25 @@ public class ClientSocket {
     }
 
     public void send(Package pkg) {
-        pkg.writeStream(outputStream);
+        synchronized (sendQueue) {
+            sendQueue.addLast(pkg);
+        }
     }
 
-    public void flush() {
+    public void transfer() {
+        if (writeLock.isLocked()) {
+            throw new ConcurrentModificationException("ClientSocket.transfer was called twice at the same time");
+        }
+        writeLock.lock();
+
+        synchronized (sendQueue) {
+            while (!sendQueue.isEmpty()) {
+                Package pkg = sendQueue.removeFirst();
+                pkg.writeStream(outputStream);
+            }
+        }
+
+        writeLock.unlock();
         try {
             outputStream.flush();
         } catch (IOException e) {
@@ -64,7 +87,13 @@ public class ClientSocket {
     }
 
     public Package pull() throws IOException {
-        return new Package(inputStream);
+        if (readLock.isLocked()) {
+            throw new ConcurrentModificationException("ClientSocket.pull was called twice at the same time");
+        }
+        readLock.lock();
+        Package pkg = new Package(inputStream);
+        readLock.unlock();
+        return pkg;
     }
 
     public boolean isClosed() {

@@ -1,6 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
+import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ServerSideWorldSyncer;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
@@ -18,13 +20,17 @@ public class HostingServer implements ServerClientType {
     private boolean serverRunning = false;
 
     private String serverCrashLog = null;
-    private Thread serverThread = new Thread(this::mainLoop, "HostingServer-Thread");
 
-    final LinkedList<Package> recvQueue = new LinkedList<>();
+    private final Thread serverThread = new Thread(this::mainLoop, "HostingServer-Thread");
+
+    final LinkedList<Package> recvQueueOut = new LinkedList<>();
+    final LinkedList<Package> recvQueueIn = new LinkedList<>();
 
     private final TreeMap<Integer, HostingClient> hostingClients = new TreeMap<>();
 
     private final TreeMap<Integer, Client> joinedClients = new TreeMap<>();
+
+    private ServerSideWorldSyncer worldSyncer;
 
     public String getServerCrashLog() {
         return serverCrashLog;
@@ -40,6 +46,18 @@ public class HostingServer implements ServerClientType {
     }
 
     private final String name;
+
+
+    public ServerSideWorldSyncer getWorldSyncer() {
+        return worldSyncer;
+    }
+
+    public GameWorld getSyncedWorld() {
+        if (getWorldSyncer() == null)
+            return null;
+        return getWorldSyncer().getWorld();
+    }
+
 
     public HostingServer(String name) {
         this.name = name;
@@ -127,6 +145,7 @@ public class HostingServer implements ServerClientType {
         client.send(pkg);
 
         client.onClientJoin(clt);
+        worldSyncer.onClientJoin(clt);
     }
 
     public void launch() {
@@ -134,6 +153,7 @@ public class HostingServer implements ServerClientType {
             throw new IllegalStateException("Server is already running!");
         serverRunning = true;
         serverThread.start();
+        worldSyncer = new ServerSideWorldSyncer(this);
     }
 
     public void shutdown() {
@@ -150,17 +170,17 @@ public class HostingServer implements ServerClientType {
     @Override
     public void flush() {
         for (HostingClient client : hostingClients.values()) {
-            client.flush();
+            client.transfer();
         }
     }
 
     @Override
     public Package pull() {
-        synchronized (recvQueue) {
-            if (recvQueue.isEmpty()) {
+        synchronized (recvQueueOut) {
+            if (recvQueueOut.isEmpty()) {
                 return null;
             }
-            return recvQueue.removeFirst();
+            return recvQueueOut.removeFirst();
         }
     }
 
@@ -171,6 +191,15 @@ public class HostingServer implements ServerClientType {
     }
 
     public void tick() {
+        while (!recvQueueIn.isEmpty()) {
+            Package pkg = recvQueueIn.removeFirst();
+            if (getWorldSyncer() != null)
+                getWorldSyncer().handlePackage(pkg);
+            recvQueueOut.addLast(pkg);
+        }
+        if (getWorldSyncer() != null) {
+            getWorldSyncer().tick();
+        }
         flush();
     }
 

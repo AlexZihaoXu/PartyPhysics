@@ -118,8 +118,8 @@ public class HostingClient implements ClientEventHandler {
             }
         }
 
-        synchronized (server.recvQueue) {
-            server.recvQueue.addLast(pkg);
+        synchronized (server.recvQueueIn) {
+            server.recvQueueIn.addLast(pkg);
         }
     }
 
@@ -127,8 +127,8 @@ public class HostingClient implements ClientEventHandler {
         return latency;
     }
 
-    public void flush() {
-        socket.flush();
+    public void transfer() {
+        socket.transfer();
     }
 
     @Override
