@@ -153,6 +153,26 @@ public class JoinStage extends MultiplayerStage {
             getWindow().changeStage(menuStage);
             client.shutdown();
         }
+
+        if (client.getLocalController() != null) {
+            client.getLocalController().tick();
+        }
+    }
+
+    @Override
+    public void onKeyPressed(int keyCode) {
+        super.onKeyPressed(keyCode);
+        if (client.getLocalController() != null) {
+            client.getLocalController().onKeyPressed(keyCode);
+        }
+    }
+
+    @Override
+    public void onKeyReleased(int keyCode) {
+        super.onKeyReleased(keyCode);
+        if (client.getLocalController() != null) {
+            client.getLocalController().onKeyReleased(keyCode);
+        }
     }
 
     private void showLog() {

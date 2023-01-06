@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
+import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ClientSideWorldSyncer;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
@@ -174,7 +175,7 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
             pingClockTimer.reset();
         }
 
-        synchronized (recvQueueIn){
+        synchronized (recvQueueIn) {
             while (!recvQueueIn.isEmpty()) {
                 Package pkg = recvQueueIn.removeFirst();
                 processPackage(pkg);
@@ -187,6 +188,14 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
 
         if (getWorldSyncer() != null) {
             getWorldSyncer().tick();
+        }
+
+        if (getLocalController() != null) {
+            while (true) {
+                Package pkg = getLocalController().pull();
+                if (pkg == null) break;
+                send(pkg);
+            }
         }
 
         flush();
@@ -227,9 +236,14 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
         } else if (pkg.getType() == PackageTypes.CLIENT_UPDATE_LATENCY) {
             getClient(pkg.getInteger("id")).latency = pkg.getFraction("latency");
         } else if (pkg.getType() == PackageTypes.CLIENT_JOIN) {
-            Client client = new Client(pkg.getInteger("id"), pkg.getString("name"));
-            clients.put(client.getID(), client);
-            onClientJoin(client);
+            int id = pkg.getInteger("id");
+            if (ownClient != null && ownClient.getID() == id) {
+                onClientJoin(ownClient);
+            } else {
+                Client client = new Client(id, pkg.getString("name"));
+                clients.put(client.getID(), client);
+                onClientJoin(client);
+            }
         } else if (pkg.getType() == PackageTypes.CLIENT_LEAVE) {
             Client client = getClient(pkg.getInteger("id"));
             onClientLeave(client);
@@ -262,5 +276,11 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
         if (worldSyncer != null) {
             worldSyncer.onClientLeave(client);
         }
+    }
+
+    public LocalPlayerController getLocalController() {
+        if (worldSyncer != null)
+            return worldSyncer.getLocalController();
+        return null;
     }
 }

@@ -4,6 +4,7 @@ import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBo
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
+import site.alex_xu.dev.game.party_physics.game.content.player.NetworkPlayerController;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
@@ -27,6 +28,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private final HostingServer server;
     private GameWorld world = null;
 
+    private final TreeMap<Integer, NetworkPlayerController> remoteControllers = new TreeMap<>();
     private final ArrayList<Color> randomColors = new ArrayList<>();
     private final LinkedList<Package> sendQueue = new LinkedList<>();
 
@@ -88,7 +90,9 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     }
 
     public void handlePackage(Package pkg) {
-
+        for (NetworkPlayerController controller : remoteControllers.values()) {
+            controller.handlePackage(pkg);
+        }
     }
 
     public GameWorld getWorld() {
@@ -158,12 +162,16 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
 
     @Override
     public void onClientJoin(Client client) {
-        if (client.getID() != 0)
-            initializeClient(server.getHostingClient(client));
 
         int index = (int) (Math.random() * randomColors.size());
         Color color = randomColors.remove(index);
         syncAddPlayer(index / 5d, -2, color, client);
+
+        if (client.getID() != 0) {
+            initializeClient(server.getHostingClient(client));
+            NetworkPlayerController controller = new NetworkPlayerController(getWorld().getPlayer(client.getID()));
+            remoteControllers.put(client.getID(), controller);
+        }
 
         if (client.getID() == 0) {
             localPlayerController = new LocalPlayerController(getWorld().getPlayer(0));
@@ -173,5 +181,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     @Override
     public void onClientLeave(Client client) {
         syncRemovePlayer(getWorld().getPlayer(client.getID()));
+
+        remoteControllers.remove(client.getID());
     }
 }

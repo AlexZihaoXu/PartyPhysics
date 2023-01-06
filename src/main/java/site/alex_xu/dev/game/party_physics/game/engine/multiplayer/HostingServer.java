@@ -146,12 +146,10 @@ public class HostingServer implements ServerClientType {
         pkg.setInteger("id", client.getID());
         client.send(pkg);
 
+        worldSyncer.onClientJoin(clt); // add player model to the client
         client.onClientJoin(clt);
-        worldSyncer.onClientJoin(clt);
         for (Client c : joinedClients.values()) {
-            if (c.getID() != client.getID()) {
-                client.send(c.createJoinPackage());
-            }
+            client.send(c.createJoinPackage());
         }
 
     }

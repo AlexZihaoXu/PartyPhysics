@@ -1,5 +1,6 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync;
 
+import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
 import site.alex_xu.dev.game.party_physics.game.content.player.NetworkPlayerController;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
@@ -20,6 +21,8 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
     private final LinkedList<Package> sendQueue = new LinkedList<>();
 
     private final TreeMap<Integer, NetworkPlayerController> remoteControllers = new TreeMap<>();
+
+    private LocalPlayerController controller;
 
     public ClientSideWorldSyncer(JoiningClient client) {
         this.client = client;
@@ -92,7 +95,9 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
 
     @Override
     public void onClientJoin(Client client) {
-        if (client.getID() != getClient().getOwnClient().getID()) {
+        if (client.getID() == getClient().getOwnClient().getID()) {
+            controller = new LocalPlayerController(getWorld().getPlayer(getClient().getOwnClient().getID()));
+        } else {
             NetworkPlayerController controller = new NetworkPlayerController(getWorld().getPlayer(client.getID()));
             remoteControllers.put(client.getID(), controller);
         }
@@ -103,5 +108,9 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         if (client.getID() != getClient().getOwnClient().getID()) {
             remoteControllers.remove(client.getID());
         }
+    }
+
+    public LocalPlayerController getLocalController() {
+        return controller;
     }
 }
