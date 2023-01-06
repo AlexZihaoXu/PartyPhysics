@@ -40,9 +40,9 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         public boolean checkUpdate(GameObject object) {
             boolean shouldUpdate = false;
 
-            double maxOffset = 0.1;
-            double velOffset = 0.5;
-            double angleOffset = 0.1;
+            double maxOffset = 0.02;
+            double velOffset = 0.05;
+            double angleOffset = Math.PI / 180;
             double angleVelOffset = Math.PI / 90;
             if (object.getTransform().getTranslation().copy().subtract(pos).getMagnitude() > maxOffset)
                 shouldUpdate = true;
