@@ -9,7 +9,7 @@ public class NetworkPlayerController extends PlayerController {
     }
 
     public void handlePackage(Package pkg) {
-        if (!pkg.hasKey("player-control")) return;
+        if (!pkg.hasKey("player")) return;
         if (pkg.getInteger("player") != getPlayer().getID()) return;
 
         if (pkg.getType() == PackageTypes.PLAYER_SYNC_MOVEMENT_X) {

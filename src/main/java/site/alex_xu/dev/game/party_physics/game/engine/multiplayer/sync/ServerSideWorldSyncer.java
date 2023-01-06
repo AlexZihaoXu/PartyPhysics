@@ -19,6 +19,7 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -87,10 +88,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     }
 
     public void handlePackage(Package pkg) {
-        if (pkg.hasKey("sync")) {
 
-
-        }
     }
 
     public GameWorld getWorld() {

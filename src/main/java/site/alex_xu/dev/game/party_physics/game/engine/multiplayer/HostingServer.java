@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
+import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ServerSideWorldSyncer;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
@@ -147,6 +148,12 @@ public class HostingServer implements ServerClientType {
 
         client.onClientJoin(clt);
         worldSyncer.onClientJoin(clt);
+        for (Client c : joinedClients.values()) {
+            if (c.getID() != client.getID()) {
+                client.send(c.createJoinPackage());
+            }
+        }
+
     }
 
     public void launch() {
@@ -243,5 +250,12 @@ public class HostingServer implements ServerClientType {
 
     public HostingClient getHostingClient(Client client) {
         return getHostingClient(client.getID());
+    }
+
+    public LocalPlayerController getLocalPlayerController() {
+        if (worldSyncer != null) {
+            return worldSyncer.getLocalPlayerController();
+        }
+        return null;
     }
 }

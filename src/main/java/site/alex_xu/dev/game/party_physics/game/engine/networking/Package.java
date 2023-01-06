@@ -192,6 +192,9 @@ public class Package {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
+        if (data.size() == 0) {
+            return type + ": {}";
+        }
         for (Integer hash : data.keySet()) {
             result.append(String.format("%16d", hash)).append(": ").append(data.get(hash)).append(",\n");
         }

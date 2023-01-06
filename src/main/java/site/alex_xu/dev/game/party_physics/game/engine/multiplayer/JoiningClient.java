@@ -251,10 +251,16 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
     @Override
     public void onClientJoin(Client client) {
         System.out.println(client.getName() + " joined.");
+        if (worldSyncer != null) {
+            worldSyncer.onClientJoin(client);
+        }
     }
 
     @Override
     public void onClientLeave(Client client) {
         System.out.println(client.getName() + " left.");
+        if (worldSyncer != null) {
+            worldSyncer.onClientLeave(client);
+        }
     }
 }

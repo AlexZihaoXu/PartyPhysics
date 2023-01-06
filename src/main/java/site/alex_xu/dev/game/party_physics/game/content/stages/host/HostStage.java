@@ -6,7 +6,6 @@ import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
-import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingClient;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingServer;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
@@ -34,7 +33,7 @@ public class HostStage extends MultiplayerStage {
 
     private String crashLog = null;
 
-    private final HostingServer hostingServer;
+    private final HostingServer server;
 
     private final Thread ipAddressUpdateThread = new Thread(() -> {
         while (!ipAddressUpdateThreadShouldStop) {
@@ -60,7 +59,7 @@ public class HostStage extends MultiplayerStage {
 
     public HostStage(String name, SoundSource bgmSource) {
         this.bgm = bgmSource;
-        hostingServer = new HostingServer(name);
+        server = new HostingServer(name);
     }
 
     Clock clock = new Clock();
@@ -76,9 +75,9 @@ public class HostStage extends MultiplayerStage {
             xOffset = 0;
         }
 
-        hostingServer.launch();
+        server.launch();
 
-        hostingServer.getWorldSyncer().syncAddGround(-50, 2.5, 100, 1);
+        server.getWorldSyncer().syncAddGround(-50, 2.5, 100, 1);
     }
 
     Camera camera = new Camera();
@@ -88,7 +87,7 @@ public class HostStage extends MultiplayerStage {
         super.onOffload();
         ipAddressUpdateThreadShouldStop = true;
 
-        hostingServer.shutdown();
+        server.shutdown();
     }
 
     @Override
@@ -108,15 +107,15 @@ public class HostStage extends MultiplayerStage {
         renderer.setColor(210, 195, 171);
         renderer.clear();
 
-        if (hostingServer.getSyncedWorld() != null && hostingServer.getSyncedWorld().hasPlayer(0)) {
-            Player player = hostingServer.getSyncedWorld().getPlayer(0);
+        if (server.getSyncedWorld() != null && server.getSyncedWorld().hasPlayer(0)) {
+            Player player = server.getSyncedWorld().getPlayer(0);
             camera.scale += (Math.min(getWidth(), getHeight()) / 14d - camera.scale) * Math.min(1, getDeltaTime() * 3);
             camera.pos.x += (player.getPos().x - camera.pos.x) * Math.min(1, getDeltaTime() * 2);
             camera.pos.y += (player.getPos().y - camera.pos.y) * Math.min(1, getDeltaTime());
         } else {
             camera.scale += (45 - camera.scale) * Math.min(1, getDeltaTime() * 5);
         }
-        camera.render(hostingServer.getSyncedWorld(), renderer);
+        camera.render(server.getSyncedWorld(), renderer);
 
         btnBack.setPos(50 + xOffset, 50);
         btnBack.onRender(renderer);
@@ -163,17 +162,17 @@ public class HostStage extends MultiplayerStage {
             renderer.translate(20, 0);
 
             pos.y += 30;
-            String text = hostingServer.getName();
+            String text = server.getName();
             drawFieldText(renderer, text, pos);
             drawFieldInfo(renderer,
                     "[HOST]"
                     , Math.max(pos.x + 100, pos.x + renderer.getTextWidth(text)), pos.y + 1);
             pos.y += 30;
-            if (this.hostingServer.getHostingClients().size() == 0) {
+            if (this.server.getHostingClients().size() == 0) {
                 pos.y += 10;
                 drawFieldInfo(renderer, "(waiting for other players to join)", pos);
             } else {
-                for (HostingClient client : this.hostingServer.getHostingClients()) {
+                for (HostingClient client : this.server.getHostingClients()) {
                     text = client.getName() == null ? "connecting..." : client.getName();
                     drawFieldText(renderer, text, pos);
                     double rawX = pos.x;
@@ -196,10 +195,10 @@ public class HostStage extends MultiplayerStage {
     public void onTick() {
         super.onTick();
 
-        if (clock.elapsedTime() > 1.5) {
-            clock.reset();
-            hostingServer.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
-        }
+//        if (clock.elapsedTime() > 1.5) {
+//            clock.reset();
+//            server.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
+//        }
 
         if (getWidth() > 1200) {
             xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
@@ -212,14 +211,35 @@ public class HostStage extends MultiplayerStage {
 
         btnBack.onTick(getDeltaTime(), this);
 
-        if (crashLog != null || hostingServer.isCrashed()) {
+        if (crashLog != null || server.isCrashed()) {
             MenuStage stage = new MenuStage();
             stage.bgm = bgm;
             getWindow().changeStage(stage);
             new Thread(this::showLog, "ShowLogThread").start();
         }
 
-        hostingServer.tick();
+        server.tick();
+
+        if (server.getLocalPlayerController() != null) {
+            server.getLocalPlayerController().tick();
+        }
+    }
+
+
+    @Override
+    public void onKeyPressed(int keyCode) {
+        super.onKeyPressed(keyCode);
+        if (server.getLocalPlayerController() != null) {
+            server.getLocalPlayerController().onKeyPressed(keyCode);
+        }
+    }
+
+    @Override
+    public void onKeyReleased(int keyCode) {
+        super.onKeyReleased(keyCode);
+        if (server.getLocalPlayerController() != null) {
+            server.getLocalPlayerController().onKeyReleased(keyCode);
+        }
     }
 
     private void showLog() {
@@ -227,7 +247,7 @@ public class HostStage extends MultiplayerStage {
         if (crashLog != null) {
             log = crashLog;
         } else {
-            log = hostingServer.getServerCrashLog();
+            log = server.getServerCrashLog();
         }
 
         JOptionPane.showConfirmDialog(

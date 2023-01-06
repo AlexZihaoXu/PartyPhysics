@@ -5,7 +5,9 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
+import java.util.TreeSet;
 
 public class LocalPlayerController extends PlayerController {
 
@@ -22,6 +24,35 @@ public class LocalPlayerController extends PlayerController {
     public Package pull() {
         if (sendQueue.isEmpty()) return null;
         return sendQueue.removeFirst();
+    }
+
+    private final TreeSet<Integer> pressedKeys = new TreeSet<>();
+
+    public void onKeyPressed(int keyCode) {
+        pressedKeys.add(keyCode);
+        if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_SPACE) {
+            jump();
+        } else if (keyCode == KeyEvent.VK_S) {
+            sneak(true);
+        }
+    }
+
+    public void onKeyReleased(int keyCode) {
+        pressedKeys.remove(keyCode);
+        if (keyCode == KeyEvent.VK_S) {
+            sneak(false);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        int mx = 0;
+        if (pressedKeys.contains(KeyEvent.VK_A))
+            mx--;
+        if (pressedKeys.contains(KeyEvent.VK_D))
+            mx++;
+        moveX(mx);
     }
 
     @Override
