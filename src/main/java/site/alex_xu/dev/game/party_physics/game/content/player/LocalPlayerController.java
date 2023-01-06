@@ -26,20 +26,24 @@ public class LocalPlayerController extends PlayerController {
 
     @Override
     public void moveX(int x) {
-        super.moveX(x);
-        Package pkg = new Package(PackageTypes.PLAYER_SYNC_MOVEMENT_X);
-        pkg.setInteger("player", getPlayer().getID());
-        pkg.setInteger("x", getPlayer().getMovementX());
-        send(pkg);
+        if (x != getPlayer().getMovementX()) {
+            super.moveX(x);
+            Package pkg = new Package(PackageTypes.PLAYER_SYNC_MOVEMENT_X);
+            pkg.setInteger("player", getPlayer().getID());
+            pkg.setInteger("x", getPlayer().getMovementX());
+            send(pkg);
+        }
     }
 
     @Override
     public void sneak(boolean sneak) {
-        super.sneak(sneak);
-        Package pkg = new Package(PackageTypes.PLAYER_SYNC_SNEAK);
-        pkg.setInteger("player", getPlayer().getID());
-        pkg.setBoolean("sneak", getPlayer().isSneaking());
-        send(pkg);
+        if (sneak != getPlayer().isSneaking()) {
+            super.sneak(sneak);
+            Package pkg = new Package(PackageTypes.PLAYER_SYNC_SNEAK);
+            pkg.setInteger("player", getPlayer().getID());
+            pkg.setBoolean("sneak", getPlayer().isSneaking());
+            send(pkg);
+        }
     }
 
     @Override
@@ -52,12 +56,19 @@ public class LocalPlayerController extends PlayerController {
 
     @Override
     public void reach(Vector2 reach) {
-        super.reach(reach);
-        Package pkg = new Package(PackageTypes.PLAYER_SYNC_REACH);
-        pkg.setInteger("player", getPlayer().getID());
-        pkg.setFraction("x", reach.x);
-        pkg.setFraction("y", reach.y);
-        send(pkg);
+
+        double magDiff = Math.abs(reach.getMagnitude() - getPlayer().getReachDirection().getMagnitude());
+        double dirDiff = Math.abs(reach.getDirection() - getPlayer().getReachDirection().getDirection());
+
+        if (magDiff > 0.1 || dirDiff > Math.PI / 90) {
+            super.reach(reach);
+            Package pkg = new Package(PackageTypes.PLAYER_SYNC_REACH);
+            pkg.setInteger("player", getPlayer().getID());
+            pkg.setFraction("x", reach.x);
+            pkg.setFraction("y", reach.y);
+            send(pkg);
+        }
+
     }
 
     @Override
