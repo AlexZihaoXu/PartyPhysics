@@ -186,9 +186,6 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
             }
         }
 
-        if (getWorldSyncer() != null) {
-            getWorldSyncer().tick();
-        }
 
         if (getLocalController() != null) {
             while (true) {
@@ -196,6 +193,10 @@ public class JoiningClient implements ServerClientType, ClientEventHandler {
                 if (pkg == null) break;
                 send(pkg);
             }
+        }
+
+        if (getWorldSyncer() != null) {
+            getWorldSyncer().tick();
         }
 
         flush();

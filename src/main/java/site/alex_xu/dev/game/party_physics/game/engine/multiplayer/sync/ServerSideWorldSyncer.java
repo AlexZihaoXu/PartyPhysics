@@ -39,7 +39,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     public ServerSideWorldSyncer(HostingServer server) {
         this.server = server;
         randomColors.add(new Color(190, 51, 51));
-        randomColors.add(new Color(211, 203, 85));
+        randomColors.add(new Color(231, 185, 34));
         randomColors.add(new Color(118, 169, 83));
         randomColors.add(new Color(77, 190, 174));
         randomColors.add(new Color(65, 154, 218));

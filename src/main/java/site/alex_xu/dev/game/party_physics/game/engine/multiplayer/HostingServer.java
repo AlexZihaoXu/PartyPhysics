@@ -211,6 +211,9 @@ public class HostingServer implements ServerClientType {
         if (getWorldSyncer() != null) {
             getWorldSyncer().tick();
         }
+        if (getLocalPlayerController() != null) {
+            getLocalPlayerController().tick();
+        }
         flush();
     }
 

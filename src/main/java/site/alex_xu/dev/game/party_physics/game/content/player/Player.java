@@ -255,7 +255,10 @@ public class Player {
     }
 
     public void onPhysicsTick(double dt, double now) {
+        if (getID() == 9800) {
+//            setMovementX(1);
 
+        }
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
             head.applyForce(new Vector2(0, -100));
             footLeft.applyForce(new Vector2(0, 50));

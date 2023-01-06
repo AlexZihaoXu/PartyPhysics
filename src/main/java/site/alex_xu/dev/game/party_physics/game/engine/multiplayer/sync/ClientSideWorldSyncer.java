@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync;
 
 import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
 import site.alex_xu.dev.game.party_physics.game.content.player.NetworkPlayerController;
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.Client;
@@ -37,7 +38,6 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
     }
 
     public void send(Package pkg) {
-        pkg.setBoolean("sync", true);
         sendQueue.addLast(pkg);
     }
 
@@ -48,6 +48,8 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         while (!sendQueue.isEmpty()) {
             client.send(sendQueue.removeFirst());
         }
+
+        if (controller != null) controller.tick();
     }
 
     public void handlePackage(Package pkg) {
@@ -58,7 +60,6 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         else if (pkg.getType() == PackageTypes.WORLD_SYNC_ADD_PLAYER) serverAddPlayer(pkg);
         else if (pkg.getType() == PackageTypes.WORLD_SYNC_REMOVE_PLAYER) serverRemovePlayer(pkg);
         else if (!(pkg.getType() == PackageTypes.PONG || pkg.getType() == PackageTypes.CLIENT_UPDATE_LATENCY)) {
-            System.out.println(pkg);
             for (NetworkPlayerController controller : remoteControllers.values()) {
                 controller.handlePackage(pkg);
             }
@@ -90,15 +91,19 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
     }
 
     private void serverAddPlayer(Package pkg) {
-        getWorld().addPlayer(GameObjectManager.getInstance().createPlayerFromPackage(pkg));
+        if (getWorld().hasPlayer(pkg.getInteger("playerID"))) return;
+        Player player = GameObjectManager.getInstance().createPlayerFromPackage(pkg);
+        getWorld().addPlayer(player);
     }
 
     @Override
     public void onClientJoin(Client client) {
         if (client.getID() == getClient().getOwnClient().getID()) {
-            controller = new LocalPlayerController(getWorld().getPlayer(getClient().getOwnClient().getID()));
+            Player player = getWorld().getPlayer(client.getID());
+            controller = new LocalPlayerController(player);
         } else {
-            NetworkPlayerController controller = new NetworkPlayerController(getWorld().getPlayer(client.getID()));
+            Player player = getWorld().getPlayer(client.getID());
+            NetworkPlayerController controller = new NetworkPlayerController(player);
             remoteControllers.put(client.getID(), controller);
         }
     }

@@ -77,7 +77,7 @@ public class HostStage extends MultiplayerStage {
 
         server.launch();
 
-        server.getWorldSyncer().syncAddGround(-50, 2.5, 100, 1);
+        server.getWorldSyncer().syncAddGround(-500, 2.5, 1000, 1);
     }
 
     Camera camera = new Camera();
@@ -220,9 +220,7 @@ public class HostStage extends MultiplayerStage {
 
         server.tick();
 
-        if (server.getLocalPlayerController() != null) {
-            server.getLocalPlayerController().tick();
-        }
+
     }
 
 

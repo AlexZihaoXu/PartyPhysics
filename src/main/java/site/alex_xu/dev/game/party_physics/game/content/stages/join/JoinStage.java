@@ -84,10 +84,11 @@ public class JoinStage extends MultiplayerStage {
                 camera.scale += (Math.min(getWidth(), getHeight()) / 14d - camera.scale) * Math.min(1, getDeltaTime() * 3);
                 camera.pos.x += (player.getPos().x - camera.pos.x) * Math.min(1, getDeltaTime() * 2);
                 camera.pos.y += (player.getPos().y - camera.pos.y) * Math.min(1, getDeltaTime());
+                camera.render(client.getSyncedWorld(), renderer);
             } else {
                 camera.scale += (45 - camera.scale) * Math.min(1, getDeltaTime() * 5);
+                camera.render(client.getSyncedWorld(), renderer);
             }
-            camera.render(client.getSyncedWorld(), renderer);
         }
 
         btnBack.setPos(50 + xOffset, 50);
@@ -153,10 +154,7 @@ public class JoinStage extends MultiplayerStage {
             getWindow().changeStage(menuStage);
             client.shutdown();
         }
-
-        if (client.getLocalController() != null) {
-            client.getLocalController().tick();
-        }
+//        Player player = client.getSyncedWorld().getPlayer(client.getOwnClient().getID());
     }
 
     @Override
