@@ -72,12 +72,14 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private final ArrayList<Color> randomColors = new ArrayList<>();
     private final LinkedList<Package> sendQueue = new LinkedList<>();
 
+    private final Clock syncClock = new Clock();
     private final Clock forceSyncClock = new Clock();
 
     private LocalPlayerController localPlayerController;
 
     public ServerSideWorldSyncer(HostingServer server) {
         this.server = server;
+        GameObject.serverSideWorldSyncer = this;
         randomColors.add(new Color(190, 51, 51));
         randomColors.add(new Color(231, 185, 34));
         randomColors.add(new Color(118, 169, 83));
@@ -97,9 +99,17 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
 
     public void tick() {
         if (world != null) {
+            if (getLocalPlayerController() != null) {
+                getLocalPlayerController().tick();
+            }
+            for (NetworkPlayerController controller : remoteControllers.values()) {
+                controller.tick();
+            }
+
             GameObject.latency = 0;
             world.onTick();
-            if (forceSyncClock.elapsedTime() > 1d / PhysicsSettings.SYNCS_PER_SECOND) {
+            if (syncClock.elapsedTime() > 1d / PhysicsSettings.SYNCS_PER_SECOND) {
+                boolean forceSync = forceSyncClock.elapsedTime() > 1d / PhysicsSettings.FORCE_SYNC_PER_SECOND;
                 HashSet<GameObject> updated = new HashSet<>();
 
                 ArrayList<Integer> removed = new ArrayList<>();
@@ -119,7 +129,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
 
                 for (int id : objectStates.keySet()) {
                     ObjectState state = objectStates.get(id);
-                    if (state.checkUpdate(world.getObject(id)) || world.getObject(id) instanceof GameObjectPlayerPart) {
+                    if (forceSync || state.checkUpdate(world.getObject(id)) || world.getObject(id) instanceof GameObjectPlayerPart) {
                         updated.add(world.getObject(id));
                     }
                 }
@@ -137,7 +147,10 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
                     }
                 }
 
-                forceSyncClock.reset();
+                syncClock.reset();
+                if (forceSync) {
+                    forceSyncClock.reset();
+                }
             }
 
         }
@@ -230,6 +243,13 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         pkg.setInteger("id", player.getID());
         randomColors.add(player.getColor());
         broadcast(pkg);
+    }
+
+    public void syncAddObject(GameObject object) {
+        GameWorld world = getWorld();
+        Package pkg = GameObjectManager.getInstance().createCreationPackage(object);
+        broadcast(pkg);
+        world.addObject(object);
     }
 
     @Override

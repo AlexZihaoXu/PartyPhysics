@@ -49,7 +49,7 @@ public class GameObjectGround extends GameObject {
         double w = pkg.getFraction("w");
         double h = pkg.getFraction("h");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         return new GameObjectGround(x, y, w, h);
     }
 

@@ -53,7 +53,7 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
         double velA = pkg.getFraction("vel.a");
         int hit = pkg.getInteger("hit");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectLiteBullet bullet = new GameObjectLiteBullet(new Vector2(), new Vector2());
         bullet.getTransform().setTranslation(posX, posY);
         bullet.getTransform().setRotation(posA);

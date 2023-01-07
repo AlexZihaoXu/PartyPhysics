@@ -2,7 +2,6 @@ package site.alex_xu.dev.game.party_physics.game.content.objects.map;
 
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Mass;
-import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
@@ -54,7 +53,7 @@ public class GameObjectWoodPlank extends GameObject {
         double w = pkg.getFraction("w");
         double h = pkg.getFraction("h");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectWoodPlank plank = new GameObjectWoodPlank(1000, 1000, w, h);
         plank.getTransform().setTranslation(posX, posY);
         plank.getTransform().setRotation(posA);

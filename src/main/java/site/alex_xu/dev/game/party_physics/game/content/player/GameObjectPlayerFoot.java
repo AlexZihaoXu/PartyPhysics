@@ -1,10 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
-import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Circle;
 import org.dyn4j.geometry.Mass;
-import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
@@ -36,7 +34,7 @@ public class GameObjectPlayerFoot extends GameObjectPlayerPart {
         double velY = pkg.getFraction("vel.y");
         double velA = pkg.getFraction("vel.a");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectPlayerFoot foot = new GameObjectPlayerFoot(posX, posY);
         foot.getTransform().setTranslation(posX, posY);
         foot.getTransform().setRotation(posA);

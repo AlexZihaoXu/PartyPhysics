@@ -529,6 +529,7 @@ public class Player {
 
     public void syncGrabbingFromPackage(Package pkg) {
         if (pkg.getBoolean("grabbing")) {
+
             if (grabItemSynced) return;
             int objID = pkg.getInteger("object");
             if (grabbingJoint != null && objID != grabbingObject.getObjectID()) {
@@ -552,11 +553,6 @@ public class Player {
                         head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
                     }
                     tryGrabItem(grabbingObject, armRightEnd);
-                    if (this.isGrabbing()) {
-                        System.out.println("succeed");
-                    } else {
-                        System.out.println("failed");
-                    }
                 }
 
             }

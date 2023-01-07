@@ -17,6 +17,9 @@ public class LocalPlayerController extends PlayerController {
 
     private Camera camera = new Camera();
 
+    private boolean isHoldingItem = false;
+    private boolean itemUseLocked = false;
+
     public void setCamera(Camera camera) {
         this.camera = camera;
     }
@@ -42,6 +45,10 @@ public class LocalPlayerController extends PlayerController {
             jump();
         } else if (keyCode == KeyEvent.VK_S) {
             sneak(true);
+        } else if (keyCode == KeyEvent.VK_F) {
+            if (getPlayer().getHoldItem() != null) {
+                reach(0, 0);
+            }
         }
     }
 
@@ -58,6 +65,9 @@ public class LocalPlayerController extends PlayerController {
             Vector2 playerPos = getPlayer().getPos().copy().add(0, -0.3);
             punch(Vector2.create(-1, playerPos.subtract(mouse).getDirection() - getPlayer().body.getTransform().getRotationAngle()));
         }
+        if (button == 1) {
+            itemUseLocked = false;
+        }
     }
 
     @Override
@@ -70,14 +80,44 @@ public class LocalPlayerController extends PlayerController {
             mx++;
         moveX(mx);
 
+        Vector2 mouse = camera.getWorldMousePos();
+        Vector2 playerPos = getPlayer().getPos().copy().add(0, -0.3);
         if (PartyPhysicsWindow.getInstance().getMouseButton(1)) {
-            Vector2 mouse = camera.getWorldMousePos();
-            Vector2 playerPos = getPlayer().getPos().copy().add(0, -0.3);
             if (mouse.distanceSquared(playerPos) > 1) {
                 reach(Vector2.create(-1, playerPos.subtract(mouse).getDirection() - getPlayer().body.getTransform().getRotationAngle()));
             }
-        } else if (getPlayer().getHoldItem() == null) {
-            reach(0, 0);
+        } else {
+            if (getPlayer().getHoldItem() == null) {
+                reach(0, 0);
+            } else {
+                reach(Vector2.create(-1, playerPos.subtract(mouse).getDirection() - getPlayer().body.getTransform().getRotationAngle()));
+            }
+        }
+
+        if (getPlayer().getHoldItem() == null) {
+            isHoldingItem = false;
+        } else {
+            if (!isHoldingItem) {
+                isHoldingItem = true;
+                itemUseLocked = true;
+            }
+        }
+
+        if (!itemUseLocked){
+            useItem(PartyPhysicsWindow.getInstance().getMouseButton(1));
+        }
+
+    }
+
+    @Override
+    public void useItem(boolean use) {
+        if (getPlayer().getHoldItem() == null) return;
+        if (use != isUsingItem()) {
+            super.useItem(use);
+            Package pkg = new Package(PackageTypes.PLAYER_SYNC_USE_ITEM);
+            pkg.setInteger("player", getPlayer().getID());
+            pkg.setBoolean("use", use);
+            send(pkg);
         }
     }
 

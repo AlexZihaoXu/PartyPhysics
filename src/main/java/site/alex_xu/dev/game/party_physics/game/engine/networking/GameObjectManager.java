@@ -61,7 +61,7 @@ public class GameObjectManager {
         int playerID = pkg.getInteger("playerID");
         double x = pkg.getFraction("x");
         double y = pkg.getFraction("y");
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         return new Player(new Color(color), x, y, playerID);
     }
 }

@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
+import site.alex_xu.dev.game.party_physics.game.content.player.NetworkPlayerController;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ServerSideWorldSyncer;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
@@ -219,9 +220,7 @@ public class HostingServer implements ServerClientType {
             if (getWorldSyncer() != null) {
                 getWorldSyncer().tick();
             }
-            if (getLocalPlayerController() != null) {
-                getLocalPlayerController().tick();
-            }
+
             flush();
         } catch (Exception e) {
             serverCrashLog = e.getMessage();

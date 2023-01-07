@@ -26,7 +26,7 @@ public enum PackageTypes {
 
     PLAYER_SYNC_SNEAK,
     PLAYER_SYNC_REACH,
-    PLAYER_SYNC_PUNCH,
+    PLAYER_SYNC_PUNCH, PLAYER_SYNC_USE_ITEM,
 
 
 }

@@ -27,6 +27,7 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
 
     public ClientSideWorldSyncer(JoiningClient client) {
         this.client = client;
+        GameObject.serverSideWorldSyncer = null;
     }
 
     public GameWorld getWorld() {
@@ -48,6 +49,10 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         GameObject.latency = client.getOwnClient().getLatency() / 1000;
         while (!sendQueue.isEmpty()) {
             client.send(sendQueue.removeFirst());
+        }
+
+        for (NetworkPlayerController controller : remoteControllers.values()) {
+            controller.tick();
         }
 
         if (controller != null) controller.tick();

@@ -77,7 +77,7 @@ public class GameObjectItemPistol extends GameObjectItem {
         double velA = pkg.getFraction("vel.a");
         boolean flipped = pkg.getBoolean("flip");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectItemPistol pistol = new GameObjectItemPistol(posX, posY, flipped);
         pistol.getTransform().setTranslation(posX, posY);
         pistol.getTransform().setRotation(posA);

@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.host;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemSMG;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
@@ -33,7 +34,7 @@ public class HostStage extends MultiplayerStage {
 
     private String crashLog = null;
 
-    private int boxCount = 0;
+    private int addCount = 0;
 
     private final HostingServer server;
 
@@ -197,9 +198,14 @@ public class HostStage extends MultiplayerStage {
     public void onTick() {
         super.onTick();
 
-        if (clock.elapsedTime() > 1.5) {
+        if (clock.elapsedTime() > 0.05 && addCount < 20) {
+            addCount++;
             clock.reset();
             server.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
+        } else if (clock.elapsedTime() > 0.3 && addCount < 23) {
+            addCount++;
+            clock.reset();
+            server.getWorldSyncer().syncAddObject(new GameObjectItemSMG(Math.random() * 3 - 1.5, -20 + Math.random() * 2));
         }
 
         if (getWidth() > 1200) {
@@ -224,7 +230,6 @@ public class HostStage extends MultiplayerStage {
 
 
     }
-
 
     @Override
     public void onKeyPressed(int keyCode) {

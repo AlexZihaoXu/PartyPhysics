@@ -64,7 +64,7 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
         double w = pkg.getFraction("w");
         double h = pkg.getFraction("h");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectPlayerLimb limb = new GameObjectPlayerLimb(w, h);
         limb.getTransform().setTranslation(posX, posY);
         limb.getTransform().setRotation(posA);

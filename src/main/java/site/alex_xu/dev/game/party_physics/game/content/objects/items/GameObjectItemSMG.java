@@ -51,10 +51,13 @@ public class GameObjectItemSMG extends GameObjectItem {
         double now = getPhysicsTime();
         if (now - lastShootTime > 1 / 12d) {
             lastShootTime = now;
-            Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
-            GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.26, 0.15 * (isFlipped() ? 1 : -1))), vel);
-            getWorld().addObject(bullet);
-            user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.1));
+            if (isHostSide()) {
+                Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
+                GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(1, 0.15 * (isFlipped() ? 1 : -1))), vel);
+                serverSideWorldSyncer.syncAddObject(bullet);
+                user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.2));
+            }
+            System.out.println("shoot");
         }
     }
 
@@ -76,7 +79,7 @@ public class GameObjectItemSMG extends GameObjectItem {
         double velA = pkg.getFraction("vel.a");
         boolean flipped = pkg.getBoolean("flip");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectItemSMG smg = new GameObjectItemSMG(posX, posY, flipped);
         smg.getTransform().setTranslation(posX, posY);
         smg.getTransform().setRotation(posA);

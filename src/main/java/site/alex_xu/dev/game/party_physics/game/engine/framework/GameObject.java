@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ServerSideWorldSyncer;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
@@ -9,10 +10,22 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 public abstract class GameObject extends Body {
 
-    public static int objectIDCounter = 0;
-    private final int objectID = objectIDCounter++;
+    public static int nextObjectID = 0;
+    private final int objectID;
 
     public static double latency = 0;
+
+    public static ServerSideWorldSyncer serverSideWorldSyncer = null;
+
+    public static boolean isHostSide() {
+        return serverSideWorldSyncer != null;
+    }
+
+    public GameObject() {
+        objectID = nextObjectID;
+        if (isHostSide())
+            nextObjectID ++;
+    }
 
     public int getObjectID() {
         return objectID;
@@ -40,24 +53,8 @@ public abstract class GameObject extends Body {
         double vy = pkg.getFraction("vel.y");
         double va = pkg.getFraction("vel.a");
 
-        double rx = getTransform().getTranslationX();
-        double ry = getTransform().getTranslationY();
-
-        x += vx * latency * 0.3;
-        y += vy * latency * 0.3;
-
-        Vector2 newPos = new Vector2(rx * 0.7 + x * 0.3, ry * 0.7 + y * 0.3);
-        double ra = getTransform().getRotationAngle();
-        double rdiff = (ra - angle + Math.PI * 2) % (Math.PI * 2);
-        if (rdiff > Math.PI / 90) {
-            getTransform().setRotation(angle);
-        }
-        double ddiff = newPos.copy().subtract(rx, ry).getMagnitude();
-        if (ddiff > 0.2) {
-            getTransform().setTranslation(x, y);
-        } else {
-            getTransform().setTranslation(newPos);
-        }
+        getTransform().setTranslation(x, y);
+        getTransform().setRotation(angle);
         setLinearVelocity(vx, vy);
         setAngularVelocity(va);
     }

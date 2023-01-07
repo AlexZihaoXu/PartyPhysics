@@ -1,9 +1,12 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectItem;
 
 public abstract class PlayerController {
     private final Player player;
+
+    private boolean isUsingItem = false;
 
     public PlayerController(Player player) {
         this.player = player;
@@ -41,7 +44,21 @@ public abstract class PlayerController {
         getPlayer().punch(new Vector2(x, y));
     }
 
-    public void tick() {
+    public void useItem(boolean use) {
+        isUsingItem = use;
+    }
 
+    public boolean isUsingItem() {
+        return isUsingItem;
+    }
+
+    public void tick() {
+        if (isUsingItem) {
+            if (getPlayer().getHoldItem() == null) {
+                isUsingItem = false;
+            } else {
+                getPlayer().getHoldItem().use();
+            }
+        }
     }
 }

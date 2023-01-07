@@ -3,7 +3,6 @@ package site.alex_xu.dev.game.party_physics.game.content.objects.map;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.*;
 import org.dyn4j.geometry.Rectangle;
-import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemPistol;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
@@ -34,7 +33,7 @@ public class GameObjectBox extends GameObject {
         double velY = pkg.getFraction("vel.y");
         double velA = pkg.getFraction("vel.a");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectBox box = new GameObjectBox(posX, posY);
         box.getTransform().setTranslation(posX, posY);
         box.getTransform().setRotation(posA);

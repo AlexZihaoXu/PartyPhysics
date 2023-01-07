@@ -1,16 +1,12 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
-import org.dyn4j.collision.CategoryFilter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.*;
 import org.dyn4j.geometry.Rectangle;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
-import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
-
-import java.awt.*;
 
 public class GameObjectPlayerBody extends GameObjectPlayerPart {
 
@@ -39,7 +35,7 @@ public class GameObjectPlayerBody extends GameObjectPlayerPart {
         double velY = pkg.getFraction("vel.y");
         double velA = pkg.getFraction("vel.a");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectPlayerBody body = new GameObjectPlayerBody(posX, posY);
         body.getTransform().setTranslation(posX, posY);
         body.getTransform().setRotation(posA);

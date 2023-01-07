@@ -51,7 +51,7 @@ public class GameObjectPlayerHead extends GameObjectPlayerPart {
         double velY = pkg.getFraction("vel.y");
         double velA = pkg.getFraction("vel.a");
 
-        GameObject.objectIDCounter = id;
+        GameObject.nextObjectID = id;
         GameObjectPlayerHead head = new GameObjectPlayerHead(posX, posY);
         head.getTransform().setTranslation(posX, posY);
         head.getTransform().setRotation(posA);
