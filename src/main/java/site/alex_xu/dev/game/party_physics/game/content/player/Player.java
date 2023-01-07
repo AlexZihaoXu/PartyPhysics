@@ -53,6 +53,7 @@ public class Player {
     private double moveDuration = 0;
 
     private boolean loaded = false;
+    private double latencyDurationOffset = 0;
 
     public Player(Color color, double x, double y, int id) {
         this.color = color;
@@ -255,10 +256,6 @@ public class Player {
     }
 
     public void onPhysicsTick(double dt, double now) {
-        if (getID() == 9800) {
-//            setMovementX(1);
-
-        }
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
             head.applyForce(new Vector2(0, -100));
             footLeft.applyForce(new Vector2(0, 50));
@@ -321,8 +318,14 @@ public class Player {
         }
 
 
+        latencyDurationOffset += (GameObject.latency - latencyDurationOffset) * Math.min(1, dt * 3);
         if (moveDx != 0) {
-            moveDuration += dt;
+            legLeftStart.cancelSync = true;
+            legLeftEnd.cancelSync = true;
+            legRightStart.cancelSync = true;
+            legRightEnd.cancelSync = true;
+            this.moveDuration += dt;
+            double moveDuration = this.moveDuration + latencyDurationOffset;
             rightLegJoint.setLimitsEnabled(true);
             rightLegBodyJoint.setLimitsEnabled(true);
             rightLegJoint.setLimitsReferenceAngle(0);
@@ -367,6 +370,10 @@ public class Player {
             leftLegJoint.setLimits(angle2 - gap, angle2 + gap);
 
         } else {
+            legLeftStart.cancelSync = false;
+            legLeftEnd.cancelSync = false;
+            legRightStart.cancelSync = false;
+            legRightEnd.cancelSync = false;
             moveDuration = 0;
             rightLegJoint.setLimitsEnabled(false);
             rightLegBodyJoint.setLimitsEnabled(false);

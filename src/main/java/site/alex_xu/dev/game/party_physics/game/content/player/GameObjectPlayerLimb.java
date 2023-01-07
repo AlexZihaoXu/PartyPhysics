@@ -1,18 +1,12 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
-import org.dyn4j.collision.CategoryFilter;
-import org.dyn4j.collision.CollisionBody;
-import org.dyn4j.collision.broadphase.CollisionBodyBroadphaseFilter;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.*;
-import org.dyn4j.geometry.Polygon;
 import org.dyn4j.geometry.Rectangle;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
-
-import java.awt.*;
 
 public class GameObjectPlayerLimb extends GameObjectPlayerPart {
 
@@ -21,6 +15,7 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
 
     double w, h;
 
+    boolean cancelSync = false;
     public GameObjectPlayerLimb(double x1, double y1, double x2, double y2) {
         super();
         length = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
@@ -81,7 +76,9 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
 
     @Override
     public void syncFromPackage(Package pkg) {
-        super.syncFromPackage(pkg);
+        if (!cancelSync){
+            super.syncFromPackage(pkg);
+        }
     }
 
     @Override

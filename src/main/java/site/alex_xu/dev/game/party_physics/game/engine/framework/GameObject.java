@@ -46,8 +46,18 @@ public abstract class GameObject extends Body {
         x += vx * latency * 0.3;
         y += vy * latency * 0.3;
 
-        getTransform().setRotation(angle);
-        getTransform().setTranslation((x + rx) / 2, (y + ry) / 2);
+        Vector2 newPos = new Vector2(rx * 0.7 + x * 0.3, ry * 0.7 + y * 0.3);
+        double ra = getTransform().getRotationAngle();
+        double rdiff = (ra - angle + Math.PI * 2) % (Math.PI * 2);
+        if (rdiff > Math.PI / 90) {
+            getTransform().setRotation(angle);
+        }
+        double ddiff = newPos.copy().subtract(rx, ry).getMagnitude();
+        if (ddiff > 0.2) {
+            getTransform().setTranslation(x, y);
+        } else {
+            getTransform().setTranslation(newPos);
+        }
         setLinearVelocity(vx, vy);
         setAngularVelocity(va);
     }
@@ -110,7 +120,9 @@ public abstract class GameObject extends Body {
     }
 
     public void onPhysicsTick(double dt) {
-        renderPosition.set(getTransform().getTranslation());
+        Vector2 translation = getTransform().getTranslation();
+        renderPosition.x += (translation.x - renderPosition.x) * Math.min(1, dt * 67);
+        renderPosition.y += (translation.y - renderPosition.y) * Math.min(1, dt * 67);
         renderRotationAngle = getTransform().getRotationAngle();
     }
 

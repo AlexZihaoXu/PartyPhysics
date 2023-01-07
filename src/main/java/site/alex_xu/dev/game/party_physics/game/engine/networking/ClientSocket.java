@@ -72,7 +72,7 @@ public class ClientSocket {
 
         synchronized (sendQueue) {
             long now = System.currentTimeMillis();
-            while (!sendQueue.isEmpty() && now - sendQueue.getFirst().time > 50) { // TODO: remove the artificial latency before publish
+            while (!sendQueue.isEmpty()) { // TODO: completely remove the artificial latency before publish
                 Package pkg = sendQueue.removeFirst().pkg;
                 pkg.writeStream(outputStream);
             }
