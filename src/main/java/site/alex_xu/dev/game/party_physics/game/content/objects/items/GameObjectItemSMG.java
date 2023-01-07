@@ -89,6 +89,23 @@ public class GameObjectItemSMG extends GameObjectItem {
     }
 
     @Override
+    public Package createSyncPackage() {
+        Package pkg = super.createSyncPackage();
+        pkg.setBoolean("flip", isFlipped());
+        return pkg;
+    }
+
+    @Override
+    public void syncFromPackage(Package pkg) {
+        super.syncFromPackage(pkg);
+        boolean flipped = pkg.getBoolean("flip");
+        if (flipped != this.isFlipped()) {
+            setFlipped(flipped);
+            forceUpdateModel(flipped);
+        }
+    }
+
+    @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
         renderer.setColor(70);
