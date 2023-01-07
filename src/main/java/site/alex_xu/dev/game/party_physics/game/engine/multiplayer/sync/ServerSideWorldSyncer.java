@@ -108,7 +108,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
                         removed.add(id);
                     }
                 }
-                for (Integer id : removed) {
+                for (int id : removed) {
                     objectStates.remove(id);
                 }
 
@@ -119,7 +119,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
 
                 for (int id : objectStates.keySet()) {
                     ObjectState state = objectStates.get(id);
-                    if (state.checkUpdate(world.getObject(id))) {
+                    if (state.checkUpdate(world.getObject(id)) || world.getObject(id) instanceof GameObjectPlayerPart) {
                         updated.add(world.getObject(id));
                     }
                 }
