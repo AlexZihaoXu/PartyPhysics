@@ -132,7 +132,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
                 }
 
                 for (Player player : world.getPlayers()) {
-                    if (player.getHoldItem() != null) {
+                    if (player.isGrabbing()) {
                         broadcast(player.createGrabbingSyncPackage());
                     }
                 }

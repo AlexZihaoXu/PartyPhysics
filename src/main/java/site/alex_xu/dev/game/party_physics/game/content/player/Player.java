@@ -84,6 +84,8 @@ public class Player {
 
     private String displayName = null;
 
+    private boolean grabItemSynced = false;
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -517,6 +519,9 @@ public class Player {
         pkg.setInteger("player", getID());
         pkg.setBoolean("grabbing", grabbingJoint != null);
         if (grabbingJoint != null) {
+            pkg.setFraction("x", grabbingObject.getTransform().getTranslationX());
+            pkg.setFraction("y", grabbingObject.getTransform().getTranslationY());
+            pkg.setFraction("a", grabbingObject.getTransform().getRotationAngle());
             pkg.setInteger("object", grabbingObject.getObjectID());
         }
         return pkg;
@@ -524,17 +529,52 @@ public class Player {
 
     public void syncGrabbingFromPackage(Package pkg) {
         if (pkg.getBoolean("grabbing")) {
+            if (grabItemSynced) return;
             int objID = pkg.getInteger("object");
-            if (grabbingJoint != null) {
-                if (objID != grabbingObject.getObjectID()) {
-                    cancelGrabbing();
+            if (grabbingJoint != null && objID != grabbingObject.getObjectID()) {
+
+                cancelGrabbing();
+            } else {
+                Vector2 targetPos = new Vector2(pkg.getFraction("x"), pkg.getFraction("y"));
+                double angle = pkg.getFraction("a");
+                boolean needSync = false;
+                GameObject grabbingObject = head.getWorld().getObject(pkg.getInteger("object"));
+                if (targetPos.distanceSquared(grabbingObject.getTransform().getTranslation()) > 0.5) {
+                    needSync = true;
+                } else if ((angle - grabbingObject.getTransform().getRotationAngle() + Math.PI * 2) % (Math.PI * 2) > Math.PI / 45) {
+                    needSync = true;
                 }
+
+                if (needSync) {
+                    grabbingObject.getTransform().setTranslation(targetPos);
+                    grabbingObject.getTransform().setRotation(angle);
+                    if (grabbingJoint != null) {
+                        head.getWorld().getSimulatedWorld().removeJoint(grabbingJoint);
+                    }
+                    tryGrabItem(grabbingObject, armRightEnd);
+                    if (this.isGrabbing()) {
+                        System.out.println("succeed");
+                    } else {
+                        System.out.println("failed");
+                    }
+                }
+
             }
             tryGrabItem(head.getWorld().getObject(objID), armRightEnd);
+            if (isGrabbing()) grabItemSynced = true;
+        } else {
+            if (grabbingJoint != null) {
+                cancelGrabbing();
+            }
+            grabItemSynced = false;
         }
     }
 
     public boolean isLoaded() {
         return loaded;
+    }
+
+    public boolean isGrabbing() {
+        return grabbingObject != null;
     }
 }
