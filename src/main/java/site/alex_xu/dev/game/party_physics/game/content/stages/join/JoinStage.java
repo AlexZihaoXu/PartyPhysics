@@ -186,6 +186,10 @@ public class JoinStage extends MultiplayerStage {
     @Override
     public void onMousePressed(double x, double y, int button) {
         super.onMousePressed(x, y, button);
+        if (client.getLocalController() != null) {
+            client.getLocalController().setCamera(camera);
+            client.getLocalController().onMousePressed(x, y, button);
+        }
         if (button == 1) {
             if (btnBack.getBounds().contains(x, y)) {
                 SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");

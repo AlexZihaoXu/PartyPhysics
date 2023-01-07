@@ -266,5 +266,9 @@ public class HostStage extends MultiplayerStage {
                 getWindow().changeStage(stage);
             }
         }
+        if (server.getLocalPlayerController() != null) {
+            server.getLocalPlayerController().setCamera(camera);
+            server.getLocalPlayerController().onMousePressed(x, y, button);
+        }
     }
 }

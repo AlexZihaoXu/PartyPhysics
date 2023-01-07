@@ -107,7 +107,7 @@ public class HostingServer implements ServerClientType {
                 try {
                     ClientSocket socket = serverSocket.accept();
 
-                    int id = (int) (Math.random() * 100) * 100;
+                    int id = (int) (1 + Math.random() * 100) * 100;
                     while (hostingClients.containsKey(id)) {
                         id++;
                     }

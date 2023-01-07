@@ -131,6 +131,12 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
                     }
                 }
 
+                for (Player player : world.getPlayers()) {
+                    if (player.getHoldItem() != null) {
+                        broadcast(player.createGrabbingSyncPackage());
+                    }
+                }
+
                 forceSyncClock.reset();
             }
 

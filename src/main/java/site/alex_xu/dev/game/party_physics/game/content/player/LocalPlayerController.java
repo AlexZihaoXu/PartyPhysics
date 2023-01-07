@@ -1,9 +1,11 @@
 package site.alex_xu.dev.game.party_physics.game.content.player;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
+import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
@@ -12,6 +14,12 @@ import java.util.TreeSet;
 public class LocalPlayerController extends PlayerController {
 
     private final LinkedList<Package> sendQueue = new LinkedList<>();
+
+    private Camera camera = new Camera();
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+    }
 
     public LocalPlayerController(Player player) {
         super(player);
@@ -44,6 +52,14 @@ public class LocalPlayerController extends PlayerController {
         }
     }
 
+    public void onMousePressed(double x, double y, int button) {
+        if (button == 3) {
+            Vector2 mouse = camera.getWorldMousePos();
+            Vector2 playerPos = getPlayer().getPos().copy().add(0, -0.3);
+            punch(Vector2.create(-1, playerPos.subtract(mouse).getDirection() - getPlayer().body.getTransform().getRotationAngle()));
+        }
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -53,6 +69,16 @@ public class LocalPlayerController extends PlayerController {
         if (pressedKeys.contains(KeyEvent.VK_D))
             mx++;
         moveX(mx);
+
+        if (PartyPhysicsWindow.getInstance().getMouseButton(1)) {
+            Vector2 mouse = camera.getWorldMousePos();
+            Vector2 playerPos = getPlayer().getPos().copy().add(0, -0.3);
+            if (mouse.distanceSquared(playerPos) > 1) {
+                reach(Vector2.create(-1, playerPos.subtract(mouse).getDirection() - getPlayer().body.getTransform().getRotationAngle()));
+            }
+        } else if (getPlayer().getHoldItem() == null) {
+            reach(0, 0);
+        }
     }
 
     @Override

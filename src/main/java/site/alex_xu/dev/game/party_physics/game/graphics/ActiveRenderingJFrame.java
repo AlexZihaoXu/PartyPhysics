@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.VolatileImage;
+import java.util.Arrays;
 
 class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListener, MouseListener, MouseMotionListener {
 
@@ -195,12 +196,12 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     @Override
     public void windowActivated(WindowEvent e) {
-
+        Arrays.fill(mouseButtons, false);
     }
 
     @Override
     public void windowDeactivated(WindowEvent e) {
-
+        Arrays.fill(mouseButtons, false);
     }
 
     @Override
@@ -251,12 +252,10 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
@@ -271,5 +270,6 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         partyPhysicsWindow.getStage().onMouseMove(e.getX(), e.getY());
         mouseX = e.getX();
         mouseY = e.getY();
+
     }
 }

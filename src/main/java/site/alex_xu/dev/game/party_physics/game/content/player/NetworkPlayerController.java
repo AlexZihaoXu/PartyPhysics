@@ -22,8 +22,6 @@ public class NetworkPlayerController extends PlayerController {
             reach(pkg.getFraction("x"), pkg.getFraction("y"));
         } else if (pkg.getType() == PackageTypes.PLAYER_SYNC_PUNCH) {
             punch(pkg.getFraction("x"), pkg.getFraction("y"));
-        } else if (pkg.getType() == PackageTypes.PLAYER_SYNC_GRAB_ITEM) {
-            getPlayer().syncGrabbingFromPackage(pkg);
         }
 
 
