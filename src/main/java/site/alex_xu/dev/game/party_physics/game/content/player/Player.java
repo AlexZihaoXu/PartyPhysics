@@ -82,6 +82,16 @@ public class Player {
     private GameObject grabbingObject = null;
     private WeldJoint<GameObject> grabbingJoint = null;
 
+    private String displayName = null;
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
     public void tryGrabItem(GameObject grabbed, GameObject bodyPart) {
         if (grabbingJoint == null && reachDirection.distanceSquared(0, 0) > 0.1) {
             if (bodyPart == this.armRightEnd) {

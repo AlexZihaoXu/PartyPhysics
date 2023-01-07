@@ -10,6 +10,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -86,6 +87,7 @@ public class GameWorld {
 
     public void onRender(Renderer renderer) {
         synchronized (lock) {
+
             for (GameObject object : objects) {
                 if (!(object instanceof GameObjectPlayerPart)) {
                     object.onRender(renderer);

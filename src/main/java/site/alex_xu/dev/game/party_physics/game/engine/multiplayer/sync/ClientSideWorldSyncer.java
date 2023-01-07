@@ -102,10 +102,12 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         if (client.getID() == getClient().getOwnClient().getID()) {
             Player player = getWorld().getPlayer(client.getID());
             controller = new LocalPlayerController(player);
+            player.setDisplayName(client.getName());
         } else {
             Player player = getWorld().getPlayer(client.getID());
             NetworkPlayerController controller = new NetworkPlayerController(player);
             remoteControllers.put(client.getID(), controller);
+            player.setDisplayName(client.getName());
         }
     }
 

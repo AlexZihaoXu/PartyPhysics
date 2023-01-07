@@ -211,6 +211,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         GameWorld world = getWorld();
         Player player = new Player(color, x, y, client.getID());
         world.addPlayer(player);
+        player.setDisplayName(client.getName());
 
         Package pkg = GameObjectManager.getInstance().createCreationPackage(player);
         broadcast(pkg);

@@ -33,6 +33,8 @@ public class HostStage extends MultiplayerStage {
 
     private String crashLog = null;
 
+    private int boxCount = 0;
+
     private final HostingServer server;
 
     private final Thread ipAddressUpdateThread = new Thread(() -> {
