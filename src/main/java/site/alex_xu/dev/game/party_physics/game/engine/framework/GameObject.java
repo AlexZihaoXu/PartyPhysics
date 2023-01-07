@@ -11,7 +11,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 public abstract class GameObject extends Body {
 
     public static int nextObjectID = 0;
-    private final int objectID;
+    private final int objectID = nextObjectID++;
 
     public static double latency = 0;
 
@@ -20,13 +20,6 @@ public abstract class GameObject extends Body {
     public static boolean isHostSide() {
         return serverSideWorldSyncer != null;
     }
-
-    public GameObject() {
-        objectID = nextObjectID;
-        if (isHostSide())
-            nextObjectID ++;
-    }
-
     public int getObjectID() {
         return objectID;
     }

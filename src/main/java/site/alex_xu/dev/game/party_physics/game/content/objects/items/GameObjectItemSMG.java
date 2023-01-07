@@ -53,11 +53,10 @@ public class GameObjectItemSMG extends GameObjectItem {
             lastShootTime = now;
             if (isHostSide()) {
                 Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
-                GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(1, 0.15 * (isFlipped() ? 1 : -1))), vel);
+                GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.4, 0.15 * (isFlipped() ? 1 : -1))), vel);
                 serverSideWorldSyncer.syncAddObject(bullet);
                 user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.2));
             }
-            System.out.println("shoot");
         }
     }
 

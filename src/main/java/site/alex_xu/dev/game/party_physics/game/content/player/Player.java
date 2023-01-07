@@ -303,9 +303,11 @@ public class Player {
             double angle = body.getTransform().getRotationAngle();
             head.applyForce(Vector2.create(-angle * 15, angle));
             if (sneak) {
-                body.applyForce(new Vector2(0, 120));
-                footLeft.applyForce(new Vector2(0, -30));
-                footRight.applyForce(new Vector2(0, -30));
+                body.applyForce(new Vector2(0, 80));
+                legLeftStart.applyForce(new Vector2(0, 50));
+                legRightStart.applyForce(new Vector2(0, 50));
+                footLeft.applyForce(new Vector2(0, -70));
+                footRight.applyForce(new Vector2(0, -70));
 
             } else {
                 if (moveDx == 0) {
