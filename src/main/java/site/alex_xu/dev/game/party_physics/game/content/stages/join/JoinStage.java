@@ -133,27 +133,30 @@ public class JoinStage extends MultiplayerStage {
     @Override
     public void onTick() {
         super.onTick();
+        try {
+            client.tick();
 
-        client.tick();
+            if (getWidth() > 1200) {
+                xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
+            } else {
+                xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
+            }
 
-        if (getWidth() > 1200) {
-            xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
-        } else {
-            xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
+            enterProgress += Math.min(0.1, getDeltaTime() * 3);
+            enterProgress = Math.min(1, enterProgress);
+
+            btnBack.onTick(getDeltaTime(), this);
+
+        } finally {
+            if (client.isClosed() || client.isCrashed()) {
+                new Thread(this::showLog, "ShowLogThread").start();
+                MenuStage menuStage = new MenuStage();
+                menuStage.bgm = bgm;
+                getWindow().changeStage(menuStage);
+                client.shutdown();
+            }
         }
 
-        enterProgress += Math.min(0.1, getDeltaTime() * 3);
-        enterProgress = Math.min(1, enterProgress);
-
-        btnBack.onTick(getDeltaTime(), this);
-
-        if (client.isClosed() || client.isCrashed()) {
-            new Thread(this::showLog, "ShowLogThread").start();
-            MenuStage menuStage = new MenuStage();
-            menuStage.bgm = bgm;
-            getWindow().changeStage(menuStage);
-            client.shutdown();
-        }
 //        Player player = client.getSyncedWorld().getPlayer(client.getOwnClient().getID());
     }
 

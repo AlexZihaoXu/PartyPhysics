@@ -80,6 +80,11 @@ public class GameObjectPlayerLimb extends GameObjectPlayerPart {
     }
 
     @Override
+    public void syncFromPackage(Package pkg) {
+        super.syncFromPackage(pkg);
+    }
+
+    @Override
     public void onRender(Renderer renderer) {
         renderer.pushState();
         renderer.setColor(color);

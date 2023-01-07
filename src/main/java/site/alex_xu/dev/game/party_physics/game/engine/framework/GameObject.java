@@ -12,6 +12,8 @@ public abstract class GameObject extends Body {
     public static int objectIDCounter = 0;
     private final int objectID = objectIDCounter++;
 
+    public static double latency = 0;
+
     public int getObjectID() {
         return objectID;
     }
@@ -40,6 +42,9 @@ public abstract class GameObject extends Body {
 
         double rx = getTransform().getTranslationX();
         double ry = getTransform().getTranslationY();
+
+        x += vx * latency * 0.3;
+        y += vy * latency * 0.3;
 
         getTransform().setRotation(angle);
         getTransform().setTranslation((x + rx) / 2, (y + ry) / 2);

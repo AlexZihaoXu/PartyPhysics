@@ -97,11 +97,20 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
 
     public void tick() {
         if (world != null) {
+            GameObject.latency = 0;
             world.onTick();
-
-
             if (forceSyncClock.elapsedTime() > 1d / PhysicsSettings.SYNCS_PER_SECOND) {
                 HashSet<GameObject> updated = new HashSet<>();
+
+                ArrayList<Integer> removed = new ArrayList<>();
+                for (int id : objectStates.keySet()) {
+                    if (!world.hasObject(id)) {
+                        removed.add(id);
+                    }
+                }
+                for (Integer id : removed) {
+                    objectStates.remove(id);
+                }
 
                 for (GameObject object : world.getObjects()) {
                     if (!objectStates.containsKey(object.getObjectID()))
@@ -120,16 +129,6 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
                     if (!objectStates.containsKey(object.getObjectID())) {
                         objectStates.put(object.getObjectID(), new ObjectState(object));
                     }
-                }
-
-                ArrayList<Integer> removed = new ArrayList<>();
-                for (int id : objectStates.keySet()) {
-                    if (!world.hasObject(id)) {
-                        removed.add(id);
-                    }
-                }
-                for (Integer id : removed) {
-                    objectStates.remove(id);
                 }
 
                 forceSyncClock.reset();

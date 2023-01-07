@@ -53,7 +53,8 @@ public class HostingClient implements ClientEventHandler {
 
     public void shutdown() {
         socketShouldStop = true;
-        this.socket.close();
+        if (!this.socket.getSocket().isClosed())
+            this.socket.close();
     }
 
     public boolean isClosed() {

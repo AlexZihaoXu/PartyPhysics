@@ -10,6 +10,7 @@ public class ClientSocket {
     private String host;
     private int port;
     private Socket socket = null;
+
     private DataOutputStream outputStream;
     private BufferedOutputStream bufferedOutputStream;
     private DataInputStream inputStream;
@@ -18,7 +19,18 @@ public class ClientSocket {
     private final ReentrantLock writeLock = new ReentrantLock();
     private final ReentrantLock readLock = new ReentrantLock();
 
-    private final LinkedList<Package> sendQueue = new LinkedList<>();
+    private final LinkedList<Pair> sendQueue = new LinkedList<>();
+
+    private static class Pair {
+        public Package pkg;
+        public long time;
+
+        public Pair(Package pkg, long time) {
+            this.time = time;
+            this.pkg = pkg;
+        }
+    }
+
 
     public ClientSocket(String host, int port) {
         this.host = host;
@@ -48,7 +60,7 @@ public class ClientSocket {
 
     public void send(Package pkg) {
         synchronized (sendQueue) {
-            sendQueue.addLast(pkg);
+            sendQueue.addLast(new Pair(pkg, System.currentTimeMillis()));
         }
     }
 
@@ -59,8 +71,9 @@ public class ClientSocket {
         writeLock.lock();
 
         synchronized (sendQueue) {
-            while (!sendQueue.isEmpty()) {
-                Package pkg = sendQueue.removeFirst();
+            long now = System.currentTimeMillis();
+            while (!sendQueue.isEmpty() && now - sendQueue.getFirst().time > 50) { // TODO: remove the artificial latency before publish
+                Package pkg = sendQueue.removeFirst().pkg;
                 pkg.writeStream(outputStream);
             }
         }

@@ -45,6 +45,7 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         if (world != null) {
             world.onTick();
         }
+        GameObject.latency = client.getOwnClient().getLatency() / 1000;
         while (!sendQueue.isEmpty()) {
             client.send(sendQueue.removeFirst());
         }

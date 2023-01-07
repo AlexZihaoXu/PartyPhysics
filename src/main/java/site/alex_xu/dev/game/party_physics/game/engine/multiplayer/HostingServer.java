@@ -173,15 +173,22 @@ public class HostingServer implements ServerClientType {
             serverSocket.close();
         for (HostingClient client : hostingClients.values()) {
             client.shutdown();
-
         }
         servers.remove(this);
     }
 
     @Override
     public void flush() {
+        ArrayList<HostingClient> removed = new ArrayList<>();
         for (HostingClient client : hostingClients.values()) {
-            client.transfer();
+            try {
+                client.transfer();
+            } catch (RuntimeException ignored) {
+                removed.add(client);
+            }
+        }
+        for (HostingClient client : removed) {
+            kickClient(client);
         }
     }
 
@@ -202,19 +209,26 @@ public class HostingServer implements ServerClientType {
     }
 
     public void tick() {
-        while (!recvQueueIn.isEmpty()) {
-            Package pkg = recvQueueIn.removeFirst();
-            if (getWorldSyncer() != null)
-                getWorldSyncer().handlePackage(pkg);
-            recvQueueOut.addLast(pkg);
+        try {
+            while (!recvQueueIn.isEmpty()) {
+                Package pkg = recvQueueIn.removeFirst();
+                if (getWorldSyncer() != null)
+                    getWorldSyncer().handlePackage(pkg);
+                recvQueueOut.addLast(pkg);
+            }
+            if (getWorldSyncer() != null) {
+                getWorldSyncer().tick();
+            }
+            if (getLocalPlayerController() != null) {
+                getLocalPlayerController().tick();
+            }
+            flush();
+        } catch (Exception e) {
+            serverCrashLog = e.getMessage();
+            e.printStackTrace();
+            shutdown();
         }
-        if (getWorldSyncer() != null) {
-            getWorldSyncer().tick();
-        }
-        if (getLocalPlayerController() != null) {
-            getLocalPlayerController().tick();
-        }
-        flush();
+
     }
 
     public String getName() {
