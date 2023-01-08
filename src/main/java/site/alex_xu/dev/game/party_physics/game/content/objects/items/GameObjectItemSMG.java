@@ -55,7 +55,7 @@ public class GameObjectItemSMG extends GameObjectItem {
             Vector2 pos = getWorldPoint(new Vector2(0.4, 0.15 * (isFlipped() ? 1 : -1)));
             Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
             SoundSystem.getInstance().getGameSourceGroup().setLocation(pos.x, pos.y, 0);
-            SoundSystem.getInstance().getGameSourceGroup().setVelocity(vel.x, vel.y, 0);
+            SoundSystem.getInstance().getGameSourceGroup().setVelocity(vel.x * 2, vel.y * 2, 0);
             SoundSystem.getInstance().getGameSourceGroup().play("sounds/weapon/smg-0.wav");
 
             if (isHostSide()) {
