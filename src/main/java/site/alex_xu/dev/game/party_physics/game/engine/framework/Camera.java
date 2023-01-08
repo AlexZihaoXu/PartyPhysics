@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.Listener;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
@@ -122,6 +123,7 @@ public class Camera {
     public void applyTransform(Renderer renderer) {
         Vector2 shakeOffset = new Vector2();
         ArrayList<Shake> removed = new ArrayList<>();
+        Listener.getInstance().setPosition(pos.x, pos.y, 1);
         double now = Clock.currentTime();
         for (Shake shake : shakes) {
             if (shake.isFinished(now)) {

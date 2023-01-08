@@ -48,6 +48,7 @@ public class SoundSystem {
 
     private SourceGroup sourceGroupUI;
     private SourceGroup sourceGroupGame;
+    static final float SCALE = 0.125f;
 
     public SourceGroup getUISourceGroup() {
         return sourceGroupUI;

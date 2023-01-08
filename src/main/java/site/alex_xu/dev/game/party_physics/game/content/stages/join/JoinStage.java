@@ -133,7 +133,19 @@ public class JoinStage extends MultiplayerStage {
     @Override
     public void onTick() {
         super.onTick();
+        {
+            double muffleShift = bgm.getMufflePercentage();
+            muffleShift -= muffleShift * Math.min(1, getDeltaTime() * 3);
+            bgm.setMufflePercentage(muffleShift);
+        }
+        {
+            double muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
+            double muffleShift = SoundSystem.getInstance().getMasterMuffle();
+            muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 4);
+            SoundSystem.getInstance().setMasterMuffle(muffleShift);
+        }
         try {
+
             client.tick();
 
             if (getWidth() > 1200) {

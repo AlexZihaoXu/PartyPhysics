@@ -1,5 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.engine.sounds;
 
+import org.dyn4j.geometry.Vector3;
+
 import java.util.HashSet;
 
 public class SoundSource {
@@ -98,5 +100,19 @@ public class SoundSource {
 
     public boolean isPaused() {
         return sourceOriginal.isPaused();
+    }
+
+    public void setPosition(double x, double y, double z) {
+        sourceOriginal.setPosition(x, y, z);
+        sourceMuffled.setPosition(x, y, z);
+    }
+
+    public void setVelocity(double x, double y, double z) {
+        sourceOriginal.setVelocity(x, y, z);
+        sourceMuffled.setVelocity(x, y, z);
+    }
+
+    public double getMufflePercentage() {
+        return muffleShift;
     }
 }

@@ -94,9 +94,9 @@ class BaseSoundSource {
     public void setPosition(double x, double y, double z) {
         pos.set(x, y, z);
         if (isPlayable()) {
-            ptrFloat3[0] = (float) x;
-            ptrFloat3[1] = (float) y;
-            ptrFloat3[2] = (float) z;
+            ptrFloat3[0] = (float) x * SoundSystem.SCALE;
+            ptrFloat3[1] = (float) y * SoundSystem.SCALE;
+            ptrFloat3[2] = (float) z * SoundSystem.SCALE;
             al.alSourcefv(source, AL.AL_POSITION, ptrFloat3, 0);
         }
     }
@@ -104,9 +104,9 @@ class BaseSoundSource {
     public void setVelocity(double x, double y, double z) {
         vel.set(x, y, z);
         if (isPlayable()) {
-            ptrFloat3[0] = (float) x;
-            ptrFloat3[1] = (float) y;
-            ptrFloat3[2] = (float) z;
+            ptrFloat3[0] = (float) x * SoundSystem.SCALE;
+            ptrFloat3[1] = (float) y * SoundSystem.SCALE;
+            ptrFloat3[2] = (float) z * SoundSystem.SCALE;
             al.alSourcefv(source, AL.AL_VELOCITY, ptrFloat3, 0);
         }
     }

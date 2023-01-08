@@ -37,12 +37,6 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void end(ContactCollisionData collision, Contact contact) {
-        GameObject body1 = (GameObject) collision.getBody1();
-        GameObject body2 = (GameObject) collision.getBody2();
-
-        if (body1 instanceof GameObjectPlayerPart && body2 instanceof GameObjectPlayerPart) {
-            System.out.println("player");
-        }
     }
 
     @Override

@@ -198,6 +198,18 @@ public class HostStage extends MultiplayerStage {
     public void onTick() {
         super.onTick();
 
+        {
+            double muffleShift = bgm.getMufflePercentage();
+            muffleShift -= muffleShift * Math.min(1, getDeltaTime() * 3);
+            bgm.setMufflePercentage(muffleShift);
+        }
+        {
+            double muffleShiftTarget = getWindow().getJFrame().isActive() ? 0 : 1;
+            double muffleShift = SoundSystem.getInstance().getMasterMuffle();
+            muffleShift += (muffleShiftTarget - muffleShift) * Math.min(1, getDeltaTime() * 4);
+            SoundSystem.getInstance().setMasterMuffle(muffleShift);
+        }
+
         if (clock.elapsedTime() > 0.05 && addCount < 20) {
             addCount++;
             clock.reset();

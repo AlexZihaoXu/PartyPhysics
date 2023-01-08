@@ -34,18 +34,18 @@ public class Listener {
     public void setPosition(double x, double y, double z) {
         pos.set(x, y, z);
         if (isPlayable()) {
-            temp[0] = (float) x;
-            temp[1] = (float) y;
-            temp[2] = (float) z;
+            temp[0] = (float) x * SoundSystem.SCALE;
+            temp[1] = (float) y * SoundSystem.SCALE;
+            temp[2] = (float) z * SoundSystem.SCALE;
             al.alListenerfv(AL.AL_POSITION, temp, 0);
         }
     }
     public void setVelocity(double x, double y, double z) {
         pos.set(x, y, z);
         if (isPlayable()) {
-            temp[0] = (float) x;
-            temp[1] = (float) y;
-            temp[2] = (float) z;
+            temp[0] = (float) x * SoundSystem.SCALE;
+            temp[1] = (float) y * SoundSystem.SCALE;
+            temp[2] = (float) z * SoundSystem.SCALE;
             al.alListenerfv(AL.AL_VELOCITY, temp, 0);
         }
     }
