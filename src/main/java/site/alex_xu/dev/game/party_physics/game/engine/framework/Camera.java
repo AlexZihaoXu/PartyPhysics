@@ -19,10 +19,14 @@ public class Camera {
 
         private final double speed;
 
-        public Shake(double magnitude, double direction, double speed) {
+        private final boolean gunShake;
+
+
+        public Shake(double magnitude, double direction, double speed, boolean gunShake) {
             x = Math.cos(direction) * magnitude;
             y = Math.sin(direction) * magnitude;
             this.speed = speed;
+            this.gunShake = gunShake;
             createdTime = Clock.currentTime();
         }
 
@@ -33,6 +37,8 @@ public class Camera {
 
         public double getMagnitudeWhen(double now) {
             double z = (now - createdTime) * speed;
+            if (gunShake)
+                z = Math.sqrt(z);
             if (Math.abs(z - Math.PI) <= 1e-9) {
                 z = 1e-9;
             }
@@ -41,6 +47,8 @@ public class Camera {
 
         public boolean isFinished(double now) {
             double z = (now - createdTime) * speed;
+            if (gunShake)
+                z = Math.sqrt(z);
             double leftXInt = Math.floor(z / Math.PI);
             double rightXInt = Math.ceil(z / Math.PI);
             double mid = (leftXInt + rightXInt) / 2;
@@ -107,8 +115,8 @@ public class Camera {
         renderer.popState();
     }
 
-    public void addShake(double magnitude, double direction, double speed) {
-        shakes.add(new Shake(magnitude, direction, speed));
+    public void addShake(double magnitude, double direction, double speed, boolean gunShake) {
+        shakes.add(new Shake(magnitude, direction, speed, gunShake));
     }
 
     public void applyTransform(Renderer renderer) {

@@ -51,10 +51,13 @@ public class GameObjectItemPistol extends GameObjectItem {
         double now = getPhysicsTime();
         if (now - lastShootTime > 1 / 4d) {
             lastShootTime = now;
-            Vector2 vel = Vector2.create(80, getTransform().getRotationAngle());
-            GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.24, 0.15 * (isFlipped() ? 1 : -1))), vel);
-            getWorld().addObject(bullet);
-            user.body.applyImpulse(Vector2.create(-5, getTransform().getRotationAngle()));
+            if (isHostSide()) {
+                Vector2 vel = Vector2.create(80, getTransform().getRotationAngle());
+                GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.24, 0.15 * (isFlipped() ? 1 : -1))), vel);
+                serverSideWorldSyncer.syncAddObject(bullet);
+                serverSideWorldSyncer.syncAddCameraShake(9, getTransform().getRotationAngle() + (Math.random() - 0.5) * Math.PI, 40, true);
+                user.body.applyImpulse(Vector2.create(-5, getTransform().getRotationAngle()));
+            }
         }
     }
 

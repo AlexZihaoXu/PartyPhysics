@@ -10,6 +10,7 @@ import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 public class GameObjectItemSMG extends GameObjectItem {
@@ -51,11 +52,12 @@ public class GameObjectItemSMG extends GameObjectItem {
         double now = getPhysicsTime();
         if (now - lastShootTime > 1 / 12d) {
             lastShootTime = now;
+            SoundSystem.getInstance().getGameSourceGroup().play("sounds/weapon/smg-0.wav");
             if (isHostSide()) {
                 Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
                 GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.4, 0.15 * (isFlipped() ? 1 : -1))), vel);
                 serverSideWorldSyncer.syncAddObject(bullet);
-                serverSideWorldSyncer.syncAddCameraShake(5, getTransform().getRotationAngle() + (Math.random() - 0.5) * Math.PI, 40);
+                serverSideWorldSyncer.syncAddCameraShake(8, getTransform().getRotationAngle() + (Math.random() - 0.5) * Math.PI, 120, true);
                 user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.2));
             }
         }

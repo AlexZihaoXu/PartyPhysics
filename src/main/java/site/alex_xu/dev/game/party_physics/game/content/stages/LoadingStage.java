@@ -119,6 +119,7 @@ public class LoadingStage extends Stage implements Runnable {
         String[] soundsToLoad = {
                 "sounds/ui/mouse-over-0.wav",
                 "sounds/ui/mouse-click-0.wav",
+                "sounds/weapon/smg-0.wav",
                 "sounds/bgm-0.wav",
                 "sounds/bgm-1.wav",
         };

@@ -72,7 +72,8 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
                 getLocalController().getCamera().addShake(
                         pkg.getFraction("mag"),
                         pkg.getFraction("dir"),
-                        pkg.getFraction("speed")
+                        pkg.getFraction("speed"),
+                        pkg.getBoolean("gun")
                 );
             }
         } else {

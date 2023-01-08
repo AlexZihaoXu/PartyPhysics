@@ -220,15 +220,16 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world.addObject(box);
     }
 
-    public void syncAddCameraShake(double magnitude, double direction, int speed) {
+    public void syncAddCameraShake(double magnitude, double direction, int speed, boolean gunShake) {
         Package pkg = new Package(PackageTypes.CAMERA_ADD_SHAKE);
 
         pkg.setFraction("mag", magnitude);
         pkg.setFraction("dir", direction);
         pkg.setFraction("speed", speed);
+        pkg.setBoolean("gun", gunShake);
 
         if (getLocalPlayerController() != null) {
-            getLocalPlayerController().getCamera().addShake(magnitude, direction, speed);
+            getLocalPlayerController().getCamera().addShake(magnitude, direction, speed, gunShake);
         }
 
         broadcast(pkg);

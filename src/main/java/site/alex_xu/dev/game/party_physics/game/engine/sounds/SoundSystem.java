@@ -17,14 +17,11 @@ public class SoundSystem {
         return INSTANCE;
     }
 
+
     //
 
     private boolean initialized = false;
     AL al;
-    private boolean muffleEverything = false;
-
-    private double masterVolume = 1;
-
     private double masterMuffle = 0;
 
     public void setMasterVolume(double masterVolume) {
@@ -48,10 +45,16 @@ public class SoundSystem {
     public double getMasterVolume() {
         return GameSettings.getInstance().volumeMaster;
     }
+
     private SourceGroup sourceGroupUI;
+    private SourceGroup sourceGroupGame;
 
     public SourceGroup getUISourceGroup() {
         return sourceGroupUI;
+    }
+
+    public SourceGroup getGameSourceGroup() {
+        return sourceGroupGame;
     }
 
     public void init() {
@@ -61,6 +64,7 @@ public class SoundSystem {
         al = ALFactory.getAL();
 
         sourceGroupUI = new SourceGroup();
+        sourceGroupGame = new SourceGroup(64);
 
         initialized = true;
 
