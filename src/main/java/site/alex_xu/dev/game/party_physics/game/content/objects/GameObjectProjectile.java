@@ -9,7 +9,7 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 public abstract class GameObjectProjectile extends GameObject {
 
-    public GameObjectProjectile(){
+    public GameObjectProjectile() {
         super();
         getRenderPos().set(100000, 100000);
     }
@@ -19,7 +19,8 @@ public abstract class GameObjectProjectile extends GameObject {
 
     }
 
-    public boolean onHit(GameObject object, Vector2 location) {
-        return false;
+    public void onHit(GameObject object, Vector2 location) {
     }
+
+    public abstract boolean shouldDelete();
 }

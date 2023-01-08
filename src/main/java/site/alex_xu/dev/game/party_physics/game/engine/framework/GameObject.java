@@ -8,12 +8,24 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+import java.awt.*;
+
 public abstract class GameObject extends Body {
 
     public static int nextObjectID = 0;
     private final int objectID = nextObjectID++;
 
     public static double latency = 0;
+
+    private Color hitParticleColor = new Color(192, 170, 105);
+
+    protected void setHitParticleColor(Color color) {
+        hitParticleColor = color;
+    }
+
+    public Color getHitParticleColor() {
+        return hitParticleColor;
+    }
 
     public static ServerSideWorldSyncer serverSideWorldSyncer = null;
 
@@ -76,6 +88,10 @@ public abstract class GameObject extends Body {
 
     public double getRenderRotationAngle() {
         return renderRotationAngle;
+    }
+
+    protected void setRenderRotationAngle(double angle) {
+        renderRotationAngle = angle;
     }
 
     public void onTickAnimation() {

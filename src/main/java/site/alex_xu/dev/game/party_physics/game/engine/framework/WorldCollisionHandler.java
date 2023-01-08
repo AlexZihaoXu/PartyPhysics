@@ -67,13 +67,13 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
             ((GameObjectPlayerPart) body2).getPlayer().tryGrabItem(body1, body2);
         }
         if (body1 instanceof GameObjectProjectile) {
-            boolean delete = ((GameObjectProjectile) body1).onHit(body2, point);
-            if (delete) {
+            ((GameObjectProjectile) body1).onHit(body2, point);
+            if (((GameObjectProjectile) body1).shouldDelete()) {
                 world.removeObject(body1);
             }
         } else if (body2 instanceof GameObjectProjectile) {
-            boolean delete = ((GameObjectProjectile) body2).onHit(body1, point);
-            if (delete) {
+            ((GameObjectProjectile) body2).onHit(body1, point);
+            if (((GameObjectProjectile) body2).shouldDelete()) {
                 world.removeObject(body2);
             }
         }

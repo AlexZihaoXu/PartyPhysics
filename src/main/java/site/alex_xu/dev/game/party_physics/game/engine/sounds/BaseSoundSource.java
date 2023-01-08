@@ -46,7 +46,6 @@ class BaseSoundSource {
         al.alGenSources(1, ptrSource, 0);
         int error = al.alGetError();
         if (error != AL.AL_NO_ERROR) {
-            System.out.println(error);
             playable = false;
             System.err.println("Unable to create SoundSource!");
             return;

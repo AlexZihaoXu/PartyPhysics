@@ -16,7 +16,7 @@ public class SourceGroup {
     }
 
     public SourceGroup() {
-        this(8);
+        this(4);
     }
 
     public void setLocation(double x, double y, double z) {

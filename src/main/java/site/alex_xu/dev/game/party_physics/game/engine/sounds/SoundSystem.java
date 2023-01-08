@@ -47,7 +47,7 @@ public class SoundSystem {
     }
 
     private SourceGroup sourceGroupUI;
-    private SourceGroup sourceGroupGame;
+    private SourceGroup sourceGroupGame, sourceGroupGame2, sourceGroupGame3;
     static final float SCALE = 0.125f;
 
     public SourceGroup getUISourceGroup() {
@@ -58,14 +58,24 @@ public class SoundSystem {
         return sourceGroupGame;
     }
 
+    public SourceGroup getGameSourceGroup2() {
+        return sourceGroupGame2;
+    }
+
+    public SourceGroup getGameSourceGroup3() {
+        return sourceGroupGame3;
+    }
+
     public void init() {
         if (initialized) return;
 
         ALut.alutInit();
         al = ALFactory.getAL();
 
-        sourceGroupUI = new SourceGroup();
-        sourceGroupGame = new SourceGroup(64);
+        sourceGroupUI = new SourceGroup(4);
+        sourceGroupGame = new SourceGroup(32);
+        sourceGroupGame2 = new SourceGroup(24);
+        sourceGroupGame3 = new SourceGroup(16);
 
         initialized = true;
 
