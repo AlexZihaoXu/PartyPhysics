@@ -61,7 +61,7 @@ public class GameObjectItemSMG extends GameObjectItem {
             if (isHostSide()) {
                 GameObjectLiteBullet bullet = new GameObjectLiteBullet(pos, vel);
                 serverSideWorldSyncer.syncAddObject(bullet);
-                serverSideWorldSyncer.syncAddCameraShake(8, getTransform().getRotationAngle() + (Math.random() - 0.5) * Math.PI, 120, true);
+                serverSideWorldSyncer.syncAddCameraShake(-8, getTransform().getRotationAngle() + (Math.random() - 0.5) * Math.PI, 120, true);
                 user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.2));
             }
         }

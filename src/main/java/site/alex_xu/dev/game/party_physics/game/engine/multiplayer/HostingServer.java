@@ -211,11 +211,13 @@ public class HostingServer implements ServerClientType {
 
     public void tick() {
         try {
-            while (!recvQueueIn.isEmpty()) {
-                Package pkg = recvQueueIn.removeFirst();
-                if (getWorldSyncer() != null)
-                    getWorldSyncer().handlePackage(pkg);
-                recvQueueOut.addLast(pkg);
+            synchronized (recvQueueIn) {
+                while (!recvQueueIn.isEmpty()) {
+                    Package pkg = recvQueueIn.removeFirst();
+                    if (getWorldSyncer() != null)
+                        getWorldSyncer().handlePackage(pkg);
+                    recvQueueOut.addLast(pkg);
+                }
             }
             if (getWorldSyncer() != null) {
                 getWorldSyncer().tick();

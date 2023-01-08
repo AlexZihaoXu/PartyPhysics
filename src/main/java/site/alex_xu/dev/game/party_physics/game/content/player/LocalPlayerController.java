@@ -43,7 +43,7 @@ public class LocalPlayerController extends PlayerController {
         pressedKeys.add(keyCode);
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_SPACE) {
             jump();
-        } else if (keyCode == KeyEvent.VK_S) {
+        } else if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_CONTROL) {
             sneak(true);
         } else if (keyCode == KeyEvent.VK_F) {
             if (getPlayer().getHoldItem() != null) {
@@ -54,7 +54,7 @@ public class LocalPlayerController extends PlayerController {
 
     public void onKeyReleased(int keyCode) {
         pressedKeys.remove(keyCode);
-        if (keyCode == KeyEvent.VK_S) {
+        if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_CONTROL) {
             sneak(false);
         }
     }
@@ -103,7 +103,7 @@ public class LocalPlayerController extends PlayerController {
             }
         }
 
-        if (!itemUseLocked){
+        if (!itemUseLocked) {
             useItem(PartyPhysicsWindow.getInstance().getMouseButton(1));
         }
 
