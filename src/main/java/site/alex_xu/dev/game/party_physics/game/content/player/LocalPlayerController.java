@@ -177,4 +177,8 @@ public class LocalPlayerController extends PlayerController {
         pkg.setFraction("y", punch.y);
         send(pkg);
     }
+
+    public Camera getCamera() {
+        return camera;
+    }
 }

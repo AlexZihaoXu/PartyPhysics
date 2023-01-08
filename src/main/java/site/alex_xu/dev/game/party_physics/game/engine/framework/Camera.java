@@ -4,10 +4,52 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
+import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Camera {
+
+    public static class Shake {
+        private double createdTime;
+        private final double x;
+        private final double y;
+
+        private final double speed;
+
+        public Shake(double magnitude, double direction, double speed) {
+            x = Math.cos(direction) * magnitude;
+            y = Math.sin(direction) * magnitude;
+            this.speed = speed;
+            createdTime = Clock.currentTime();
+        }
+
+        public Vector2 getOffsets(double now) {
+            double magnitude = getMagnitudeWhen(now);
+            return new Vector2(x * magnitude, y * magnitude);
+        }
+
+        public double getMagnitudeWhen(double now) {
+            double z = (now - createdTime) * speed;
+            if (Math.abs(z - Math.PI) <= 1e-9) {
+                z = 1e-9;
+            }
+            return Math.sin(z) / (z - Math.PI);
+        }
+
+        public boolean isFinished(double now) {
+            double z = (now - createdTime) * speed;
+            double leftXInt = Math.floor(z / Math.PI);
+            double rightXInt = Math.ceil(z / Math.PI);
+            double mid = (leftXInt + rightXInt) / 2;
+            return 1 / mid < 0.05;
+        }
+    }
+
+    private final HashSet<Shake> shakes = new HashSet<>();
+
     public Vector2 pos = new Vector2();
     public double scale = 1.0;
 
@@ -65,8 +107,27 @@ public class Camera {
         renderer.popState();
     }
 
+    public void addShake(double magnitude, double direction, double speed) {
+        shakes.add(new Shake(magnitude, direction, speed));
+    }
+
     public void applyTransform(Renderer renderer) {
+        Vector2 shakeOffset = new Vector2();
+        ArrayList<Shake> removed = new ArrayList<>();
+        double now = Clock.currentTime();
+        for (Shake shake : shakes) {
+            if (shake.isFinished(now)) {
+                removed.add(shake);
+            }
+            Vector2 offset = shake.getOffsets(now);
+            shakeOffset.x += offset.x;
+            shakeOffset.y += offset.y;
+        }
+        for (Shake shake : removed) {
+            shakes.remove(shake);
+        }
         renderer.translate(getWidth() / 2, getHeight() / 2);
+        renderer.translate(shakeOffset);
         renderer.scale(scale);
         renderer.translate(-pos.x, -pos.y);
     }

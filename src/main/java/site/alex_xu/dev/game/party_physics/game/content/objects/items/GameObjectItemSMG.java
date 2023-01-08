@@ -55,6 +55,7 @@ public class GameObjectItemSMG extends GameObjectItem {
                 Vector2 vel = Vector2.create(60, getTransform().getRotationAngle());
                 GameObjectLiteBullet bullet = new GameObjectLiteBullet(getWorldPoint(new Vector2(0.4, 0.15 * (isFlipped() ? 1 : -1))), vel);
                 serverSideWorldSyncer.syncAddObject(bullet);
+                serverSideWorldSyncer.syncAddCameraShake(5, getTransform().getRotationAngle() + (Math.random() - 0.5) * Math.PI, 40);
                 user.body.applyImpulse(Vector2.create(-2, getTransform().getRotationAngle() + (Math.random() - 0.5) * 0.2));
             }
         }

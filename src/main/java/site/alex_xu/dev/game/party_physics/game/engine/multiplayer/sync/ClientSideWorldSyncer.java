@@ -67,7 +67,15 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         else if (pkg.getType() == PackageTypes.WORLD_SYNC_REMOVE_PLAYER) serverRemovePlayer(pkg);
         else if (pkg.getType() == PackageTypes.PLAYER_SYNC_GRAB_ITEM) {
             world.getPlayer(pkg.getInteger("player")).syncGrabbingFromPackage(pkg);
-        } else if (!(pkg.getType() == PackageTypes.PONG || pkg.getType() == PackageTypes.CLIENT_UPDATE_LATENCY)) {
+        } else if (pkg.getType() == PackageTypes.CAMERA_ADD_SHAKE) {
+            if (getLocalController() != null) {
+                getLocalController().getCamera().addShake(
+                        pkg.getFraction("mag"),
+                        pkg.getFraction("dir"),
+                        pkg.getFraction("speed")
+                );
+            }
+        } else {
             for (NetworkPlayerController controller : remoteControllers.values()) {
                 controller.handlePackage(pkg);
             }
