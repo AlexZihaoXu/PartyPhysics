@@ -168,8 +168,6 @@ public class JoinStage extends MultiplayerStage {
                 client.shutdown();
             }
         }
-
-//        Player player = client.getSyncedWorld().getPlayer(client.getOwnClient().getID());
     }
 
     @Override
