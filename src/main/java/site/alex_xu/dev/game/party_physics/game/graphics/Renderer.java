@@ -30,6 +30,8 @@ public class Renderer {
     private final LinkedList<State> states = new LinkedList<>();
     private final int width, height;
 
+    private final AffineTransform originalTransform;
+
     private double lineWidth = 1;
 
     private Font font = Font.DEFAULT;
@@ -41,6 +43,7 @@ public class Renderer {
         this.width = width;
         this.height = height;
         this.g.setFont(font.getAwt(textSize));
+        originalTransform = (AffineTransform) ((Graphics2D) g).getTransform().clone();
 
         setRenderHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         setRenderHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
@@ -129,7 +132,7 @@ public class Renderer {
 
     public void clear() {
         AffineTransform trans = g.getTransform();
-        g.setTransform(new AffineTransform());
+        g.setTransform(originalTransform);
         g.fillRect(0, 0, width, height);
         g.setTransform(trans);
     }
