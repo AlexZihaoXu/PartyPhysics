@@ -5,6 +5,7 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectProjectile;
+import site.alex_xu.dev.game.party_physics.game.content.particles.HitParticle;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
@@ -39,6 +40,11 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
         getTransform().setRotation(vel.getDirection());
         setLinearVelocity(vel);
         setBullet(true);
+    }
+
+    @Override
+    public Color getHitParticleColor() {
+        return new Color(229, 217, 137);
     }
 
     @Override
@@ -112,9 +118,32 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
         }
         hitCount++;
         if (hitCount == 1) {
+
+            int count = (int) (Math.random() * 3 + 9);
+            for (int i = 0; i < count; i++) {
+                Vector2 vel = getLinearVelocity().copy().product(0.5);
+                vel.setDirection(vel.getDirection() + (Math.random() - 0.5) * 0.2);
+                vel.setMagnitude(vel.getMagnitude() * (0.2 + Math.random() * 0.1));
+                if (object instanceof GameObjectPlayerPart) {
+                    if (Math.random() > 0.9) {
+                        vel.setMagnitude(-vel.getMagnitude() * 0.8);
+                    }
+                }
+                HitParticle particle = new HitParticle(
+                        object.getHitParticleColor(),
+                        location.x, location.y,
+                        -vel.x, -vel.y
+                );
+                getWorld().addParticle(particle);
+            }
+
             SoundSystem.getInstance().getGameSourceGroup2().setVelocity(0, 0, 0);
-            SoundSystem.getInstance().getGameSourceGroup2().setLocation(location.x, location. y, 0);
-            SoundSystem.getInstance().getGameSourceGroup2().play("sounds/weapon/hit-0.wav");
+            SoundSystem.getInstance().getGameSourceGroup2().setLocation(location.x, location.y, 0);
+            if (object instanceof GameObjectPlayerPart) {
+                SoundSystem.getInstance().getGameSourceGroup2().play("sounds/weapon/hit-1.wav");
+            } else {
+                SoundSystem.getInstance().getGameSourceGroup2().play("sounds/weapon/hit-0.wav");
+            }
         } else if (hitCount == 3) {
             fadeOutStartTime = Clock.currentTime();
         }

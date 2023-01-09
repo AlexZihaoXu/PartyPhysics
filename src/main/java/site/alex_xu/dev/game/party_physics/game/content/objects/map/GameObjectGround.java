@@ -15,6 +15,11 @@ public class GameObjectGround extends GameObject {
     private double x, y, width, height;
     private Color color = new Color(5, 10, 31);
 
+    @Override
+    public Color getHitParticleColor() {
+        return color;
+    }
+
     public GameObjectGround(double x, double y, double w, double h) {
         super();
         this.x = x;

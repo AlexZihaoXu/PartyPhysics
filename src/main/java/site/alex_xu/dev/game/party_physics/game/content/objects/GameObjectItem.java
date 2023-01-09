@@ -5,6 +5,7 @@ import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 
+import java.awt.*;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,6 +24,11 @@ public abstract class GameObjectItem extends GameObject {
     private boolean isFlipped = false;
 
     private double physicsTime = 0;
+
+    @Override
+    public Color getHitParticleColor() {
+        return Color.darkGray;
+    }
 
     public double getPhysicsTime() {
         return physicsTime;

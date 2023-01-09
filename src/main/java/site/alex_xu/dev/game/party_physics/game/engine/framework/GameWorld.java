@@ -11,16 +11,15 @@ import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.*;
 
 public class GameWorld {
 
     WorldCollisionHandler playerCollisionHandler = new WorldCollisionHandler(this);
     World<GameObject> world;
     ArrayList<GameObject> objects = new ArrayList<>();
+
+    HashSet<Particle> particles = new HashSet<>();
 
     TreeMap<Integer, GameObject> objectsIdMap = new TreeMap<>();
 
@@ -41,6 +40,11 @@ public class GameWorld {
         world.addContactListener(playerCollisionHandler);
 
         staticBody.setMass(MassType.INFINITE);
+    }
+
+    public void addParticle(Particle particle) {
+        particle.world = this;
+        particles.add(particle);
     }
 
     public void addPlayer(Player player) {
@@ -97,6 +101,16 @@ public class GameWorld {
                 player.onRender(renderer);
             }
         }
+        ArrayList<Particle> removed = new ArrayList<>();
+        for (Particle particle : particles) {
+            particle.onRender(renderer);
+            if (particle.shouldDelete())
+                removed.add(particle);
+        }
+
+        for (Particle particle : removed) {
+            particles.remove(particle);
+        }
     }
 
     public void onTick() {
@@ -118,6 +132,10 @@ public class GameWorld {
                             player.tickPlayers(p);
                         }
                     }
+                }
+                for (Particle particle : particles) {
+                    particle.onPhysicsTick(dt);
+                    particle.lifeTime += dt;
                 }
                 updateCount++;
             }

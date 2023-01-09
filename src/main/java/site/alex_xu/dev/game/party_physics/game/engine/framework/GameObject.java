@@ -17,15 +17,7 @@ public abstract class GameObject extends Body {
 
     public static double latency = 0;
 
-    private Color hitParticleColor = new Color(192, 170, 105);
-
-    protected void setHitParticleColor(Color color) {
-        hitParticleColor = color;
-    }
-
-    public Color getHitParticleColor() {
-        return hitParticleColor;
-    }
+    public abstract Color getHitParticleColor();
 
     public static ServerSideWorldSyncer serverSideWorldSyncer = null;
 

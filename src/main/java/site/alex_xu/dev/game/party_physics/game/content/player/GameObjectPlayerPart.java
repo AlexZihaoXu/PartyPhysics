@@ -11,4 +11,9 @@ public abstract class GameObjectPlayerPart extends GameObject {
     public Player getPlayer() {
         return player;
     }
+
+    @Override
+    public Color getHitParticleColor() {
+        return color;
+    }
 }

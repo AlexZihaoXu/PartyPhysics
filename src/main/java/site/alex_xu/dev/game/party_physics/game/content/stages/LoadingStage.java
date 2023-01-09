@@ -121,6 +121,7 @@ public class LoadingStage extends Stage implements Runnable {
                 "sounds/ui/mouse-click-0.wav",
                 "sounds/weapon/smg-0.wav",
                 "sounds/weapon/hit-0.wav",
+                "sounds/weapon/hit-1.wav",
                 "sounds/bgm-0.wav",
                 "sounds/bgm-1.wav",
         };

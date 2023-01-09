@@ -51,7 +51,20 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void preSolve(ContactCollisionData collision, Contact contact) {
-
+        GameObject body1 = (GameObject) collision.getBody1();
+        GameObject body2 = (GameObject) collision.getBody2();
+        Vector2 point = contact.getPoint();
+        if (body1 instanceof GameObjectProjectile) {
+            ((GameObjectProjectile) body1).onHit(body2, point);
+            if (((GameObjectProjectile) body1).shouldDelete()) {
+                world.removeObject(body1);
+            }
+        } else if (body2 instanceof GameObjectProjectile) {
+            ((GameObjectProjectile) body2).onHit(body1, point);
+            if (((GameObjectProjectile) body2).shouldDelete()) {
+                world.removeObject(body2);
+            }
+        }
     }
 
     @Override
@@ -66,16 +79,6 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
             ((GameObjectPlayerPart) body2).getPlayer().setTouchGround(now, body2, body1, point);
             ((GameObjectPlayerPart) body2).getPlayer().tryGrabItem(body1, body2);
         }
-        if (body1 instanceof GameObjectProjectile) {
-            ((GameObjectProjectile) body1).onHit(body2, point);
-            if (((GameObjectProjectile) body1).shouldDelete()) {
-                world.removeObject(body1);
-            }
-        } else if (body2 instanceof GameObjectProjectile) {
-            ((GameObjectProjectile) body2).onHit(body1, point);
-            if (((GameObjectProjectile) body2).shouldDelete()) {
-                world.removeObject(body2);
-            }
-        }
+
     }
 }

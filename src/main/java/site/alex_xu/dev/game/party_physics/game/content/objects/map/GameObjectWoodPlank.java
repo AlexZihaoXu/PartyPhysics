@@ -34,6 +34,11 @@ public class GameObjectWoodPlank extends GameObject {
     }
 
     @Override
+    public Color getHitParticleColor() {
+        return color;
+    }
+
+    @Override
     public Package createCreationPackage() {
         Package pkg = super.createCreationPackage();
         pkg.setFraction("w", width);

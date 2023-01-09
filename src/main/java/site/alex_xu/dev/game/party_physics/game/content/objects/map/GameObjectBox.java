@@ -24,6 +24,11 @@ public class GameObjectBox extends GameObject {
     }
 
     @Override
+    public Color getHitParticleColor() {
+        return color;
+    }
+
+    @Override
     public GameObject createFromPackage(Package pkg) {
         int id = pkg.getInteger("id");
         double posX = pkg.getFraction("pos.x");

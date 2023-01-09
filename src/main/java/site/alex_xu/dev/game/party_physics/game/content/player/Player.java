@@ -126,6 +126,10 @@ public class Player {
         }
         if (grabbingJoint != null) {
             world.getSimulatedWorld().removeJoint(grabbingJoint);
+            if (grabbingObject instanceof GameObjectItem) {
+                ((GameObjectItem) grabbingObject).setHoldPlayer(null);
+                ((GameObjectItem) grabbingObject).forceUpdateModel(((GameObjectItem) grabbingObject).isFlipped());
+            }
         }
     }
 
