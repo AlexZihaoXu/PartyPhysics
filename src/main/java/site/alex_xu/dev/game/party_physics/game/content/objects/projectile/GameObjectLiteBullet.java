@@ -6,8 +6,10 @@ import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectProjectile;
 import site.alex_xu.dev.game.party_physics.game.content.particles.HitParticle;
+import site.alex_xu.dev.game.party_physics.game.content.particles.PlayerHitParticle;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Particle;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
@@ -99,12 +101,12 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
         renderer.scale(getTransparency());
         renderer.rotate(getRenderRotationAngle());
         renderer.setColor(new Color(255, 247, 91, alpha));
-        renderer.rect(-width / 2, -height / 2, width, height);
-        renderer.scale(getTransparency() * 2.4, getTransparency() * 1.5);
+        renderer.rect(-width / 4, -height / 2, width, height);
+        renderer.scale(getTransparency() * 3.5, getTransparency() * 1.6);
         if (hitCount == 0 && physicsTickTime > 0.008) {
             for (int i = 0; i < 3; i++) {
                 renderer.setColor(new Color(255, 255, 0, (int) (alpha * 0.5)));
-                renderer.rect(-width / 2, -height / 2, width, height, 4);
+                renderer.rect(-width / 2, -height / 2, width, height, 3);
                 renderer.scale(0.8);
             }
         }
@@ -125,16 +127,35 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
                 vel.setDirection(vel.getDirection() + (Math.random() - 0.5) * 0.2);
                 vel.setMagnitude(vel.getMagnitude() * (0.2 + Math.random() * 0.1));
                 if (object instanceof GameObjectPlayerPart) {
+
+
+                    Color color;
+                    color = object.getHitParticleColor();
+
+                    Particle particle = new PlayerHitParticle(
+                            color,
+                            location.x, location.y, vel.getDirection() + (Math.random() - 0.5) * 0.7,
+                            0.1 + Math.random() * 3, 1 + Math.random() * 3, 0.03 + Math.random() * 0.02
+                    );
+                    ((PlayerHitParticle) particle).lifetimeScale = Math.random() * 0.6 + 0.4;
+                    getWorld().addParticle(particle);
+                    particle = new HitParticle(
+                            object.getHitParticleColor(),
+                            location.x, location.y,
+                            -vel.x, -vel.y
+                    );
+                    getWorld().addParticle(particle);
+                } else {
                     if (Math.random() > 0.9) {
                         vel.setMagnitude(-vel.getMagnitude() * 0.8);
                     }
+                    HitParticle particle = new HitParticle(
+                            object.getHitParticleColor(),
+                            location.x, location.y,
+                            -vel.x, -vel.y
+                    );
+                    getWorld().addParticle(particle);
                 }
-                HitParticle particle = new HitParticle(
-                        object.getHitParticleColor(),
-                        location.x, location.y,
-                        -vel.x, -vel.y
-                );
-                getWorld().addParticle(particle);
             }
 
             SoundSystem.getInstance().getGameSourceGroup2().setVelocity(0, 0, 0);
