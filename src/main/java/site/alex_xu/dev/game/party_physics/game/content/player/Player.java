@@ -433,9 +433,9 @@ public class Player {
 
         if (isPunching()) {
 
-            armLeftEnd.applyImpulse(new Vector2(punchDirection.x * 0.8, punchDirection.y > 0 ? punchDirection.y : punchDirection.y * 0.1));
-            legRightEnd.applyImpulse(new Vector2(-punchDirection.x * 0.15, punchDirection.y > 0 ? -punchDirection.y * 0.5 : -punchDirection.y * 0.05));
-            legLeftEnd.applyImpulse(new Vector2(-punchDirection.x * 0.15, punchDirection.y > 0 ? -punchDirection.y * 0.5 : -punchDirection.y * 0.05));
+            armLeftEnd.applyImpulse(new Vector2(punchDirection.x * 1.5, punchDirection.y > 0 ? punchDirection.y : punchDirection.y * 0.1));
+            legRightEnd.applyImpulse(new Vector2(-punchDirection.x * 0.5, punchDirection.y > 0 ? -punchDirection.y * 0.5 : -punchDirection.y * 0.05));
+            legLeftEnd.applyImpulse(new Vector2(-punchDirection.x * 0.5, punchDirection.y > 0 ? -punchDirection.y * 0.5 : -punchDirection.y * 0.05));
             armLeftMotor1.setMaximumForce(20);
             armLeftMotor2.setMaximumForce(20);
             armLeftMotor1.setMaximumTorque(150);
@@ -457,8 +457,8 @@ public class Player {
             armLeftMotor1.setMaximumTorque(0);
             armLeftMotor2.setMaximumTorque(0);
         }
-        punchDirection.x -= punchDirection.x * dt * 25;
-        punchDirection.y -= punchDirection.y * dt * 25;
+        punchDirection.x -= punchDirection.x * dt * 15;
+        punchDirection.y -= punchDirection.y * dt * 15;
 
     }
 
@@ -481,6 +481,7 @@ public class Player {
         if (isPunching()) {
             if (armLeftEnd.getWorldCenter().distance(player.getPos()) < 0.7) {
                 player.body.applyImpulse(punchDirection.product(3));
+
             }
             if (armLeftEnd.getWorldCenter().distance(player.head.getWorldCenter()) < 0.3) {
                 player.head.applyImpulse(punchDirection.product(6));
