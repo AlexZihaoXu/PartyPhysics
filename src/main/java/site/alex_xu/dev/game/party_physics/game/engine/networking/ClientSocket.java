@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.engine.networking;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
@@ -47,7 +48,8 @@ public class ClientSocket {
 
     public void connect() {
         try {
-            Socket socket = new Socket(host, port);
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), 4000);
             bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
             outputStream = new DataOutputStream(bufferedOutputStream);
             bufferedInputStream = new BufferedInputStream(socket.getInputStream());
