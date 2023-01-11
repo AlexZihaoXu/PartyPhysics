@@ -27,6 +27,8 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
 
     private double physicsTickTime = 0;
 
+    private boolean shouldHide = false;
+
 
     public GameObjectLiteBullet(Vector2 pos, Vector2 vel) {
         super();
@@ -94,6 +96,10 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
     @Override
     public void onRender(Renderer renderer) {
         super.onRender(renderer);
+
+        if (shouldHide) {
+            return;
+        }
         renderer.pushState();
 
         int alpha = (int) (getTransparency() * 255);
@@ -120,22 +126,17 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
         }
         hitCount++;
         if (hitCount == 1) {
-
             int count = (int) (Math.random() * 3 + 9);
             for (int i = 0; i < count; i++) {
                 Vector2 vel = getLinearVelocity().copy().product(0.5);
                 vel.setDirection(vel.getDirection() + (Math.random() - 0.5) * 0.2);
                 vel.setMagnitude(vel.getMagnitude() * (0.2 + Math.random() * 0.1));
                 if (object instanceof GameObjectPlayerPart) {
-
-
-                    Color color;
-                    color = object.getHitParticleColor();
-
+                    shouldHide = true;
                     Particle particle = new PlayerHitParticle(
-                            color,
-                            location.x, location.y, vel.getDirection() + (Math.random() - 0.5) * 0.7,
-                            0.1 + Math.random() * 3, 1 + Math.random() * 3, 0.03 + Math.random() * 0.02
+                            object.getHitParticleColor(),
+                            location.x, location.y, vel.getDirection() + (Math.random() - 0.5) * 0.8,
+                            0.1 + Math.random() * 2.5, 1 + Math.random() * 3, 0.025 + Math.random() * 0.015
                     );
                     ((PlayerHitParticle) particle).lifetimeScale = Math.random() * 0.6 + 0.4;
                     getWorld().addParticle(particle);

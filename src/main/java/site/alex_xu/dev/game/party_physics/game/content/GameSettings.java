@@ -10,8 +10,8 @@ public class GameSettings {
         return INSTANCE;
     }
 
-    public double volumeMaster = 1/3d;
-    public double volumeBackgroundMusic = 1;
+    public double volumeMaster = 2/3d;
+    public double volumeBackgroundMusic = 0.1;
 
     public double volumeUI = 1;
 
