@@ -31,6 +31,8 @@ public class GameWorld {
     private final ArrayList<Particle> addingParticles = new ArrayList<>();
     long updateCount = 0;
 
+    private int alivePlayerCount = 0;
+
     TreeMap<Integer, Player> players = new TreeMap<>();
 
     public GameWorld() {
@@ -50,10 +52,20 @@ public class GameWorld {
         addingParticles.add(particle);
     }
 
+    public int getAlivePlayerCount() {
+        return alivePlayerCount;
+    }
+
+    public int getPlayerCount() {
+        return players.size();
+    }
+
     public void addPlayer(Player player) {
         synchronized (lock) {
             player.initPhysics(this);
             players.put(player.getID(), player);
+            if (player.isAlive())
+                alivePlayerCount += 1;
         }
     }
 
@@ -145,7 +157,11 @@ public class GameWorld {
                 for (GameObject object : objects) {
                     object.onPhysicsTick(dt);
                 }
+                int aliveCount = 0;
                 for (Player player : players.values()) {
+                    if (!player.isDead()) {
+                        aliveCount++;
+                    }
                     player.onPhysicsTick(dt, updateCount * dt);
                     for (Player p : players.values()) {
                         if (p != player) {
@@ -153,6 +169,7 @@ public class GameWorld {
                         }
                     }
                 }
+                this.alivePlayerCount = aliveCount;
                 for (Particle particle : particles) {
                     particle.onPhysicsTick(dt);
                     particle.lifeTime += dt;
@@ -168,6 +185,21 @@ public class GameWorld {
             }
         }
 
+    }
+
+    public Player getLastPlayerStanding() {
+        if (getAlivePlayerCount() == 1) {
+            for (Player value : players.values()) {
+                if (value.isAlive()) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean shouldStartNextRound() {
+        return getAlivePlayerCount() <= 1;
     }
 
     public Player getPlayer(int id) {

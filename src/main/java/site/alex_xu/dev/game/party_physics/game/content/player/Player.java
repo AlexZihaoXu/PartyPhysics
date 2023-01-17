@@ -100,6 +100,10 @@ public class Player {
         return health <= 0;
     }
 
+    public boolean isAlive() {
+        return !isDead();
+    }
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -599,5 +603,13 @@ public class Player {
 
     public boolean isGrabbing() {
         return grabbingObject != null;
+    }
+
+    public void moveTo(double x, double y) {
+        for (GameObjectPlayerPart bodyPart : bodyParts) {
+            double xOffset = bodyPart.getTransform().getTranslationX() - body.getTransform().getTranslationX();
+            double yOffset = bodyPart.getTransform().getTranslationY() - body.getTransform().getTranslationY();
+            bodyPart.getTransform().setTranslation(xOffset + x, yOffset + y);
+        }
     }
 }

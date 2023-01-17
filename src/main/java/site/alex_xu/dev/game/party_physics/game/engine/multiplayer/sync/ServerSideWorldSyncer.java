@@ -29,6 +29,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         public Vector2 pos = new Vector2();
 
         public Vector2 vel = new Vector2();
+
         public double angle;
         public double angularVel;
 
@@ -74,12 +75,12 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private GameWorld world = null;
 
     private final TreeMap<Integer, NetworkPlayerController> remoteControllers = new TreeMap<>();
-    private final ArrayList<Color> randomColors = new ArrayList<>();
 
+    private final ArrayList<Color> randomColors = new ArrayList<>();
     private final LinkedList<Package> sendQueue = new LinkedList<>();
+
     private final Clock syncClock = new Clock();
     private final Clock forceSyncClock = new Clock();
-
     private LocalPlayerController localPlayerController;
 
     public ServerSideWorldSyncer(HostingServer server) {
@@ -212,6 +213,14 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world = new GameWorld();
         world.init();
         Package pkg = new Package(PackageTypes.WORLD_SYNC_CREATE);
+        broadcast(pkg);
+    }
+
+    public void syncRemoveObject(GameObject object) {
+        world = getWorld();
+        Package pkg = new Package(PackageTypes.WORLD_SYNC_REMOVE_OBJECT);
+        world.removeObject(object);
+        pkg.setInteger("id", object.getObjectID());
         broadcast(pkg);
     }
 

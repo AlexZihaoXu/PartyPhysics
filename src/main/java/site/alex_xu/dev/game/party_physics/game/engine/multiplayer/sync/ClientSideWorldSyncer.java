@@ -78,6 +78,8 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
             }
         } else if (pkg.getType() == PackageTypes.PLAYER_SYNC_HEALTH_UPDATE) {
             serverUpdatePlayerHealth(pkg);
+        } else if (pkg.getType() == PackageTypes.WORLD_SYNC_REMOVE_OBJECT) {
+            world.removeObject(world.getObject(pkg.getInteger("id")));
         } else {
             for (NetworkPlayerController controller : remoteControllers.values()) {
                 controller.handlePackage(pkg);

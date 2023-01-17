@@ -1,13 +1,13 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.host;
 
 import org.dyn4j.geometry.Vector2;
-import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemSMG;
-import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectTNT;
+import site.alex_xu.dev.game.party_physics.game.content.generator.MapGenerator;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.Button;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingClient;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.HostingServer;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSource;
@@ -34,8 +34,6 @@ public class HostStage extends MultiplayerStage {
     private String[] ipAddressList = new String[0];
 
     private String crashLog = null;
-
-    private int addCount = 0;
 
     private final HostingServer server;
 
@@ -66,7 +64,9 @@ public class HostStage extends MultiplayerStage {
         server = new HostingServer(name);
     }
 
-    Clock clock = new Clock();
+    MapGenerator generator;
+
+
 
     @Override
     public void onLoad() {
@@ -81,13 +81,19 @@ public class HostStage extends MultiplayerStage {
 
         server.launch();
 
-        server.getWorldSyncer().syncAddGround(-500, 2.5, 1000, 1);
-        for (int i = 0; i < 10; i++) {
-            server.getWorldSyncer().syncAddObject(new GameObjectTNT(Math.random() * 100 - 50, -100));
-        }
+//        server.getWorldSyncer().syncAddGround(-500, 2.5, 1000, 1);
+//        for (int i = 0; i < 10; i++) {
+//            server.getWorldSyncer().syncAddObject(new GameObjectTNT(Math.random() * 100 - 50, -100));
+//        }
+//
+        server.getSyncedWorld().onTick();
+        generator = new MapGenerator(server.getWorldSyncer());
+        generator.regenerate();
     }
 
     Camera camera = new Camera();
+
+    Clock switchClock;
 
     @Override
     public void onOffload() {
@@ -214,15 +220,15 @@ public class HostStage extends MultiplayerStage {
             SoundSystem.getInstance().setMasterMuffle(muffleShift);
         }
 
-        if (clock.elapsedTime() > 0.05 && addCount < 20) {
-            addCount++;
-            clock.reset();
-            server.getWorldSyncer().syncAddBox(Math.random() * 10 - 5, -20 + Math.random() * 2);
-        } else if (clock.elapsedTime() > 0.3 && addCount < 23) {
-            addCount++;
-            clock.reset();
-            server.getWorldSyncer().syncAddObject(new GameObjectItemSMG(Math.random() * 3 - 1.5, -20 + Math.random() * 2));
-        }
+//        if (clock.elapsedTime() > 0.05 && addCount < 20) {
+//            addCount++;
+//            clock.reset();
+//            server.getWorldSyncer().syncAddBox(Math.random() * 10 - 5, -20 + Math.random() * 2);
+//        } else if (clock.elapsedTime() > 0.3 && addCount < 23) {
+//            addCount++;
+//            clock.reset();
+//            server.getWorldSyncer().syncAddObject(new GameObjectItemSMG(Math.random() * 3 - 1.5, -20 + Math.random() * 2));
+//        }
 
         if (getWidth() > 1200) {
             xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
@@ -244,7 +250,21 @@ public class HostStage extends MultiplayerStage {
 
         server.tick();
 
+        if (this.server.getSyncedWorld() != null) {
+            GameWorld world = server.getSyncedWorld();
+            if (world.getAlivePlayerCount() == 1 && world.getPlayerCount() > 1) {
+                if (switchClock == null) {
+                    switchClock = new Clock();
+                }
+            }
+        }
 
+        if (switchClock != null) {
+            if (switchClock.elapsedTime() > 2) {
+                switchClock = null;
+                generator.regenerate();
+            }
+        }
     }
 
     @Override
