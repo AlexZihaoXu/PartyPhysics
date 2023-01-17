@@ -1,15 +1,26 @@
 package site.alex_xu.dev.game.party_physics.game.content.test;
 
 
+import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.particles.ExplosionSmokeParticle;
+import site.alex_xu.dev.game.party_physics.game.content.particles.ExplosionSparkParticle;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
+import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Stage;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Networking;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
+import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class TNTTestStage extends Stage {
+
+    GameWorld world = new GameWorld();
+    Camera camera = new Camera();
+
+    Clock clock = new Clock();
 
     public static void main(String[] args) {
         Networking.getInstance().init();
@@ -21,6 +32,8 @@ public class TNTTestStage extends Stage {
     @Override
     public void onLoad() {
         super.onLoad();
+        world.init();
+
     }
 
     public void drawTNT(Renderer renderer, double x, double y) {
@@ -75,16 +88,16 @@ public class TNTTestStage extends Stage {
         renderer.setColor(Color.white);
         renderer.clear();
 
+        camera.scale = 50;
         renderer.pushState();
-
-
-        renderer.translate(getWidth() / 2, getHeight() / 2);
-        renderer.scale(80);
-        renderer.rotate(getCurrentTime());
-
+        camera.applyTransform(renderer);
         drawTNT(renderer, 0, 0);
-
+        world.onRender(renderer);
         renderer.popState();
+
+
+        getWindow().setAutoSwitchAALevelEnabled(false);
+        getWindow().setAALevel(0);
     }
 
     @Override
@@ -98,7 +111,12 @@ public class TNTTestStage extends Stage {
     @Override
     public void onTick() {
         super.onTick();
+        world.onTick();
 
+        if (clock.elapsedTime() > 1.5) {
+            clock.reset();
+
+        }
 
     }
 }

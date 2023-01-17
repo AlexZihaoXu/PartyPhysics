@@ -27,6 +27,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private static class ObjectState {
 
         public Vector2 pos = new Vector2();
+
         public Vector2 vel = new Vector2();
         public double angle;
         public double angularVel;
@@ -63,6 +64,7 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
             return shouldUpdate;
         }
 
+
     }
 
     private final TreeMap<Integer, ObjectState> objectStates = new TreeMap<>();
@@ -70,13 +72,14 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private final HostingServer server;
 
     private GameWorld world = null;
-    private final TreeMap<Integer, NetworkPlayerController> remoteControllers = new TreeMap<>();
 
+    private final TreeMap<Integer, NetworkPlayerController> remoteControllers = new TreeMap<>();
     private final ArrayList<Color> randomColors = new ArrayList<>();
+
     private final LinkedList<Package> sendQueue = new LinkedList<>();
     private final Clock syncClock = new Clock();
-
     private final Clock forceSyncClock = new Clock();
+
     private LocalPlayerController localPlayerController;
 
     public ServerSideWorldSyncer(HostingServer server) {
@@ -220,7 +223,14 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world.addObject(box);
     }
 
-    public void syncAddCameraShake(double magnitude, double direction, int speed, boolean gunShake) {
+    public void syncPlayerUpdateHP(Player player) {
+        Package pkg = new Package(PackageTypes.PLAYER_SYNC_HEALTH_UPDATE);
+        pkg.setInteger("id", player.getID());
+        pkg.setFraction("hp", player.getHealth());
+        broadcast(pkg);
+    }
+
+    public void syncAddCameraShake(double magnitude, double direction, double speed, boolean gunShake) {
         Package pkg = new Package(PackageTypes.CAMERA_ADD_SHAKE);
 
         pkg.setFraction("mag", magnitude);

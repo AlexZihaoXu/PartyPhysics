@@ -5,6 +5,7 @@ import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObject
 import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemSMG;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectTNT;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectWoodPlank;
 import site.alex_xu.dev.game.party_physics.game.content.objects.projectile.GameObjectLiteBullet;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerBody;
@@ -39,6 +40,7 @@ public class Networking {
         manager.register(new GameObjectPlayerLimb(1, 1));
         manager.register(new GameObjectPlayerBody(0, 0));
         manager.register(new GameObjectPlayerFoot(0, 0));
+        manager.register(new GameObjectTNT(0, 0));
 
     }
 }

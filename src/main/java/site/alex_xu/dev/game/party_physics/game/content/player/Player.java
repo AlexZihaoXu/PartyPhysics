@@ -41,6 +41,16 @@ public class Player {
     double lastTouchGroundTime = 0;
     int moveDx = 0;
 
+    private double health = 1.0;
+
+    public double getHealth() {
+        return health;
+    }
+
+    public void setHealth(double health) {
+        this.health = Math.min(1, Math.max(0, health));
+    }
+
     GameObject groundObject = null;
     boolean touchGround = false;
     boolean sneak = false;
@@ -85,6 +95,10 @@ public class Player {
     private String displayName = null;
 
     private boolean grabItemSynced = false;
+
+    public boolean isDead() {
+        return health <= 0;
+    }
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
@@ -241,7 +255,7 @@ public class Player {
     }
 
     public void jump() {
-        if (isTouchingGround()) {
+        if (isTouchingGround() && !isDead()) {
             touchGround = false;
             for (GameObjectPlayerPart bodyPart : bodyParts) {
                 Vector2 vel = bodyPart.getLinearVelocity();
@@ -272,6 +286,12 @@ public class Player {
     }
 
     public void onPhysicsTick(double dt, double now) {
+
+        if (isDead()) {
+            cancelGrabbing();
+            return;
+        }
+
         if (touchGround && (now - lastTouchGroundTime < 0.2)) {
             head.applyForce(new Vector2(0, -100));
             footLeft.applyForce(new Vector2(0, 50));

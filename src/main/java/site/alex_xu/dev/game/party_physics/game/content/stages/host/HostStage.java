@@ -2,6 +2,7 @@ package site.alex_xu.dev.game.party_physics.game.content.stages.host;
 
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemSMG;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectTNT;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.content.stages.MultiplayerStage;
 import site.alex_xu.dev.game.party_physics.game.content.stages.menu.MenuStage;
@@ -81,6 +82,9 @@ public class HostStage extends MultiplayerStage {
         server.launch();
 
         server.getWorldSyncer().syncAddGround(-500, 2.5, 1000, 1);
+        for (int i = 0; i < 10; i++) {
+            server.getWorldSyncer().syncAddObject(new GameObjectTNT(Math.random() * 100 - 50, -100));
+        }
     }
 
     Camera camera = new Camera();
@@ -213,7 +217,7 @@ public class HostStage extends MultiplayerStage {
         if (clock.elapsedTime() > 0.05 && addCount < 20) {
             addCount++;
             clock.reset();
-            server.getWorldSyncer().syncAddBox(Math.random() - 0.5, -20 + Math.random() * 2);
+            server.getWorldSyncer().syncAddBox(Math.random() * 10 - 5, -20 + Math.random() * 2);
         } else if (clock.elapsedTime() > 0.3 && addCount < 23) {
             addCount++;
             clock.reset();

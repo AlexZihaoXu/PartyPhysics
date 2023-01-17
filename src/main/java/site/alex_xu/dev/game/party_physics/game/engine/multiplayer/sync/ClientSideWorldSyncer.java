@@ -76,6 +76,8 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
                         pkg.getBoolean("gun")
                 );
             }
+        } else if (pkg.getType() == PackageTypes.PLAYER_SYNC_HEALTH_UPDATE) {
+            serverUpdatePlayerHealth(pkg);
         } else {
             for (NetworkPlayerController controller : remoteControllers.values()) {
                 controller.handlePackage(pkg);
@@ -92,6 +94,13 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
 
 
     // Server operations
+
+    private void serverUpdatePlayerHealth(Package pkg) {
+        if (getWorld() != null) {
+            getWorld().getPlayer(pkg.getInteger("id")).setHealth(pkg.getFraction("hp"));
+        }
+    }
+
     private void serverRemovePlayer(Package pkg) {
         if (getWorld() != null) {
             getWorld().removePlayer(getWorld().getPlayer(pkg.getInteger("id")));

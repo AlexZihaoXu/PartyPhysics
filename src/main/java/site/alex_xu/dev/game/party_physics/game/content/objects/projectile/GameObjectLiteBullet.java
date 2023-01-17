@@ -5,9 +5,11 @@ import org.dyn4j.geometry.Mass;
 import org.dyn4j.geometry.Rectangle;
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.content.objects.GameObjectProjectile;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectTNT;
 import site.alex_xu.dev.game.party_physics.game.content.particles.HitParticle;
 import site.alex_xu.dev.game.party_physics.game.content.particles.PlayerHitParticle;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
+import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameObject;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Particle;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
@@ -166,6 +168,24 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
             } else {
                 SoundSystem.getInstance().getGameSourceGroup2().play("sounds/weapon/hit-0.wav");
             }
+
+            if (object instanceof GameObjectTNT) {
+                ((GameObjectTNT) object).ignite();
+
+                if (isHostSide()) {
+                    serverSideWorldSyncer.syncAddCameraShake(
+                            Math.random() * 30 + 50, Math.random() * Math.PI * 2,
+                            Math.random() * 0.3 + 0.1, false
+                    );
+                }
+            } else if (object instanceof GameObjectPlayerPart) {
+                if (isHostSide()) {
+                    Player player = ((GameObjectPlayerPart) object).getPlayer();
+                    player.setHealth(player.getHealth() - 0.1);
+                    serverSideWorldSyncer.syncPlayerUpdateHP(player);
+                }
+            }
+
         } else if (hitCount == 3) {
             fadeOutStartTime = Clock.currentTime();
         }

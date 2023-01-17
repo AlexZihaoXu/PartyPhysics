@@ -3,6 +3,7 @@ package site.alex_xu.dev.game.party_physics.game.engine.framework;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.World;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectTNT;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
@@ -26,6 +27,8 @@ public class GameWorld {
     private final Body staticBody = new Body();
 
     private final Object lock = new Object();
+
+    private final ArrayList<Particle> addingParticles = new ArrayList<>();
     long updateCount = 0;
 
     TreeMap<Integer, Player> players = new TreeMap<>();
@@ -44,7 +47,7 @@ public class GameWorld {
 
     public void addParticle(Particle particle) {
         particle.world = this;
-        particles.add(particle);
+        addingParticles.add(particle);
     }
 
     public void addPlayer(Player player) {
@@ -116,8 +119,25 @@ public class GameWorld {
     public void onTick() {
 
         synchronized (lock) {
+            particles.addAll(addingParticles);
+            addingParticles.clear();
             double dt = 1d / PhysicsSettings.TICKS_PER_SECOND;
             long expectedUpdateCount = (long) (getCurrentTime() / dt);
+
+            ArrayList<GameObject> removed = new ArrayList<>();
+
+            for (GameObject object : getObjects()) {
+                if (object instanceof GameObjectTNT) {
+                    if (((GameObjectTNT) object).isExploded()) {
+                        removed.add(object);
+                    }
+                }
+            }
+
+            for (GameObject obj : removed) {
+                removeObject(obj);
+            }
+
             while (updateCount < expectedUpdateCount) {
                 playerCollisionHandler.now = updateCount * dt;
                 world.updatev(dt);
