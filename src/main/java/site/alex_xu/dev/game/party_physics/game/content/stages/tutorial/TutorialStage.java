@@ -88,11 +88,29 @@ public class TutorialStage extends Stage {
 
         renderer.pushState();
         camera.applyTransform(renderer);
-        world.onRender(renderer);
-        renderer.setFont(Font.get("fonts/bulkypix.ttf"));
         renderer.setColor(38, 34, 25);
-        renderer.setTextSize(12);
+        renderer.setTextSize(1);
+        renderer.setFont(Font.get("fonts/bulkypix.ttf"));
         renderer.text("TUTORIAL!!!!!!!!", 0, 0);
+
+        renderer.pushState();
+
+        renderer.pushState();
+        renderer.scale(0.4);
+        renderer.text("Press <A> to move left. <D> to move right.", 1, 3);
+        renderer.text("Continue moving to the right ...", 1, 7);
+        renderer.popState();
+
+
+        renderer.pushState();
+        renderer.translate(20, 0);
+        renderer.scale(0.4);
+        renderer.text("Press <W> or <Space> to jump.", 1, 3);
+        renderer.popState();
+
+        renderer.popState();
+
+        world.onRender(renderer);
 
         renderer.popState();
 
