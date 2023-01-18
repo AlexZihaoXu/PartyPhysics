@@ -29,6 +29,7 @@ public class LocalPlayerController extends PlayerController {
     }
 
     private void send(Package pkg) {
+        // TODO: OPTIMIZE FOR OFFLINE TUTORIAL
         sendQueue.addLast(pkg);
     }
 

@@ -5,6 +5,7 @@ import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 import site.alex_xu.dev.game.party_physics.game.content.GameSettings;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
+import site.alex_xu.dev.game.party_physics.game.content.stages.tutorial.TutorialStage;
 import site.alex_xu.dev.game.party_physics.game.content.ui.OptionsPane;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
@@ -321,6 +322,7 @@ public class MenuStage extends Stage {
                     }
                     if (btnTutorials.getBounds().contains(x, y)) {
                         btnTutorials.onClick();
+                        getWindow().changeStage(new TutorialStage());
                     }
                 }
             }
