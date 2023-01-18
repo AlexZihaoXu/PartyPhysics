@@ -615,10 +615,16 @@ public class Player {
 
     public void moveTo(double x, double y) {
         for (GameObjectPlayerPart bodyPart : bodyParts) {
-            double xOffset = bodyPart.getTransform().getTranslationX() - body.getTransform().getTranslationX();
-            double yOffset = bodyPart.getTransform().getTranslationY() - body.getTransform().getTranslationY();
-            bodyPart.getTransform().setTranslation(xOffset + x, yOffset + y);
+            double xOffset = bodyPart.getPreviousTransform().getTranslationX() - body.getPreviousTransform().getTranslationX();
+            double yOffset = bodyPart.getPreviousTransform().getTranslationY() - body.getPreviousTransform().getTranslationY();
+            bodyPart.translateToOrigin();
+            bodyPart.translate(xOffset + x, yOffset + y);
+            bodyPart.getRenderPos().set(bodyPart.getTransform().getTranslation());
             bodyPart.setLinearVelocity(0, 0);
+            bodyPart.clearForce();
+            bodyPart.clearAccumulatedForce();
+            bodyPart.clearTorque();
+            bodyPart.clearAccumulatedTorque();
         }
     }
 }

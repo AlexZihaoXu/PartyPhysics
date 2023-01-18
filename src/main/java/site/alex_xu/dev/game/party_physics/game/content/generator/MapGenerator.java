@@ -56,9 +56,7 @@ public class MapGenerator {
     public void regenerate() {
         resetWorld();
 
-//        int id = (int) (Math.random() * 2);
-
-        int id = 1; // FIXME: player won't land on the right spot when id == 0
+        int id = (int) (Math.random() * 2);
 
 
         if (id == 0) {
@@ -73,7 +71,7 @@ public class MapGenerator {
 
             syncer.syncAddObject(new GameObjectWoodPlank(-12, -3, 24, 0.75));
 
-            setSpawnRule(0, -10, 3);
+            setSpawnRule(0, -5, 2);
             repopulatePlayers();
 
             return;
@@ -105,7 +103,7 @@ public class MapGenerator {
                 syncer.syncAddObject(new GameObjectItemSMG(i * 3, -3.5));
             }
 
-            setSpawnRule(0, -5, 10);
+            setSpawnRule(0, -4, 10);
             repopulatePlayers();
 
             return;

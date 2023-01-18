@@ -17,6 +17,7 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -276,6 +277,15 @@ public class HostStage extends MultiplayerStage {
         super.onKeyPressed(keyCode);
         if (server.getLocalPlayerController() != null) {
             server.getLocalPlayerController().onKeyPressed(keyCode);
+        }
+
+        if (keyCode == KeyEvent.VK_T) {
+            server.getWorldSyncer().getGenerator().setSpawnRule(0, -3, 4);
+            server.getWorldSyncer().getGenerator().repopulatePlayers();
+        }
+        if (keyCode == KeyEvent.VK_R) {
+            server.getWorldSyncer().getGenerator().setSpawnRule(0, 0, 4);
+            server.getWorldSyncer().getGenerator().repopulatePlayers();
         }
     }
 
