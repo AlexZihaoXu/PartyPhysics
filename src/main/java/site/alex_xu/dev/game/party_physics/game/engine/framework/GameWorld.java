@@ -239,11 +239,12 @@ public class GameWorld {
     }
 
     public void removeObject(GameObject object) {
-        if (object.world != this) {
+        if (object != null && object.world != this) {
             if (object.world == null)
                 throw new RuntimeException("Attempted to remove an object that was not added!");
             throw new RuntimeException("Attempted to remove an object that doesn't belong to this world!");
         }
+        if (object == null) return;
         objects.remove(object);
         objectsIdMap.remove(object.getObjectID());
         world.removeBody(object);

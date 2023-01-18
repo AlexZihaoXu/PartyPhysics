@@ -1,6 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync;
 
 import org.dyn4j.geometry.Vector2;
+import site.alex_xu.dev.game.party_physics.game.content.generator.MapGenerator;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
@@ -17,6 +18,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.GameObjectMana
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
@@ -71,6 +73,8 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private final TreeMap<Integer, ObjectState> objectStates = new TreeMap<>();
 
     private final HostingServer server;
+
+    private final MapGenerator generator = new MapGenerator(this);
 
     private GameWorld world = null;
 
@@ -192,6 +196,10 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         return world;
     }
 
+    public MapGenerator getGenerator() {
+        return generator;
+    }
+
     public void initializeClient(HostingClient client) {
         if (world != null) {
             Package pkg = new Package(PackageTypes.WORLD_SYNC_CREATE);
@@ -254,6 +262,15 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    public void syncPlaySound(String path, double x, double y) {
+        Package pkg = new Package(PackageTypes.SOUND_PLAY);
+        pkg.setString("path", path);
+        pkg.setFraction("x", x);
+        pkg.setFraction("y", y);
+        SoundSystem.getInstance().getGameSourceGroup2().play(path);
+        broadcast(pkg);
+    }
+
     public void syncAddGround(double x, double y, double w, double h) {
         GameWorld world = getWorld();
         GameObject box = new GameObjectGround(x, y, w, h);
@@ -267,6 +284,8 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         Player player = new Player(color, x, y, client.getID());
         world.addPlayer(player);
         player.setDisplayName(client.getName());
+
+        getGenerator().respawnPlayer(player);
 
         Package pkg = GameObjectManager.getInstance().createCreationPackage(player);
         broadcast(pkg);

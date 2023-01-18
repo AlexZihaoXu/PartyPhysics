@@ -48,6 +48,8 @@ public class GameObjectTNT extends GameObject {
 
         if (isHostSide()) {
 
+            serverSideWorldSyncer.syncPlaySound("sounds/tnt.wav", getRenderPos().x, getRenderPos().y);
+
             ArrayList<Player> damagedPlayers = new ArrayList<>();
             for (GameObject object : getWorld().getObjects()) {
                 double distance = object.getTransform().getTranslation().distance(this.getTransform().getTranslation());

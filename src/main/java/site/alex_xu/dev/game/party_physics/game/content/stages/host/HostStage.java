@@ -64,9 +64,6 @@ public class HostStage extends MultiplayerStage {
         server = new HostingServer(name);
     }
 
-    MapGenerator generator;
-
-
 
     @Override
     public void onLoad() {
@@ -87,8 +84,7 @@ public class HostStage extends MultiplayerStage {
 //        }
 //
         server.getSyncedWorld().onTick();
-        generator = new MapGenerator(server.getWorldSyncer());
-        generator.regenerate();
+        server.getWorldSyncer().getGenerator().regenerate();
     }
 
     Camera camera = new Camera();
@@ -252,7 +248,7 @@ public class HostStage extends MultiplayerStage {
 
         if (this.server.getSyncedWorld() != null) {
             GameWorld world = server.getSyncedWorld();
-            if (world.getAlivePlayerCount() == 1 && world.getPlayerCount() > 1) {
+            if (world.getAlivePlayerCount() <= 1 && world.getPlayerCount() > 1) {
                 if (switchClock == null) {
                     switchClock = new Clock();
                 }
@@ -262,8 +258,16 @@ public class HostStage extends MultiplayerStage {
         if (switchClock != null) {
             if (switchClock.elapsedTime() > 2) {
                 switchClock = null;
-                generator.regenerate();
+                server.getWorldSyncer().getGenerator().regenerate();
             }
+        }
+
+        try {
+            Player player = server.getWorldSyncer().getLocalPlayerController().getPlayer();
+            if (player != null) {
+//                System.out.println(player.body.getRenderPos());
+            }
+        } catch (NullPointerException ignored) {
         }
     }
 

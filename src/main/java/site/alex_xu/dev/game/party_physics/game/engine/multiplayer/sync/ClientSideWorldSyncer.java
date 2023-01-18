@@ -11,6 +11,7 @@ import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.JoiningClient
 import site.alex_xu.dev.game.party_physics.game.engine.networking.GameObjectManager;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
+import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 
 import java.util.LinkedList;
 import java.util.TreeMap;
@@ -80,6 +81,10 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
             serverUpdatePlayerHealth(pkg);
         } else if (pkg.getType() == PackageTypes.WORLD_SYNC_REMOVE_OBJECT) {
             world.removeObject(world.getObject(pkg.getInteger("id")));
+        } else if (pkg.getType() == PackageTypes.SOUND_PLAY) {
+            SoundSystem.getInstance().getGameSourceGroup2().setVelocity(0, 0, 0);
+            SoundSystem.getInstance().getGameSourceGroup2().setLocation(pkg.getFraction("x"), pkg.getFraction("y"), 0);
+            SoundSystem.getInstance().getGameSourceGroup2().play(pkg.getString("path"));
         } else {
             for (NetworkPlayerController controller : remoteControllers.values()) {
                 controller.handlePackage(pkg);

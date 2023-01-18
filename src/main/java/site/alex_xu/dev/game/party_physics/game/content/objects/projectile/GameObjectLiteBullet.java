@@ -181,7 +181,7 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
             } else if (object instanceof GameObjectPlayerPart) {
                 if (isHostSide()) {
                     Player player = ((GameObjectPlayerPart) object).getPlayer();
-                    player.setHealth(player.getHealth() - 0.1);
+                    player.setHealth(player.getHealth() - 0.02 + Math.random() * 0.01);
                     serverSideWorldSyncer.syncPlayerUpdateHP(player);
                 }
             }

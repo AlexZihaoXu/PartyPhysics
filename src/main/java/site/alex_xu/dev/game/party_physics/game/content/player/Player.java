@@ -113,21 +113,25 @@ public class Player {
     }
 
     public void tryGrabItem(GameObject grabbed, GameObject bodyPart) {
-        if (grabbingJoint == null && reachDirection.distanceSquared(0, 0) > 0.1) {
-            if (bodyPart == this.armRightEnd) {
-                if (grabbed instanceof GameObjectGround) return;
-                grabbingObject = grabbed;
-                if (grabbed instanceof GameObjectItem) {
-                    Vector2 point = armRightEnd.getWorldPoint(new Vector2(0.2, 0));
-                    grabbed.getTransform().setTranslation(point);
-                    grabbed.getTransform().setRotation(armRightEnd.getTransform().getRotationAngle());
-                    grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, point);
-                    ((GameObjectItem) grabbed).setHoldPlayer(this);
-                    ((GameObjectItem) grabbed).forceUpdateModel(reachDirection.x < 0);
+        try {
+            if (grabbingJoint == null && reachDirection.distanceSquared(0, 0) > 0.1 && isAlive()) {
+                if (bodyPart == this.armRightEnd) {
+                    if (grabbed instanceof GameObjectGround) return;
+                    grabbingObject = grabbed;
+                    if (grabbed instanceof GameObjectItem) {
+                        Vector2 point = armRightEnd.getWorldPoint(new Vector2(0.2, 0));
+                        grabbed.getTransform().setTranslation(point);
+                        grabbed.getTransform().setRotation(armRightEnd.getTransform().getRotationAngle());
+                        grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, point);
+                        ((GameObjectItem) grabbed).setHoldPlayer(this);
+                        ((GameObjectItem) grabbed).forceUpdateModel(reachDirection.x < 0);
+                    }
+                    grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, armRightEnd.getWorldCenter());
+                    head.getWorld().getSimulatedWorld().addJoint(grabbingJoint);
                 }
-                grabbingJoint = new WeldJoint<>(armRightEnd, grabbed, armRightEnd.getWorldCenter());
-                head.getWorld().getSimulatedWorld().addJoint(grabbingJoint);
             }
+        } catch (IllegalArgumentException ignored) {
+            cancelGrabbing();
         }
     }
 
@@ -290,6 +294,10 @@ public class Player {
     }
 
     public void onPhysicsTick(double dt, double now) {
+
+        if (this.getPos().y > 50) {
+            this.setHealth(0);
+        }
 
         if (isDead()) {
             cancelGrabbing();
@@ -486,7 +494,7 @@ public class Player {
 
     }
 
-    private void cancelGrabbing() {
+    public void cancelGrabbing() {
         if (grabbingObject instanceof GameObjectItem) {
             ((GameObjectItem) grabbingObject).setHoldPlayer(null);
             ((GameObjectItem) grabbingObject).forceUpdateModel(((GameObjectItem) grabbingObject).isFlipped());
@@ -610,6 +618,7 @@ public class Player {
             double xOffset = bodyPart.getTransform().getTranslationX() - body.getTransform().getTranslationX();
             double yOffset = bodyPart.getTransform().getTranslationY() - body.getTransform().getTranslationY();
             bodyPart.getTransform().setTranslation(xOffset + x, yOffset + y);
+            bodyPart.setLinearVelocity(0, 0);
         }
     }
 }

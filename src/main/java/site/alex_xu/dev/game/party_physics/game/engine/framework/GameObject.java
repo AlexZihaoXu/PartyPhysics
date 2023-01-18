@@ -75,6 +75,9 @@ public abstract class GameObject extends Body {
     private double renderRotationAngle = 0;
 
     public Vector2 getRenderPos() {
+        if (renderPosition.distanceSquared(getTransform().getTranslation()) > 9) {
+            renderPosition.set(getTransform().getTranslation());
+        }
         return renderPosition;
     }
 

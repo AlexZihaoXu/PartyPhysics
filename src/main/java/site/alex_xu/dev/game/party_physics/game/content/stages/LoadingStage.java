@@ -117,6 +117,7 @@ public class LoadingStage extends Stage implements Runnable {
     @Override
     public void run() {
         String[] soundsToLoad = {
+                "sounds/tnt.wav",
                 "sounds/ui/mouse-over-0.wav",
                 "sounds/ui/mouse-click-0.wav",
                 "sounds/weapon/smg-0.wav",
