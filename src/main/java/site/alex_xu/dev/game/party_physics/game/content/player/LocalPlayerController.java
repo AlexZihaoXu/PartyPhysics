@@ -2,7 +2,6 @@ package site.alex_xu.dev.game.party_physics.game.content.player;
 
 import org.dyn4j.geometry.Vector2;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.Camera;
-import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.graphics.PartyPhysicsWindow;

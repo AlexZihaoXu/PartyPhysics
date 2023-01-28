@@ -6,11 +6,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+/**
+ * A wrap up of java's awt Font class
+ */
 public class Font {
     java.awt.Font awtFont;
+    /**
+     * An array that cashes awt fonts with different sizes
+     */
     java.awt.Font[] sizeList = new java.awt.Font[512];
 
-    private static HashMap<String, Font> cache = new HashMap<>();
+    /**
+     * A hashmap that cashes all loaded fonts
+     */
+    private static final HashMap<String, Font> cache = new HashMap<>();
 
     public static final Font DEFAULT = new Font(new JLabel().getFont());
 
@@ -18,6 +27,10 @@ public class Font {
         awtFont = font;
     }
 
+    /**
+     * @param size size
+     * @return the awt font of the given size
+     */
     public java.awt.Font getAwt(int size) {
         if (sizeList[size] == null) {
             sizeList[size] = awtFont.deriveFont((float) size);
@@ -25,6 +38,10 @@ public class Font {
         return sizeList[size];
     }
 
+    /**
+     * @param path the path of the font
+     * @return the font of the given size
+     */
     public static Font get(String path) {
         if (!cache.containsKey(path)) {
             try {

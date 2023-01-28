@@ -2,6 +2,9 @@ package site.alex_xu.dev.game.party_physics.game.engine.physics;
 
 import org.dyn4j.collision.CategoryFilter;
 
+/**
+ * A Physics Settings class that keeps all physics simulation settings
+ */
 public class PhysicsSettings {
     public static final int TICKS_PER_SECOND = 150;
 

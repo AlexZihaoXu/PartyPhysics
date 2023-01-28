@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TreeMap;
 
+/**
+ * The package class that is used to communicate between server and clients
+ */
 public class Package {
     private static final byte TYPE_INTEGER = 0;
     private static final byte TYPE_FRACTION = 1;
@@ -18,10 +21,18 @@ public class Package {
     TreeMap<Integer, Object> data = new TreeMap<>();
     TreeMap<Integer, Byte> types = new TreeMap<>();
 
+    /**
+     * @param type the package type
+     */
     public Package(PackageTypes type) {
         this.type = type;
     }
 
+    /**
+     * Deserialize a package from data stream
+     * @param stream the data stream
+     * @throws IOException if any IO error occurs
+     */
     Package(DataInputStream stream) throws IOException {
 
         type = PackageTypes.values()[stream.readByte()];
@@ -57,6 +68,9 @@ public class Package {
 
     }
 
+    /**
+     * @param stream the stream to serialize to
+     */
     void writeStream(DataOutputStream stream) {
         try {
             // Package type
@@ -89,10 +103,17 @@ public class Package {
         }
     }
 
+    /**
+     * @return the type of the package
+     */
     public PackageTypes getType() {
         return type;
     }
 
+    /**
+     * @param key the key to set
+     * @param value the value for the key
+     */
     public void setInteger(String key, int value) {
         int hash = key.hashCode();
         if (!data.containsKey(hash))
@@ -101,6 +122,10 @@ public class Package {
         types.put(hash, TYPE_INTEGER);
     }
 
+    /**
+     * @param key the key to set
+     * @param value the value for the key
+     */
     public void setFraction(String key, float value) {
         int hash = key.hashCode();
         if (!data.containsKey(hash))
@@ -109,10 +134,18 @@ public class Package {
         types.put(hash, TYPE_FRACTION);
     }
 
+    /**
+     * @param key the key to set
+     * @param value the value for the key
+     */
     public void setFraction(String key, double value) {
         setFraction(key, (float) value);
     }
 
+    /**
+     * @param key the key to set
+     * @param value the value to set
+     */
     public void setString(String key, String value) {
         int hash = key.hashCode();
         if (!data.containsKey(hash))
@@ -121,6 +154,10 @@ public class Package {
         types.put(hash, TYPE_STRING);
     }
 
+    /**
+     * @param key the key to set
+     * @param value the value to set
+     */
     public void setBoolean(String key, boolean value) {
         int hash = key.hashCode();
         if (!data.containsKey(hash))
@@ -129,6 +166,10 @@ public class Package {
         types.put(hash, TYPE_BOOLEAN);
     }
 
+    /**
+     * @param key key
+     * @return the value associated with the key
+     */
     public int getInteger(String key) {
         int hash = key.hashCode();
         if (data.containsKey(hash)) {
@@ -142,10 +183,17 @@ public class Package {
         }
     }
 
+    /**
+     * @return the estimated size in bytes of this package
+     */
     public int getPackageSize() {
         return packageSize;
     }
 
+    /**
+     * @param key key
+     * @return the value associated with the key
+     */
     public double getFraction(String key) {
         int hash = key.hashCode();
         if (data.containsKey(hash)) {
@@ -159,6 +207,10 @@ public class Package {
         }
     }
 
+    /**
+     * @param key key
+     * @return the value associated with the key
+     */
     public String getString(String key) {
         int hash = key.hashCode();
         if (data.containsKey(hash)) {
@@ -172,6 +224,10 @@ public class Package {
         }
     }
 
+    /**
+     * @param key key
+     * @return the value associated with the key
+     */
     public boolean getBoolean(String key) {
         int hash = key.hashCode();
         if (data.containsKey(hash)) {
@@ -185,6 +241,11 @@ public class Package {
         }
     }
 
+
+    /**
+     * @param key the key to check
+     * @return true if the package contains this key
+     */
     public boolean hasKey(String key) {
         return data.containsKey(key.hashCode());
     }

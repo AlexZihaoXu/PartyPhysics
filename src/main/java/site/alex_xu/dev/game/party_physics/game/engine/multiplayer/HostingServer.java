@@ -2,10 +2,9 @@ package site.alex_xu.dev.game.party_physics.game.engine.multiplayer;
 
 import site.alex_xu.dev.game.party_physics.PartyPhysicsGame;
 import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
-import site.alex_xu.dev.game.party_physics.game.content.player.NetworkPlayerController;
 import site.alex_xu.dev.game.party_physics.game.engine.framework.GameWorld;
 import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ServerSideWorldSyncer;
-import site.alex_xu.dev.game.party_physics.game.engine.networking.ClientSocket;
+import site.alex_xu.dev.game.party_physics.game.engine.networking.WrapUpSocket;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.networking.ServerSocket;
@@ -14,34 +13,74 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.*;
 
+/**
+ * A server that hosts client
+ * should be instantiated on the server side
+ */
 public class HostingServer implements ServerClientType {
 
     private static boolean shutdownHookAdded = false;
+    /**
+     * A cache of all servers to clean up before the program shuts down
+     */
     static HashSet<HostingServer> servers = new HashSet<>();
+    /**
+     * A socket that accepts new connections
+     */
     private ServerSocket serverSocket;
     private boolean serverRunning = false;
 
+    /**
+     * Crash log (if crashed)
+     */
     private String serverCrashLog = null;
 
+    /**
+     * A thread that executes the main loop of the server
+     */
     private final Thread serverThread = new Thread(this::mainLoop, "HostingServer-Thread");
 
-    final LinkedList<Package> recvQueueOut = new LinkedList<>();
+    /**
+     * The receiving queue that stores packages just received
+     */
     final LinkedList<Package> recvQueueIn = new LinkedList<>();
+    /**
+     * The receiving queue that stores processed packages after getting received
+     */
+    final LinkedList<Package> recvQueueOut = new LinkedList<>();
 
+    /**
+     * All hosting clients that has connections to the joining client
+     */
     private final TreeMap<Integer, HostingClient> hostingClients = new TreeMap<>();
 
+    /**
+     * All clients
+     */
     private final TreeMap<Integer, Client> joinedClients = new TreeMap<>();
 
+    /**
+     * The world syncer
+     */
     private ServerSideWorldSyncer worldSyncer;
 
+    /**
+     * @return the crash log (if crashed)
+     */
     public String getServerCrashLog() {
         return serverCrashLog;
     }
 
+    /**
+     * @return true if the server is running
+     */
     public boolean isServerRunning() {
         return serverRunning && !serverSocket.isClosed();
     }
 
+    /**
+     * @return true if server is crashed
+     */
     @Override
     public boolean isCrashed() {
         return serverCrashLog != null;
@@ -50,10 +89,16 @@ public class HostingServer implements ServerClientType {
     private final String name;
 
 
+    /**
+     * @return the world syncer
+     */
     public ServerSideWorldSyncer getWorldSyncer() {
         return worldSyncer;
     }
 
+    /**
+     * @return world from world syncer if they exist, otherwise null
+     */
     public GameWorld getSyncedWorld() {
         if (getWorldSyncer() == null)
             return null;
@@ -61,6 +106,9 @@ public class HostingServer implements ServerClientType {
     }
 
 
+    /**
+     * @param name the name of the host
+     */
     public HostingServer(String name) {
         this.name = name;
         servers.add(this);
@@ -70,6 +118,10 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    /**
+     * @param id the id of the client to kick
+     * Should be called when error occurs such as connection lost, or client request to leave
+     */
     public void kickClient(int id) {
         if (hostingClients.containsKey(id)) {
             HostingClient client = hostingClients.get(id);
@@ -83,15 +135,25 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    /**
+     * @param client the client to kick
+     * A shortcut for kickClient(client.getID());
+     */
     public void kickClient(Client client) {
         kickClient(client.getID());
     }
 
+    /**
+     * @param client the hosting client to kick
+     * A shortcut for kickClient(client.getID());
+     */
     public void kickClient(HostingClient client) {
         kickClient(client.getID());
-
     }
 
+    /**
+     * The main loop of the server thread
+     */
     private void mainLoop() {
         try {
             serverSocket = new ServerSocket(PartyPhysicsGame.SERVER_PORT);
@@ -106,7 +168,7 @@ public class HostingServer implements ServerClientType {
                     }
                 }
                 try {
-                    ClientSocket socket = serverSocket.accept();
+                    WrapUpSocket socket = serverSocket.accept();
 
                     int id = (int) (1 + Math.random() * 100) * 100;
                     while (hostingClients.containsKey(id)) {
@@ -137,6 +199,10 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    /**
+     * @param client make a client join the world
+     * This will send out all the necessary packages for the client to create world and join
+     */
     void joinClient(HostingClient client) {
 
         Client clt = new Client(client.getID(), client.getName());
@@ -155,6 +221,9 @@ public class HostingServer implements ServerClientType {
 
     }
 
+    /**
+     * Start the server
+     */
     public void launch() {
         if (serverRunning)
             throw new IllegalStateException("Server is already running!");
@@ -168,6 +237,9 @@ public class HostingServer implements ServerClientType {
 
     }
 
+    /**
+     * Shutdown the server
+     */
     public void shutdown() {
         serverRunning = false;
         if (serverSocket != null)
@@ -178,6 +250,9 @@ public class HostingServer implements ServerClientType {
         servers.remove(this);
     }
 
+    /**
+     * Send out all packages
+     */
     @Override
     public void flush() {
         ArrayList<HostingClient> removed = new ArrayList<>();
@@ -193,6 +268,9 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    /**
+     * @return a network package if the queue is not empty, otherwise null
+     */
     @Override
     public Package pull() {
         synchronized (recvQueueOut) {
@@ -203,12 +281,19 @@ public class HostingServer implements ServerClientType {
         }
     }
 
+    /**
+     * Clean up and shutdown everything
+     */
     public static void cleanup() {
         for (HostingServer server : servers) {
             server.shutdown();
         }
     }
 
+    /**
+     * Tick once
+     * processes the packages and tick the world
+     */
     public void tick() {
         try {
             synchronized (recvQueueIn) {
@@ -232,20 +317,33 @@ public class HostingServer implements ServerClientType {
 
     }
 
+    /**
+     * @return the host's name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * @return a list of all hosting clients
+     */
     public Collection<HostingClient> getHostingClients() {
         return hostingClients.values();
     }
 
+    /**
+     * @param pkg a package to be sent to all clients
+     */
     public void broadcast(Package pkg) {
         for (HostingClient client : hostingClients.values()) {
             client.send(pkg);
         }
     }
 
+    /**
+     * @param id id of the client
+     * @return the client with the given id
+     */
     public Client getClient(int id) {
         if (joinedClients.containsKey(id)) {
             return joinedClients.get(id);
@@ -253,10 +351,18 @@ public class HostingServer implements ServerClientType {
         return null;
     }
 
+    /**
+     * @param hostingClient hosting client of the client
+     * @return the client of the hosting client
+     */
     public Client getClient(HostingClient hostingClient) {
         return getClient(hostingClient.getID());
     }
 
+    /**
+     * @param id the id to get hosting client
+     * @return the hosting client from the given ID
+     */
     public HostingClient getHostingClient(int id) {
         if (hostingClients.containsKey(id)) {
             return hostingClients.get(id);
@@ -264,10 +370,17 @@ public class HostingServer implements ServerClientType {
         return null;
     }
 
+    /**
+     * @param client the client to find hosting client
+     * @return the hosting client from the client
+     */
     public HostingClient getHostingClient(Client client) {
         return getHostingClient(client.getID());
     }
 
+    /**
+     * @return the local player controller
+     */
     public LocalPlayerController getLocalPlayerController() {
         if (worldSyncer != null) {
             return worldSyncer.getLocalPlayerController();

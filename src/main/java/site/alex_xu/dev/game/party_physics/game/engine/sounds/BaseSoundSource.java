@@ -6,8 +6,14 @@ import org.dyn4j.geometry.Vector3;
 
 import java.util.HashSet;
 
+/**
+ * The base sound source that plays a single Sound object
+ */
 class BaseSoundSource {
 
+    /**
+     * A cache of all sources that have not been cleaned up
+     */
     static HashSet<BaseSoundSource> sources = new HashSet<>();
 
     private final int[] ptrInt = new int[1];
@@ -30,10 +36,16 @@ class BaseSoundSource {
     private double volume = 1;
 
 
+    /**
+     * @return true if the source is playable (not playable when sound system isn't working)
+     */
     public boolean isPlayable() {
         return playable && !deleted;
     }
 
+    /**
+     * @return true if the sound buffer is deleted
+     */
     public boolean isDeleted() {
         return deleted;
     }
@@ -66,6 +78,9 @@ class BaseSoundSource {
         sources.add(this);
     }
 
+    /**
+     * @param sound the sound object to play
+     */
     public void setSound(Sound sound) {
         this.sound = sound;
         if (isPlayable()) {
@@ -74,22 +89,36 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * @param pitch pitch effect (0~2, default=1)
+     */
     public void setPitch(double pitch) {
         if (isPlayable())
             al.alSourcef(source, AL.AL_PITCH, (float) pitch);
     }
 
+    /**
+     * @param volume the new volume
+     */
     public void setVolume(double volume) {
         this.volume = volume;
         updateVolume();
     }
 
+    /**
+     * Update the actual volume
+     */
     void updateVolume() {
         if (isPlayable()) {
             al.alSourcef(source, AL.AL_GAIN, (float) (volume * SoundSystem.getInstance().getMasterVolume()));
         }
     }
 
+    /**
+     * @param x x-location
+     * @param y y-location
+     * @param z z-location
+     */
     public void setPosition(double x, double y, double z) {
         pos.set(x, y, z);
         if (isPlayable()) {
@@ -100,6 +129,11 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * @param x x-velocity
+     * @param y y-velocity
+     * @param z z-velocity
+     */
     public void setVelocity(double x, double y, double z) {
         vel.set(x, y, z);
         if (isPlayable()) {
@@ -110,6 +144,9 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * Play the bound sound object
+     */
     public void play() {
         if (isPlayable()) {
             if (!isPlaying())
@@ -117,6 +154,9 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * Pause the current playing sound
+     */
     public void pause() {
         if (isPlayable()) {
             if (!isPaused())
@@ -124,12 +164,18 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * Stop playing the sound
+     */
     public void stop() {
         if (isPlayable()) {
             al.alSourceStop(source);
         }
     }
 
+    /**
+     * @return current state (playing/paused/stopped)
+     */
     private int getState() {
         if (isPlayable()) {
             al.alGetSourcei(source, ALConstants.AL_SOURCE_STATE, ptrInt, 0);
@@ -138,18 +184,30 @@ class BaseSoundSource {
         return -1;
     }
 
+    /**
+     * @return true if the source is playing
+     */
     public boolean isPlaying() {
         return getState() == AL.AL_PLAYING;
     }
 
+    /**
+     * @return true if the source is stopped
+     */
     public boolean isStopped() {
         return getState() == AL.AL_STOPPED;
     }
 
+    /**
+     * @return true if the source is paused
+     */
     public boolean isPaused() {
         return getState() == AL.AL_PAUSED;
     }
 
+    /**
+     * @return the playing progress in seconds
+     */
     public double getSecondOffset() {
         if (isPlayable()) {
             al.alGetSourcef(source, AL.AL_SEC_OFFSET, ptrFloat, 0);
@@ -158,6 +216,9 @@ class BaseSoundSource {
         return 0;
     }
 
+    /**
+     * @param offset the playing progress in seconds
+     */
     public void setSecondOffset(double offset) {
         if (isPlayable()) {
             boolean shouldPlayAfter = isPlaying();
@@ -168,6 +229,9 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * @return the playing progress in percentage (0.0~1.0)
+     */
     public double getProgress() {
         if (isPlayable()) {
             if (isPlaying()) {
@@ -177,6 +241,9 @@ class BaseSoundSource {
         return 0;
     }
 
+    /**
+     * @return the sound length in seconds
+     */
     public double getLength() {
         if (isPlayable()) {
             return sound.getLength();
@@ -184,6 +251,9 @@ class BaseSoundSource {
         return 0;
     }
 
+    /**
+     * Free up the memory space allocated for this sound source
+     */
     public void delete() {
         if (isPlayable()) {
             al.alDeleteSources(1, ptrSource, 0);
@@ -192,6 +262,9 @@ class BaseSoundSource {
         }
     }
 
+    /**
+     * @param path the path to the sound
+     */
     public void setSound(String path) {
         setSound(Sound.get(path));
     }

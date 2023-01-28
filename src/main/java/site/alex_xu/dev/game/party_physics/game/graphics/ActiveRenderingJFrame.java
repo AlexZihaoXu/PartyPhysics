@@ -9,6 +9,9 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.VolatileImage;
 import java.util.Arrays;
 
+/**
+ * A special JFrame that actively renders
+ */
 class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListener, MouseListener, MouseMotionListener {
 
     final Canvas canvas;
@@ -64,6 +67,9 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
     }
 
+    /**
+     * The main active rendering loop
+     */
     void mainLoop() {
         if (running)
             throw new IllegalStateException("The loop is already running!");
@@ -84,6 +90,7 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
         double lastSwitch = now;
         while (running) {
 
+            // Decide which level of anti-aliasing to use
             if (autoSwitchAALevel) {
                 if (width != canvas.getWidth() || height != canvas.getHeight()) {
                     aaLevel = 0;
@@ -115,10 +122,12 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
             Clock videoDtClock = new Clock();
             Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
-            if (aaLevel == 0) {
+            if (aaLevel == 0) { // Directly render to screen
                 Renderer renderer = new Renderer(g, width, height);
                 partyPhysicsWindow.onRender(renderer);
-            } else {
+            } else { // Down sample to achieve anti-aliasing effects
+
+                // Checks if down sample buffers (volatile images) matches the current window size and if they should be recreated.
                 if (msaaBuffers == null || msaaBuffers.length != aaLevel || msaaBuffers[0].validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE || msaaBuffers[0].getWidth() / 2 != width || msaaBuffers[0].getHeight() / 2 != height) {
                     renderScale = 2;
                     msaaBuffers = new VolatileImage[aaLevel];
@@ -153,18 +162,19 @@ class ActiveRenderingJFrame extends JFrame implements WindowListener, KeyListene
 
             }
 
+            // Decides whether render methods should be called
             if (!this.bufferStrategy.contentsLost()) {
                 this.bufferStrategy.show();
                 videoDt = videoDtClock.elapsedTime();
             }
             try {
+                // Limit the FPS to 1000
                 Thread.sleep(1);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
         running = false;
-
 
     }
 

@@ -2,6 +2,9 @@ package site.alex_xu.dev.game.party_physics.game.engine.sounds;
 
 import org.dyn4j.geometry.Vector3;
 
+/**
+ * A sound source group that helps play multiple sounds at the same time
+ */
 public class SourceGroup {
     SoundSource[] sources;
     private int index = 0;
@@ -19,13 +22,27 @@ public class SourceGroup {
         this(4);
     }
 
+    /**
+     * @param x x-location
+     * @param y y-location
+     * @param z z-location
+     */
     public void setLocation(double x, double y, double z) {
         location.set(x, y, z);
     }
 
+    /**
+     * @param x x-velocity
+     * @param y y-velocity
+     * @param z z-velocity
+     */
     public void setVelocity(double x, double y, double z) {
         velocity.set(x, y, z);
     }
+
+    /**
+     * @param sound the sound object to play
+     */
     public void play(Sound sound) {
         for (int i = 0; i < sources.length; i++) {
             if (sources[index] == null) {
@@ -53,14 +70,23 @@ public class SourceGroup {
         sources[index].play();
     }
 
+    /**
+     * @param path the path of the sound to play
+     */
     public void play(String path) {
         play(Sound.get(path));
     }
 
+    /**
+     * @param path play sound from given path with muffled effect
+     */
     public void playMuffled(String path) {
         play(Sound.get(path));
     }
 
+    /**
+     * @param volume volume
+     */
     public void setVolume(double volume) {
         volume = Math.min(1, Math.max(0, volume));
         this.volume = volume;
@@ -71,6 +97,9 @@ public class SourceGroup {
         }
     }
 
+    /**
+     * Free up allocated memory space
+     */
     public void delete() {
         for (SoundSource source : sources) {
             if (source != null)
@@ -78,6 +107,9 @@ public class SourceGroup {
         }
     }
 
+    /**
+     * @return the volume of the sound group
+     */
     public double getVolume() {
         return volume;
     }

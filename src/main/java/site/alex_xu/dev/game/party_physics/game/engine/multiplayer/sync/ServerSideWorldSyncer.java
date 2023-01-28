@@ -24,8 +24,16 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 import java.awt.*;
 import java.util.*;
 
+/**
+ * The server side world syncer
+ * sends out packages to help clients sync with the server's world's state
+ */
 public class ServerSideWorldSyncer implements ClientEventHandler {
 
+    /**
+     * Object state class
+     * stores the physics states of an object
+     */
     private static class ObjectState {
 
         public Vector2 pos = new Vector2();
@@ -87,6 +95,9 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
     private final Clock forceSyncClock = new Clock();
     private LocalPlayerController localPlayerController;
 
+    /**
+     * @param server the hosting server
+     */
     public ServerSideWorldSyncer(HostingServer server) {
         this.server = server;
         GameObject.serverSideWorldSyncer = this;
@@ -99,14 +110,24 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         randomColors.add(new Color(187, 65, 192));
     }
 
+    /**
+     * @return the server of the world syncer
+     */
     public HostingServer getServer() {
         return server;
     }
 
+    /**
+     * @param pkg a package to send to all clients
+     */
     public void broadcast(Package pkg) {
         sendQueue.addLast(pkg);
     }
 
+    /**
+     * Tick once
+     * updates the world, sends out packages, help clients to sync
+     */
     public void tick() {
         if (world != null) {
             if (getLocalPlayerController() != null) {
@@ -179,16 +200,25 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         }
     }
 
+    /**
+     * @return the local controller
+     */
     public LocalPlayerController getLocalPlayerController() {
         return localPlayerController;
     }
 
+    /**
+     * @param pkg the package to process
+     */
     public void handlePackage(Package pkg) {
         for (NetworkPlayerController controller : remoteControllers.values()) {
             controller.handlePackage(pkg);
         }
     }
 
+    /**
+     * @return the world of the syncer
+     */
     public GameWorld getWorld() {
         if (world == null) {
             syncCreateWorld();
@@ -196,10 +226,16 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         return world;
     }
 
+    /**
+     * @return the map generator
+     */
     public MapGenerator getGenerator() {
         return generator;
     }
 
+    /**
+     * @param client the client to initialize
+     */
     public void initializeClient(HostingClient client) {
         if (world != null) {
             Package pkg = new Package(PackageTypes.WORLD_SYNC_CREATE);
@@ -217,6 +253,9 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         }
     }
 
+    /**
+     * Create world and sends out sync packages
+     */
     public void syncCreateWorld() {
         world = new GameWorld();
         world.init();
@@ -224,6 +263,10 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * Removes an object and sends out sync packages
+     * @param object the object to remove
+     */
     public void syncRemoveObject(GameObject object) {
         world = getWorld();
         Package pkg = new Package(PackageTypes.WORLD_SYNC_REMOVE_OBJECT);
@@ -232,6 +275,11 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * Adds a box and sends out sync packages
+     * @param x x-position of the box
+     * @param y y-position of the box
+     */
     public void syncAddBox(double x, double y) {
         GameWorld world = getWorld();
         GameObjectBox box = new GameObjectBox(x, y);
@@ -240,6 +288,10 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world.addObject(box);
     }
 
+    /**
+     * Sends out sync packages about player's health
+     * @param player the player to update
+     */
     public void syncPlayerUpdateHP(Player player) {
         Package pkg = new Package(PackageTypes.PLAYER_SYNC_HEALTH_UPDATE);
         pkg.setInteger("id", player.getID());
@@ -247,6 +299,12 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * @param magnitude magnitude of the shake
+     * @param direction direction of the shake
+     * @param speed speed of the shake
+     * @param gunShake shape of the shake curve (exponent on the equation)
+     */
     public void syncAddCameraShake(double magnitude, double direction, double speed, boolean gunShake) {
         Package pkg = new Package(PackageTypes.CAMERA_ADD_SHAKE);
 
@@ -262,6 +320,12 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * Play sound for all clients
+     * @param path the path to the sound
+     * @param x x-position of the playing location
+     * @param y y-position of the playing location
+     */
     public void syncPlaySound(String path, double x, double y) {
         Package pkg = new Package(PackageTypes.SOUND_PLAY);
         pkg.setString("path", path);
@@ -271,6 +335,13 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * Adds ground and sends out sync packages
+     * @param x x-pos of the ground
+     * @param y y-pos of the ground
+     * @param w width of the ground
+     * @param h height of the ground
+     */
     public void syncAddGround(double x, double y, double w, double h) {
         GameWorld world = getWorld();
         GameObject box = new GameObjectGround(x, y, w, h);
@@ -279,6 +350,13 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world.addObject(box);
     }
 
+    /**
+     * Adds new player and sends out sync packages
+     * @param x x-position of the player
+     * @param y y-position of the player
+     * @param color color of the player
+     * @param client the client bound to the player
+     */
     public void syncAddPlayer(double x, double y, Color color, Client client) {
         GameWorld world = getWorld();
         Player player = new Player(color, x, y, client.getID());
@@ -291,6 +369,10 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * Removes a player and sends out sync packages
+     * @param player the player to be removed
+     */
     public void syncRemovePlayer(Player player) {
         GameWorld world = getWorld();
         world.removePlayer(player);
@@ -300,6 +382,10 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         broadcast(pkg);
     }
 
+    /**
+     * Add an object and sends out sync packages
+     * @param object the object to add
+     */
     public void syncAddObject(GameObject object) {
         GameWorld world = getWorld();
         Package pkg = GameObjectManager.getInstance().createCreationPackage(object);
@@ -307,6 +393,9 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         world.addObject(object);
     }
 
+    /**
+     * @param client the joined client
+     */
     @Override
     public void onClientJoin(Client client) {
 
@@ -325,6 +414,9 @@ public class ServerSideWorldSyncer implements ClientEventHandler {
         }
     }
 
+    /**
+     * @param client the client who left
+     */
     @Override
     public void onClientLeave(Client client) {
         syncRemovePlayer(getWorld().getPlayer(client.getID()));

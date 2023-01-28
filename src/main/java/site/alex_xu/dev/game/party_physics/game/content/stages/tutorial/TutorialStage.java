@@ -1,5 +1,7 @@
 package site.alex_xu.dev.game.party_physics.game.content.stages.tutorial;
 
+import site.alex_xu.dev.game.party_physics.game.content.objects.items.GameObjectItemSMG;
+import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectBox;
 import site.alex_xu.dev.game.party_physics.game.content.objects.map.GameObjectGround;
 import site.alex_xu.dev.game.party_physics.game.content.player.LocalPlayerController;
 import site.alex_xu.dev.game.party_physics.game.content.player.Player;
@@ -25,8 +27,11 @@ public class TutorialStage extends Stage {
         super.onLoad();
 
         world.init();
-        world.addObject(new GameObjectGround(-60, 4, 120, 1));
-        world.addObject(new GameObjectGround(-60, -2, 120, 1));
+        world.addObject(new GameObjectGround(-60, 4, 220, 1));
+        world.addObject(new GameObjectGround(-60, -2, 220, 1));
+        world.addObject(new GameObjectGround(24, 2, 1.5, 2.5));
+        world.addObject(new GameObjectBox(54, 0));
+        world.addObject(new GameObjectItemSMG(74, 0));
         player = new Player(Color.white, 0, 0, 0);
         world.addPlayer(player);
 
@@ -91,7 +96,7 @@ public class TutorialStage extends Stage {
         renderer.setColor(38, 34, 25);
         renderer.setTextSize(1);
         renderer.setFont(Font.get("fonts/bulkypix.ttf"));
-        renderer.text("TUTORIAL!!!!!!!!", 0, 0);
+        renderer.text("TUTORIAL!!!", 0, 0);
 
         renderer.pushState();
 
@@ -106,6 +111,19 @@ public class TutorialStage extends Stage {
         renderer.translate(20, 0);
         renderer.scale(0.4);
         renderer.text("Press <W> or <Space> to jump.", 1, 3);
+        renderer.popState();
+
+        renderer.pushState();
+        renderer.translate(36, 0);
+        renderer.scale(0.4);
+        renderer.text("Press <S> or <Ctrl> to crouch.", 1, 3);
+        renderer.popState();
+
+
+        renderer.pushState();
+        renderer.translate(48, 0);
+        renderer.scale(0.4);
+        renderer.text("Hold mouse left button to reach and grab.", 1, 3);
         renderer.popState();
 
         renderer.popState();

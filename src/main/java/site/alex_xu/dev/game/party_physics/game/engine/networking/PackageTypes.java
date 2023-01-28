@@ -1,5 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.engine.networking;
 
+/**
+ * An enumerate class of all package types for server/client communication
+ */
 public enum PackageTypes {
     HANDSHAKE, // The very first package that will be sent to share basic information such as player's name
     PING,

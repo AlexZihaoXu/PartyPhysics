@@ -12,8 +12,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+/**
+ * Sound that holds a piece of audio
+ */
 public class Sound {
 
+    /**
+     * A cache of sounds (will be cleaned up when the program exits)
+     */
     private static final HashMap<String, Sound> cache = new HashMap<>();
     static HashSet<Sound> sounds = new HashSet<>();
     private boolean playable = true;
@@ -28,6 +34,9 @@ public class Sound {
 
     private boolean isMuffled = false;
 
+    /**
+     * @param path preload sound from path (should be called in preload stage)
+     */
     public static void preload(String path) {
         if (!cache.containsKey(path)) {
             Sound sound = new Sound(ResourceManager.get(path));
@@ -36,19 +45,32 @@ public class Sound {
         }
     }
 
+    /**
+     * @return true if the audio is properly loaded and is playable
+     */
     public boolean isPlayable() {
         return playable && !deleted;
     }
 
+    /**
+     * @return true if the allocated memory space is already freed
+     */
     public boolean isDeleted() {
         return deleted;
     }
 
+    /**
+     * @param path path to the audio file
+     * @return a sound object (automatically caches audios from duplicated paths to save memory space and improve performance)
+     */
     public static Sound get(String path) {
         preload(path);
         return cache.get(path);
     }
 
+    /**
+     * @param stream the data stream that provides the audio data
+     */
     Sound(InputStream stream) {
         SoundSystem.getInstance().init();
         al = SoundSystem.getInstance().al;
@@ -63,6 +85,7 @@ public class Sound {
         int[] ptrFreq = new int[1];
         int[] ptrLoop = new int[1];
 
+        // Load and convert the audio data from the stream
         ALut.alutLoadWAVFile(stream, ptrFormat, ptrData, ptrSize, ptrFreq, ptrLoop);
         size = ptrSize[0];
         freq = ptrFreq[0];
@@ -75,7 +98,7 @@ public class Sound {
 
         ByteBuffer newData = ByteBuffer.wrap(data);
 
-        if (init(format, newData, size, freq)) {
+        if (init(format, newData, size, freq)) { // Initialize with the converted audio data
             return;
         }
         sounds.add(this);
@@ -90,6 +113,9 @@ public class Sound {
         sounds.add(this);
     }
 
+    /**
+     * @return a muffled copy of this sound
+     */
     Sound getMuffled() {
         if (this.isMuffled)
             return this;
@@ -106,6 +132,13 @@ public class Sound {
         return sound;
     }
 
+    /**
+     * @param format format
+     * @param newData data
+     * @param size size
+     * @param freq frequency
+     * @return true if error occurs during initialization
+     */
     private boolean init(int format, ByteBuffer newData, int size, int freq) {
         al.alGenBuffers(1, ptrBuffer, 0);
         buffer = ptrBuffer[0];
@@ -135,6 +168,9 @@ public class Sound {
         return false;
     }
 
+    /**
+     * @param data the audio data to be converted
+     */
     public static void applyMuffleEffect(byte[] data) {
         // Convert the byte array to a short array
         short[] audioData = new short[data.length / 2];
@@ -162,10 +198,16 @@ public class Sound {
         ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(audioData);
     }
 
+    /**
+     * @return length of the audio in seconds
+     */
     public double getLength() {
         return length;
     }
 
+    /**
+     * Free up the memory space that was allocated for the sound buffer
+     */
     public void delete() {
         if (isPlayable()) {
             al.alDeleteBuffers(1, ptrBuffer, 0);

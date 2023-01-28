@@ -13,9 +13,18 @@ import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerF
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerHead;
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerLimb;
 
+/**
+ * A class that handles initializing stuff and make them ready for communicating over network
+ */
 public class Networking {
+    /**
+     * The only instance of the Networking class
+     */
     private static Networking INSTANCE = null;
 
+    /**
+     * @return the only instance (Singleton)
+     */
     public static Networking getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new Networking();
@@ -27,6 +36,9 @@ public class Networking {
         initGameObjectList();
     }
 
+    /**
+     * Register all object to the object manager for serialization purpose
+     */
     public void initGameObjectList() {
         GameObjectManager manager = GameObjectManager.getInstance();
 

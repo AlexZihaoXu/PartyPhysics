@@ -16,6 +16,10 @@ import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
+/**
+ * Client Side World Syncer
+ * a syncer that synchronizes the world to the server side
+ */
 public class ClientSideWorldSyncer implements ClientEventHandler {
 
     private final JoiningClient client;
@@ -26,23 +30,39 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
 
     private LocalPlayerController controller;
 
+    /**
+     * @param client the joining client
+     */
     public ClientSideWorldSyncer(JoiningClient client) {
         this.client = client;
         GameObject.serverSideWorldSyncer = null;
     }
 
+    /**
+     * @return the world if created, otherwise null
+     */
     public GameWorld getWorld() {
         return world;
     }
 
+    /**
+     * @return the own client
+     */
     public JoiningClient getClient() {
         return client;
     }
 
+    /**
+     * @param pkg the package to send
+     */
     public void send(Package pkg) {
         sendQueue.addLast(pkg);
     }
 
+    /**
+     * Tick once
+     * handle all packages, sync and update the world
+     */
     public void tick() {
         if (world != null) {
             world.onTick();
@@ -59,6 +79,9 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         if (controller != null) controller.tick();
     }
 
+    /**
+     * @param pkg the package to process
+     */
     public void handlePackage(Package pkg) {
 
         if (pkg.getType() == PackageTypes.WORLD_SYNC_CREATE) serverCreateWorld();
@@ -94,6 +117,9 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
 
     }
 
+    /**
+     * @param pkg the package that contains the object's information for sync purpose
+     */
     private void serverSyncObjectState(Package pkg) {
         if (getWorld() != null)
             getWorld().syncObject(pkg);
@@ -102,34 +128,52 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
 
     // Server operations
 
+    /**
+     * @param pkg a package that contains player and their health information
+     */
     private void serverUpdatePlayerHealth(Package pkg) {
         if (getWorld() != null) {
             getWorld().getPlayer(pkg.getInteger("id")).setHealth(pkg.getFraction("hp"));
         }
     }
 
+    /**
+     * @param pkg a package that contains player removing information
+     */
     private void serverRemovePlayer(Package pkg) {
         if (getWorld() != null) {
             getWorld().removePlayer(getWorld().getPlayer(pkg.getInteger("id")));
         }
     }
 
+    /**
+     * Create a world
+     */
     private void serverCreateWorld() {
         world = new GameWorld();
         world.init();
     }
 
+    /**
+     * @param pkg a package that contains the creation information of an object
+     */
     private void serverAddObject(Package pkg) {
         GameObject obj = GameObjectManager.getInstance().createFromPackage(pkg);
         getWorld().addObject(obj);
     }
 
+    /**
+     * @param pkg a package that contains the player creation information
+     */
     private void serverAddPlayer(Package pkg) {
         if (getWorld().hasPlayer(pkg.getInteger("playerID"))) return;
         Player player = GameObjectManager.getInstance().createPlayerFromPackage(pkg);
         getWorld().addPlayer(player);
     }
 
+    /**
+     * @param client the joined client
+     */
     @Override
     public void onClientJoin(Client client) {
         if (client.getID() == getClient().getOwnClient().getID()) {
@@ -144,6 +188,9 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         }
     }
 
+    /**
+     * @param client the client who left
+     */
     @Override
     public void onClientLeave(Client client) {
         if (client.getID() != getClient().getOwnClient().getID()) {
@@ -151,6 +198,9 @@ public class ClientSideWorldSyncer implements ClientEventHandler {
         }
     }
 
+    /**
+     * @return the local controller
+     */
     public LocalPlayerController getLocalController() {
         return controller;
     }
