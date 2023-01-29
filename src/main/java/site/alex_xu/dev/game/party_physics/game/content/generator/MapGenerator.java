@@ -11,6 +11,10 @@ import site.alex_xu.dev.game.party_physics.game.engine.multiplayer.sync.ServerSi
 
 import java.util.ArrayList;
 
+/**
+ * Map generator class
+ * (currently only support changing maps, no generating supported)
+ */
 public class MapGenerator {
 
     ServerSideWorldSyncer syncer;
@@ -19,6 +23,9 @@ public class MapGenerator {
         this.syncer = syncer;
     }
 
+    /**
+     * Clean up and reset the world
+     */
     public void resetWorld() {
         ArrayList<GameObject> removed = new ArrayList<>();
         for (GameObject object : syncer.getWorld().getObjects()) {
@@ -31,12 +38,20 @@ public class MapGenerator {
         }
     }
 
+    /**
+     * Respawn all players to random locations
+     */
     public void repopulatePlayers() {
         for (Player player : syncer.getWorld().getPlayers()) {
             respawnPlayer(player);
         }
     }
 
+    /**
+     * @param centerX center x
+     * @param centerY center y
+     * @param dispersionX the maximum random x-offset range
+     */
     public void setSpawnRule(double centerX, double centerY, double dispersionX) {
         this.spawnLocation.set(centerX, centerY);
         this.dispersionX = dispersionX;
@@ -45,6 +60,11 @@ public class MapGenerator {
     Vector2 spawnLocation = new Vector2(0, -5);
     double dispersionX = 0;
 
+    /**
+     * Respawn player
+     * Reset health, teleport to a new location based on the respawn rule
+     * @param player the player to respawn
+     */
     public void respawnPlayer(Player player) {
         player.setHealth(1);
         player.cancelGrabbing();
@@ -53,6 +73,9 @@ public class MapGenerator {
         syncer.syncPlayerUpdateHP(player);
     }
 
+    /**
+     * Re-generate a new map
+     */
     public void regenerate() {
         resetWorld();
 

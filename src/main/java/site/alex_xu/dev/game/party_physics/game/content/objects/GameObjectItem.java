@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+/**
+ * The parent class for all item objects
+ */
 public abstract class GameObjectItem extends GameObject {
 
     private static final HashMap<String, Triangle[]> cache = new HashMap<>();
@@ -44,22 +47,38 @@ public abstract class GameObjectItem extends GameObject {
         }
     }
 
+    /**
+     * Set a holding player
+     * @param player the holding player
+     */
     public void setHoldPlayer(Player player) {
         this.heldPlayer = player;
     }
 
+    /**
+     * @return true if is currently holding by a player
+     */
     public boolean isHoldByPlayer() {
         return heldPlayer != null;
     }
 
+    /**
+     * @param flipped true if the model should be flipped otherwise false
+     */
     public void forceUpdateModel(boolean flipped) {
         updateModel(flipped);
         isFlipped = flipped;
         updateMass();
     }
 
+    /**
+     * @param flipped true if the model is flipped
+     */
     protected abstract void updateModel(boolean flipped);
 
+    /**
+     * @param isFlipped true if the model is flipped otherwise false
+     */
     public void setFlipped(boolean isFlipped) {
         if (isFlipped != this.isFlipped) {
             updateModel(isFlipped);
@@ -68,10 +87,17 @@ public abstract class GameObjectItem extends GameObject {
         this.isFlipped = isFlipped;
     }
 
+    /**
+     * @return true of the model is flipped otherwise false
+     */
     public boolean isFlipped() {
         return isFlipped;
     }
 
+    /**
+     * Load a model from file (created in site.alex_xu.dev.game.party_physics.game.content.test.ModelEditingStage)
+     * @param path the path to the model
+     */
     private static void loadModel(String path) {
         if (!cache.containsKey(path)) {
             try {
@@ -135,18 +161,32 @@ public abstract class GameObjectItem extends GameObject {
         }
     }
 
+    /**
+     * @param path the path to the model
+     * @return an array of triangles that forms the model
+     */
     public static Triangle[] getModel(String path) {
         loadModel(path);
         return cache.get(path);
     }
 
+    /**
+     * @param path the path to the model
+     * @return the flipped version of the model
+     */
     public static Triangle[] getFlippedModel(String path) {
         loadModel(path);
         return cacheFlipped.get(path);
     }
 
+    /**
+     * @param user the user to use
+     */
     protected abstract void onUse(Player user);
 
+    /**
+     * Try to use this item
+     */
     public void use() {
         requestUse = true;
     }

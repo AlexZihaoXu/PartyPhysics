@@ -19,6 +19,9 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
 
+/**
+ * Lite bullet class
+ */
 public class GameObjectLiteBullet extends GameObjectProjectile {
 
     private static final double width = 0.3;
@@ -87,6 +90,9 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
         return bullet;
     }
 
+    /**
+     * @return the transparency of the bullet
+     */
     private double getTransparency() {
         if (hitCount < 3) {
             return 1;
@@ -127,7 +133,10 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
             object.applyImpulse(Vector2.create(4, getTransform().getRotationAngle()), location);
         }
         hitCount++;
-        if (hitCount == 1) {
+
+
+        if (hitCount == 1) {        // Bullet loses its functionality after the first hit
+
             int count = (int) (Math.random() * 3 + 9);
             for (int i = 0; i < count; i++) {
                 Vector2 vel = getLinearVelocity().copy().product(0.5);
@@ -186,7 +195,8 @@ public class GameObjectLiteBullet extends GameObjectProjectile {
                 }
             }
 
-        } else if (hitCount == 3) {
+        } else if (hitCount == 3) {        // Bullet will disappear after hitting 3 times
+
             fadeOutStartTime = Clock.currentTime();
         }
 

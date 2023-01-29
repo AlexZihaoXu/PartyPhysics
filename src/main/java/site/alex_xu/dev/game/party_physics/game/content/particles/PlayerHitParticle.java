@@ -6,6 +6,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * The particle when player was hit by a bullet
+ */
 public class PlayerHitParticle extends Particle {
     private final Vector2 vel;
     private final Vector2 centerPos = new Vector2();
@@ -25,6 +28,9 @@ public class PlayerHitParticle extends Particle {
     }
 
 
+    /**
+     * @return the progress of the animation from 0 to 1
+     */
     public double getProgress() {
         return Math.min(1, getLifetime() * 1.5 / lifetimeScale);
     }
@@ -52,26 +58,6 @@ public class PlayerHitParticle extends Particle {
         renderer.circle(0, 0, 1);
 
         renderer.popState();
-    }
-
-    public static void draw(Renderer renderer, Vector2 p1, double s1, Vector2 p2, double s2) {
-        renderer.setColor(Color.white);
-
-        renderer.circle(p1, s1);
-        renderer.circle(p2, s2);
-
-        double direction = Math.atan2(p1.y - p2.y, p1.x - p2.x) + Math.PI / 2;
-
-        Vector2 offset1 = Vector2.create(s1, direction);
-        Vector2 offset2 = Vector2.create(s2, direction);
-        Vector2 v1 = p1.copy().add(offset1);
-        Vector2 v2 = p1.copy().subtract(offset1);
-        Vector2 v3 = p2.copy().add(offset2);
-        Vector2 v4 = p2.copy().subtract(offset2);
-
-        renderer.triangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
-        renderer.triangle(v2.x, v2.y, v3.x, v3.y, v4.x, v4.y);
-
     }
 
     @Override

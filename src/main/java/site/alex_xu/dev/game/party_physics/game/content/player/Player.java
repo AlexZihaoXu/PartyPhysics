@@ -14,24 +14,36 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * Player class
+ */
 public class Player {
 
     private final double x;
     private final double y;
-    public GameObjectPlayerHead head;
+
+    // Player body parts
+
     public GameObjectPlayerBody body;
+    public GameObjectPlayerHead head;
+
     GameObjectPlayerLimb armRightStart, armRightEnd, armLeftStart, armLeftEnd;
     GameObjectPlayerLimb legRightStart, legRightEnd, legLeftStart, legLeftEnd;
 
     GameObjectPlayerFoot footLeft, footRight;
 
+    // Joints
+
     RevoluteJoint<GameObject> headBodyJoint;
     RevoluteJoint<GameObject> rightArmBodyJoint, rightArmJoint, leftArmBodyJoint, leftArmJoint;
     RevoluteJoint<GameObject> rightLegBodyJoint, rightLegJoint, leftLegBodyJoint, leftLegJoint;
 
+    // Motors
+
     MotorJoint<GameObject> armRightMotor1, armRightMotor2;
     MotorJoint<GameObject> armLeftMotor1, armLeftMotor2;
 
+    // Feet joints
     WeldJoint<GameObject> footLeftJoint, footRightJoint;
 
     ArrayList<Joint<GameObject>> joints = new ArrayList<>();
@@ -43,10 +55,16 @@ public class Player {
 
     private double health = 1.0;
 
+    /**
+     * @return the health level of the player
+     */
     public double getHealth() {
         return health;
     }
 
+    /**
+     * @param health the new health level of the player
+     */
     public void setHealth(double health) {
         this.health = Math.min(1, Math.max(0, health));
     }
@@ -72,6 +90,9 @@ public class Player {
         this.id = id;
     }
 
+    /**
+     * @return the ID of the player
+     */
     public int getID() {
         return id;
     }
@@ -80,6 +101,13 @@ public class Player {
 
     Vector2 jumpPoint = null;
 
+    /**
+     * Should be called when there is a chance player is touching ground
+     * @param now current time
+     * @param gameObject the object who touched ground (player body part)
+     * @param standObject the touched object (does necessarily have to be ground)
+     * @param jumpPoint the contact point
+     */
     public void setTouchGround(double now, GameObject gameObject, GameObject standObject, Vector2 jumpPoint) {
         if ((gameObject == legLeftEnd || gameObject == legRightEnd) && standObject != grabbingObject) {
             lastTouchGroundTime = now;
@@ -96,22 +124,39 @@ public class Player {
 
     private boolean grabItemSynced = false;
 
+    /**
+     * @return true if the player is dead
+     */
     public boolean isDead() {
         return health <= 0;
     }
 
+    /**
+     * @return true if the player is alive
+     */
     public boolean isAlive() {
         return !isDead();
     }
 
+    /**
+     * @param displayName new display name
+     */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    /**
+     * @return the display name of the player
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     * Try to grab the item if is touched
+     * @param grabbed the item to grab
+     * @param bodyPart the body part which grabbed the item
+     */
     public void tryGrabItem(GameObject grabbed, GameObject bodyPart) {
         try {
             if (grabbingJoint == null && reachDirection.distanceSquared(0, 0) > 0.1 && isAlive()) {
@@ -135,10 +180,18 @@ public class Player {
         }
     }
 
+    /**
+     * @return true if is touching ground otherwise false
+     */
     public boolean isTouchingGround() {
         return touchGround && (head.getCurrentTime() - lastTouchGroundTime < 20.0 / PhysicsSettings.TICKS_PER_SECOND);
     }
 
+    /**
+     * Offloads all physics objects of this player
+     * Remove all body parts and joints
+     * @param world the world where this player lives in
+     */
     public void offloadPhysics(GameWorld world) {
         for (Joint<GameObject> joint : joints) {
             world.getSimulatedWorld().removeJoint(joint);
@@ -155,6 +208,11 @@ public class Player {
         }
     }
 
+    /**
+     * Creates all body parts and joints
+     * Add everything to world
+     * @param world the world to add this player
+     */
     public void initPhysics(GameWorld world) {
         double x = this.x;
         double y = this.y;
@@ -257,11 +315,18 @@ public class Player {
         loaded = true;
     }
 
+    /**
+     * Punch to the direction
+     * @param direction the direction to punch
+     */
     public void punch(Vector2 direction) {
         if (punchDirection.distanceSquared(0, 0) < 0.001)
             punchDirection = direction.getNormalized();
     }
 
+    /**
+     * Try jump
+     */
     public void jump() {
         if (isTouchingGround() && !isDead()) {
             touchGround = false;
@@ -273,26 +338,46 @@ public class Player {
         }
     }
 
+    /**
+     * @param sneak true if should sneak
+     */
     public void setSneak(boolean sneak) {
         this.sneak = sneak;
     }
 
+    /**
+     * @param dx the x-offset
+     */
     public void setMovementX(int dx) {
         moveDx = dx;
     }
 
+    /**
+     * @return x movement offset
+     */
     public int getMovementX() {
         return moveDx;
     }
 
+    /**
+     * @param reachDirection new reach direction
+     */
     public void setReachDirection(Vector2 reachDirection) {
         this.reachDirection.set(reachDirection);
     }
 
+    /**
+     * @return true if the punching animation is playing
+     */
     public boolean isPunching() {
         return punchDirection.distanceSquared(0, 0) > 0.01;
     }
 
+    /**
+     * Make the player stand / play running animation / die animation / ...
+     * @param dt delta time between last tick and the current tick
+     * @param now current time
+     */
     public void onPhysicsTick(double dt, double now) {
 
         if (this.getPos().y > 50) {
@@ -494,6 +579,10 @@ public class Player {
 
     }
 
+    /**
+     * Cancel grabbing
+     * Try to release things in hand
+     */
     public void cancelGrabbing() {
         if (grabbingObject instanceof GameObjectItem) {
             ((GameObjectItem) grabbingObject).setHoldPlayer(null);
@@ -505,10 +594,17 @@ public class Player {
     }
 
 
+    /**
+     * @return the position of the player
+     */
     public Vector2 getPos() {
         return body.getWorldCenter();
     }
 
+    /**
+     * Update and interact with other players
+     * @param player another player
+     */
     public void tickPlayers(Player player) {
         if (isPunching()) {
             if (armLeftEnd.getWorldCenter().distance(player.getPos()) < 0.7) {
@@ -521,6 +617,10 @@ public class Player {
         }
     }
 
+    /**
+     * Renders the player using the given renderer
+     * @param renderer renderer to render
+     */
     public void onRender(Renderer renderer) {
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             bodyPart.onRender(renderer);
@@ -528,6 +628,9 @@ public class Player {
     }
 
 
+    /**
+     * @return the holding item if the player is currently holding an item
+     */
     public GameObjectItem getHoldItem() {
         if (this.grabbingJoint != null) {
             if (this.grabbingObject instanceof GameObjectItem) {
@@ -537,22 +640,37 @@ public class Player {
         return null;
     }
 
+    /**
+     * @return the color of the player
+     */
     public Color getColor() {
         return color;
     }
 
+    /**
+     * @return a list of all body parts
+     */
     public ArrayList<GameObjectPlayerPart> getBodyParts() {
         return bodyParts;
     }
 
+    /**
+     * @return true if is sneaking
+     */
     public boolean isSneaking() {
         return sneak;
     }
 
+    /**
+     * @return the punching direction
+     */
     public Vector2 getReachDirection() {
         return reachDirection;
     }
 
+    /**
+     * @return a network package that contains information about synchronizing grabbing states
+     */
     public Package createGrabbingSyncPackage() {
         Package pkg = new Package(PackageTypes.PLAYER_SYNC_GRAB_ITEM);
         pkg.setInteger("player", getID());
@@ -566,6 +684,10 @@ public class Player {
         return pkg;
     }
 
+    /**
+     * Sync grabbing state from the given package
+     * @param pkg a network package that contains information about synchronizing grabbing states
+     */
     public void syncGrabbingFromPackage(Package pkg) {
         if (pkg.getBoolean("grabbing")) {
 
@@ -605,14 +727,25 @@ public class Player {
         }
     }
 
+    /**
+     * @return true if everything is loaded
+     */
     public boolean isLoaded() {
         return loaded;
     }
 
+    /**
+     * @return true if is grabbing an object
+     */
     public boolean isGrabbing() {
         return grabbingObject != null;
     }
 
+    /**
+     * Move the player to the target coordinate
+     * @param x new x-pos
+     * @param y new y-pos
+     */
     public void moveTo(double x, double y) {
         for (GameObjectPlayerPart bodyPart : bodyParts) {
             double xOffset = bodyPart.getPreviousTransform().getTranslationX() - body.getPreviousTransform().getTranslationX();

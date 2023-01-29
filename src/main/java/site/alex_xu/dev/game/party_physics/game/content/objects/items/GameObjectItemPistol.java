@@ -12,6 +12,11 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+/**
+ * Pistol item object
+ * (can be used by players)
+ * (shoots lite bullet)
+ */
 public class GameObjectItemPistol extends GameObjectItem {
 
     private Triangle[] triangles;

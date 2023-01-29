@@ -9,6 +9,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * Box object class
+ */
 public class GameObjectBox extends GameObject {
     private final Color color = new Color(197, 161, 65);
     public static final double size = 1;

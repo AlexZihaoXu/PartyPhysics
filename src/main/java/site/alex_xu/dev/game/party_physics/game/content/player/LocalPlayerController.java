@@ -10,6 +10,10 @@ import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.TreeSet;
 
+/**
+ * Local player controller
+ * Controls the local player
+ */
 public class LocalPlayerController extends PlayerController {
 
     private final LinkedList<Package> sendQueue = new LinkedList<>();
@@ -27,11 +31,17 @@ public class LocalPlayerController extends PlayerController {
         super(player);
     }
 
+    /**
+     * @param pkg the package to send
+     */
     private void send(Package pkg) {
         // TODO: OPTIMIZE FOR OFFLINE TUTORIAL
         sendQueue.addLast(pkg);
     }
 
+    /**
+     * @return the pulled package, null if not exist
+     */
     public Package pull() {
         if (sendQueue.isEmpty()) return null;
         return sendQueue.removeFirst();
@@ -39,6 +49,11 @@ public class LocalPlayerController extends PlayerController {
 
     private final TreeSet<Integer> pressedKeys = new TreeSet<>();
 
+    /**
+     * Should be called when a key is pressed
+     * Handles the movement of the player
+     * @param keyCode the pressed key
+     */
     public void onKeyPressed(int keyCode) {
         pressedKeys.add(keyCode);
         if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_SPACE) {
@@ -52,6 +67,10 @@ public class LocalPlayerController extends PlayerController {
         }
     }
 
+    /**
+     * Should be called when a key is released
+     * @param keyCode the released key
+     */
     public void onKeyReleased(int keyCode) {
         pressedKeys.remove(keyCode);
         if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_CONTROL) {
@@ -59,6 +78,12 @@ public class LocalPlayerController extends PlayerController {
         }
     }
 
+    /**
+     * Should be called when mouse is pressed
+     * @param x x-position
+     * @param y y-position
+     * @param button button
+     */
     public void onMousePressed(double x, double y, int button) {
         if (button == 3) {
             Vector2 mouse = camera.getWorldMousePos();
@@ -70,6 +95,9 @@ public class LocalPlayerController extends PlayerController {
         }
     }
 
+    /**
+     * Update the controller
+     */
     @Override
     public void tick() {
         super.tick();

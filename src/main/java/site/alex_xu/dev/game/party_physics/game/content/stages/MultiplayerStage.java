@@ -6,20 +6,46 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * An abstract class for multiplayer stage that provides some easy draw methods
+ */
 public class MultiplayerStage extends Stage {
 
+    /**
+     * Renders text with field title style
+     * @param renderer the renderer to render
+     * @param title title
+     * @param pos pos
+     */
     protected void drawFieldTitle(Renderer renderer, String title, Vector2 pos) {
         drawFieldTitle(renderer, title, pos.x, pos.y);
     }
 
+    /**
+     * Renders text with field text style
+     * @param renderer the renderer to render
+     * @param pos pos
+     */
     protected void drawFieldText(Renderer renderer, String text, Vector2 pos) {
         drawFieldText(renderer, text, pos.x, pos.y);
     }
 
+    /**
+     * Renders text with field info style
+     * @param renderer the renderer to render
+     * @param pos pos
+     */
     protected void drawFieldInfo(Renderer renderer, String text, Vector2 pos) {
         drawFieldInfo(renderer, text, pos.x, pos.y);
     }
 
+    /**
+     * Renders text with field title style
+     * @param renderer the renderer to render
+     * @param title title
+     * @param x x-position
+     * @param y y-position
+     */
     protected void drawFieldTitle(Renderer renderer, String title, double x, double y) {
         renderer.setFont("fonts/bulkypix.ttf");
         renderer.setTextSize(20);
@@ -29,6 +55,12 @@ public class MultiplayerStage extends Stage {
         renderer.text(title, x, y);
     }
 
+    /**
+     * Renders text with field text style
+     * @param renderer the renderer to render
+     * @param x x-position
+     * @param y y-position
+     */
     protected void drawFieldText(Renderer renderer, String text, double x, double y) {
         renderer.setFont("fonts/bulkypix.ttf");
         renderer.setTextSize(16);
@@ -38,7 +70,12 @@ public class MultiplayerStage extends Stage {
         renderer.text(text, x, y);
     }
 
-
+    /**
+     * Renders text with field info style
+     * @param renderer the renderer to render
+     * @param x x-position
+     * @param y y-position
+     */
     protected void drawFieldInfo(Renderer renderer, String text, double x, double y) {
         renderer.setFont("fonts/bulkypix.ttf");
         renderer.setTextSize(14);

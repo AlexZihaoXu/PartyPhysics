@@ -8,6 +8,9 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 
 import java.awt.*;
 
+/**
+ * TNT Explosion spark particle
+ */
 public class ExplosionSparkParticle extends Particle {
 
     private final Vector2 pos, vel;
@@ -44,6 +47,12 @@ public class ExplosionSparkParticle extends Particle {
         }
     }
 
+    /**
+     * @param color1 color 1
+     * @param color2 color 2
+     * @param shift the shift from 1 to 2 (value should be between 0 and 1)
+     * @return the mixed color based on the shift
+     */
     public static Color map(Color color1, Color color2, double shift) {
         double b = 1 - shift;
         return new Color(
@@ -54,6 +63,9 @@ public class ExplosionSparkParticle extends Particle {
         );
     }
 
+    /**
+     * @return the progress of the animation from 0 to 1
+     */
     private double getProgress() {
         return getLifetime() / 1.5;
     }

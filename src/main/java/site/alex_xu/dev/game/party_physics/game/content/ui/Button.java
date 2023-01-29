@@ -9,6 +9,10 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Button class
+ * Handles button rendering and click sounds
+ */
 public class Button {
     private final String title;
     private Vector2 pos = new Vector2();
@@ -29,22 +33,39 @@ public class Button {
 
     }
 
+    /**
+     * @param pos the position of the button
+     */
     public void setPos(Vector2 pos) {
         this.pos = pos;
     }
 
+    /**
+     * @param x x-position of the button
+     * @param y y-position of the button
+     */
     public void setPos(double x, double y) {
         pos.set(x, y);
     }
 
+    /**
+     * @return x-position of the button
+     */
     public double getX() {
         return pos.x;
     }
 
+    /**
+     * @return y-position of the button
+     */
     public double getY() {
         return pos.y;
     }
 
+    /**
+     * @param dt delta time between last tick and current tick
+     * @param stage the stage
+     */
     public void onTick(double dt, Stage stage) {
         Vector2 pos = stage.getMousePos();
         if (getBounds().contains(pos.x, pos.y)) {
@@ -62,14 +83,25 @@ public class Button {
         animationRate = Math.max(0, Math.min(1, 1 + (x * x * x * (x - 2))));
     }
 
+    /**
+     * Gets called when mouse is over (players mouse over sound)
+     */
     private void onMouseOver() {
         SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-over-0.wav");
     }
 
+    /**
+     * Gets called when mouse clicks (plays click sound)
+     */
     public void onClick() {
         SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-click-0.wav");
     }
 
+    /**
+     * Gets called when it should be rendered
+     * Draws the button using the given renderer
+     * @param renderer renderer to render
+     */
     public void onRender(Renderer renderer) {
         renderer.pushState();
 

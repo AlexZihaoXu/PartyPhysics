@@ -10,6 +10,10 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * Ground object class
+ * (unmovable)
+ */
 public class GameObjectGround extends GameObject {
 
     private double x, y, width, height;

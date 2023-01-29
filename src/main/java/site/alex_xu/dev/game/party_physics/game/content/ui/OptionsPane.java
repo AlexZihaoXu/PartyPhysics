@@ -15,6 +15,9 @@ public class OptionsPane {
     SlideBar slideBarUIVolume = new SlideBar(250);
     LevelSlideBar slideBarAntiAliasing = new LevelSlideBar(4, 250);
 
+    /**
+     * A class that binds all option UI components together
+     */
     public OptionsPane() {
         slideBarAntiAliasing.selectedLevel = GameSettings.getInstance().antiAliasingLevel + 1;
         slideBarUIVolume.percentage = GameSettings.getInstance().volumeUI;
@@ -22,6 +25,10 @@ public class OptionsPane {
         slideBarMasterVolume.percentage = GameSettings.getInstance().volumeMaster;
     }
 
+    /**
+     * Draws the panel and components
+     * @param renderer the renderer
+     */
     public void onRender(Renderer renderer) {
 
         renderer.pushState();
@@ -37,6 +44,7 @@ public class OptionsPane {
 
         pos.y += 50;
 
+        // Render Master Volume
         {
             double masterVolume = GameSettings.getInstance().volumeMaster;
             renderer.setColor(new Color(128, 120, 108));
@@ -50,6 +58,7 @@ public class OptionsPane {
             slideBarMasterVolume.onRender(renderer);
         }
 
+        // Render Background Music
         pos.y += 55;
         {
             double backgroundVolume = GameSettings.getInstance().volumeBackgroundMusic;
@@ -63,6 +72,8 @@ public class OptionsPane {
             slideBarBackgroundVolume.pos.x += 5;
             slideBarBackgroundVolume.onRender(renderer);
         }
+
+        // Render UI Volume
         pos.y += 55;
         {
             double uiVolume = GameSettings.getInstance().volumeUI;
@@ -77,7 +88,7 @@ public class OptionsPane {
             slideBarUIVolume.onRender(renderer);
         }
 
-
+        // Render Anti-aliasing
         pos.y += 55;
         {
             String aaLevelString;
@@ -112,6 +123,12 @@ public class OptionsPane {
         renderer.popState();
     }
 
+    /**
+     * Should be called when mouse is released
+     * @param x x-position
+     * @param y y-position
+     * @param button button
+     */
     public void onMouseReleased(double x, double y, int button) {
         slideBarMasterVolume.onMouseRelease(x, y, button);
         slideBarAntiAliasing.onMouseRelease(x, y, button);
@@ -119,6 +136,12 @@ public class OptionsPane {
         slideBarBackgroundVolume.onMouseRelease(x, y, button);
     }
 
+    /**
+     * Should be called when mouse is pressed
+     * @param x x-position
+     * @param y y-position
+     * @param button button
+     */
     public void onMousePressed(double x, double y, int button) {
         slideBarMasterVolume.onMousePress(x, y, button);
         slideBarAntiAliasing.onMousePress(x, y, button);
@@ -126,10 +149,18 @@ public class OptionsPane {
         slideBarUIVolume.onMousePress(x, y, button);
     }
 
+
+    /**
+     * @param x x-position of the mouse
+     * @param y y-position of the mouse
+     */
     public void setPos(double x, double y) {
         pos.set(x, y);
     }
 
+    /**
+     * Called when required to tick
+     */
     public void onTick() {
         slideBarMasterVolume.onTick();
         GameSettings.getInstance().volumeMaster = slideBarMasterVolume.percentage;

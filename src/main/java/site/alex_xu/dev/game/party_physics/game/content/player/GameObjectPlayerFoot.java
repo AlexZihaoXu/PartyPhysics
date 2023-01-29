@@ -9,6 +9,9 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+/**
+ * Player foot class
+ */
 public class GameObjectPlayerFoot extends GameObjectPlayerPart {
 
     public GameObjectPlayerFoot(double x, double y) {

@@ -8,6 +8,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * A special slide bar with fixed levels
+ */
 public class LevelSlideBar {
     Vector2 pos = new Vector2();
     Rectangle2D bounds = new Rectangle2D.Double();
@@ -27,6 +30,11 @@ public class LevelSlideBar {
         this.levelCount = levelCount;
     }
 
+    /**
+     * Gets called when it should be rendered
+     * Draws the button using the given renderer
+     * @param renderer renderer to render
+     */
     public void onRender(Renderer renderer) {
         renderer.pushState();
 
@@ -59,6 +67,9 @@ public class LevelSlideBar {
         renderer.popState();
     }
 
+    /**
+     * Gets called when need to tick
+     */
     public void onTick() {
         Vector2 mouse = PartyPhysicsWindow.getInstance().getMousePos();
         if (!PartyPhysicsWindow.getInstance().getMouseButton(1)) {
@@ -78,6 +89,12 @@ public class LevelSlideBar {
         }
     }
 
+    /**
+     * Should be called when mouse pressed
+     * @param x x-position of the mouse
+     * @param y y-position of the mouse
+     * @param button button
+     */
     public void onMousePress(double x, double y, int button) {
         if (button == 1) {
             if (getBounds().contains(x, y)) {
@@ -87,6 +104,12 @@ public class LevelSlideBar {
         }
     }
 
+    /**
+     * Should be called when mouse released
+     * @param x x-position of the mouse
+     * @param y y-position of the mouse
+     * @param button button
+     */
     public void onMouseRelease(double x, double y, int button) {
         if (button == 1) {
             if (inUse) {
@@ -96,14 +119,23 @@ public class LevelSlideBar {
         }
     }
 
+    /**
+     * Gets called when mouse is over
+     */
     private void onMouseOver() {
         SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-over-0.wav");
     }
 
+    /**
+     * @return the rectangle area of the slide bar
+     */
     public Rectangle2D getBounds() {
         return bounds;
     }
 
+    /**
+     * @return true if mouse is over otherwise false
+     */
     public boolean isMouseOver() {
         return mouseOver;
     }

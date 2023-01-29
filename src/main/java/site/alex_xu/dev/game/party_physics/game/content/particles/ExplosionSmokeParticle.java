@@ -9,6 +9,9 @@ import site.alex_xu.dev.game.party_physics.game.utils.Clock;
 import java.awt.*;
 
 
+/**
+ * TNT explosion smoke
+ */
 public class ExplosionSmokeParticle extends Particle {
 
     Vector2 pos, finalOffset;

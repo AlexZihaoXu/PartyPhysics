@@ -10,6 +10,9 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.PackageTypes;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+/**
+ * Player head class
+ */
 public class GameObjectPlayerHead extends GameObjectPlayerPart {
     static final double r = 0.22;
 

@@ -22,6 +22,11 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ConcurrentModificationException;
 
+/**
+ * Menu Stage class
+ * The second stage of the game
+ * Shows all menu components with an interactive player on the screen
+ */
 public class MenuStage extends Stage {
 
     site.alex_xu.dev.game.party_physics.game.content.ui.Button btnPlay = new site.alex_xu.dev.game.party_physics.game.content.ui.Button("PLAY");
@@ -62,6 +67,8 @@ public class MenuStage extends Stage {
     @Override
     public void onLoad() {
         super.onLoad();
+
+        // Add background music if not added
         if (bgm == null) {
             bgm = new SoundSource();
             Sound sound = Sound.get("sounds/bgm-0.wav");
@@ -70,7 +77,7 @@ public class MenuStage extends Stage {
             bgm.play();
         }
 
-
+        // Initialize the world with a ground
         world.init();
         world.addObject(new GameObjectGround(-60, 4, 120, 1));
     }
@@ -86,6 +93,8 @@ public class MenuStage extends Stage {
 
         renderer.pushState();
 
+        // Zoom from center based on an animation curve
+
         renderer.translate(getWidth() / 2, getHeight() / 2);
         double zoom;
         {
@@ -93,13 +102,15 @@ public class MenuStage extends Stage {
             zoomProgress = Math.min(1, zoomProgress);
 
             double x = 1 - zoomProgress;
-            zoom = 1 - x * x * x * x * x;
+            zoom = 1 - x * x * x * x * x; // animation curve
 
         }
         renderer.scale(zoom);
         renderer.translate(-getWidth() / 2, -getHeight() / 2);
 
         renderer.setFont(Font.get("fonts/bulkypix.ttf"));
+
+        // Render everything
 
         renderer.setColor(new Color(211, 196, 172));
         renderer.clear();
@@ -112,10 +123,18 @@ public class MenuStage extends Stage {
 
     }
 
+    /**
+     * Renders the background of the stage (world)
+     * @param renderer renderer to render
+     */
     public void renderBackground(Renderer renderer) {
         camera.render(world, renderer);
     }
 
+    /**
+     * Renders the foreground of the stage (titles/copyrights/...)
+     * @param renderer renderer to render
+     */
     public void renderForeGround(Renderer renderer) {
         renderer.setColor(0);
         renderer.setTextSize(65);
@@ -151,6 +170,10 @@ public class MenuStage extends Stage {
         renderer.popState();
     }
 
+    /**
+     * Renders all UI components
+     * @param renderer renderer to render
+     */
     public void renderUIComponents(Renderer renderer) {
         btnPlay.onRender(renderer);
         btnTutorials.onRender(renderer);
@@ -200,6 +223,7 @@ public class MenuStage extends Stage {
             getWindow().setAALevel(GameSettings.getInstance().antiAliasingLevel);
         }
 
+        // Update UI component positions based on the current window size
 
         btnPlay.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d - 60);
         btnTutorials.setPos(menuShift + xOffset + getWidth() * 0.01 + 40, getHeight() / 2d);
@@ -208,6 +232,8 @@ public class MenuStage extends Stage {
 
         btnBack.setPos(menuShift + xOffset + getWidth() * 1.01 + 40, getHeight() / 2d - 80);
 
+        // Update UI components
+
         btnPlay.onTick(getDeltaTime(), this);
         btnTutorials.onTick(getDeltaTime(), this);
         btnOptions.onTick(getDeltaTime(), this);
@@ -215,11 +241,15 @@ public class MenuStage extends Stage {
 
         btnBack.onTick(getDeltaTime(), this);
 
+        // Tick the world (physics simulation)
+
         try {
             world.onTick();
         } catch (ConcurrentModificationException ignored) {
             System.err.println("WARNING: ConcurrentModification when ticking simulated world!");
         }
+
+        // Update camera of the background
         camera.scale += (Math.min(getWidth(), getHeight()) / 13d - camera.scale) * Math.min(1, getDeltaTime() * 3);
         camera.pos.x = -menuShift * 0.003;
 
@@ -242,11 +272,15 @@ public class MenuStage extends Stage {
 
         }
 
+        // Update the UI components' offset
+
         if (getWidth() > 1200) {
             xOffset += ((getWidth() - 1200) / 2d - xOffset) * Math.min(1, getDeltaTime() * 10);
         } else {
             xOffset -= xOffset * Math.min(1, getDeltaTime() * 10);
         }
+
+        // Update music effects
 
         double bgmVolume = GameSettings.getInstance().volumeBackgroundMusic;
         bgm.setVolume(bgmVolume);
@@ -278,6 +312,8 @@ public class MenuStage extends Stage {
         double muffle = SoundSystem.getInstance().getMasterMuffle() + getDeltaTime() * (getWindow().getJFrame().isActive() ? -1 : 1);
         muffle = Math.max(0, Math.min(1, muffle));
         SoundSystem.getInstance().setMasterMuffle(muffle);
+
+        // Replay after music is stopped
 
         if (bgm.isStopped()) {
             bgm.play();

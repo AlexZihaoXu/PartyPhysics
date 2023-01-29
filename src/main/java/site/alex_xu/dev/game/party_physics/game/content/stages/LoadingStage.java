@@ -10,6 +10,11 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * Loading stage
+ * the very first stage of the program
+ * loads everything and shows the progress bar
+ */
 public class LoadingStage extends Stage implements Runnable {
     private boolean finishedLoading = false;
 
@@ -36,7 +41,7 @@ public class LoadingStage extends Stage implements Runnable {
     @Override
     public void onRender(Renderer renderer) {
         super.onRender(renderer);
-        if (whiteCoverProgress < 1) {
+        if (whiteCoverProgress < 1) { // The screen is not completely covered by the white transition screen
 
             renderer.pushState();
 
@@ -99,7 +104,6 @@ public class LoadingStage extends Stage implements Runnable {
         renderer.clear();
 
 
-
         if (whiteCoverProgress >= 1){
             renderer.setColor(210, 195, 171, (int) Math.min(255, (whiteCoverProgress - 1) * 255));
             renderer.clear();
@@ -116,6 +120,7 @@ public class LoadingStage extends Stage implements Runnable {
 
     @Override
     public void run() {
+        // A list of resources that will be preloaded
         String[] soundsToLoad = {
                 "sounds/tnt.wav",
                 "sounds/ui/mouse-over-0.wav",

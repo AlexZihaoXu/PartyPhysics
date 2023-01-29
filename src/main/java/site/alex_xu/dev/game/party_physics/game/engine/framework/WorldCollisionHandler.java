@@ -12,6 +12,10 @@ import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerL
 import site.alex_xu.dev.game.party_physics.game.content.player.GameObjectPlayerPart;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 
+/**
+ * World Collision Handler class
+ * handles collisions in physics simulation
+ */
 class WorldCollisionHandler implements ContactListener<GameObject> {
     GameWorld world;
 
@@ -51,6 +55,9 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void preSolve(ContactCollisionData collision, Contact contact) {
+
+        // Remove contacted projectiles
+
         GameObject body1 = (GameObject) collision.getBody1();
         GameObject body2 = (GameObject) collision.getBody2();
         Vector2 point = contact.getPoint();
@@ -69,6 +76,9 @@ class WorldCollisionHandler implements ContactListener<GameObject> {
 
     @Override
     public void postSolve(ContactCollisionData collision, SolvedContact contact) {
+
+        // Help players to grab items
+
         GameObject body1 = (GameObject) collision.getBody1();
         GameObject body2 = (GameObject) collision.getBody2();
         Vector2 point = contact.getPoint();

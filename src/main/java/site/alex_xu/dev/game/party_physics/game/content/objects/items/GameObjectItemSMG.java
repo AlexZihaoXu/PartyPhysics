@@ -13,6 +13,11 @@ import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.engine.sounds.SoundSystem;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+/**
+ * Sub-machine-gun item class
+ * (can be used by players)
+ * (shoots lite bullet)
+ */
 public class GameObjectItemSMG extends GameObjectItem {
 
     private Triangle[] triangles;

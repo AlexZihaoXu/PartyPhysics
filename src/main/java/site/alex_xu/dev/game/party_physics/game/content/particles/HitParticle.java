@@ -6,6 +6,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * The particle when bullet hit anything
+ */
 public class HitParticle extends Particle {
     private final Vector2 pos = new Vector2();
     private final Vector2 vel = new Vector2();
@@ -27,6 +30,9 @@ public class HitParticle extends Particle {
         this.color = color;
     }
 
+    /**
+     * @return the animation progress from 0 to 1
+     */
     private double getProgress() {
         return Math.min(1, getLifetime() / 1.2);
     }

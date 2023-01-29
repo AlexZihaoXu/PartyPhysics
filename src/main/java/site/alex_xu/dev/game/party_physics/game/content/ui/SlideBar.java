@@ -7,6 +7,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Slide bar class
+ */
 public class SlideBar {
     Vector2 pos = new Vector2();
     Rectangle2D bounds = new Rectangle2D.Double();
@@ -19,10 +22,17 @@ public class SlideBar {
 
     boolean mouseOver = false;
 
+    /**
+     * @param width width of the slide bar in pixels
+     */
     public SlideBar(double width) {
         this.width = width;
     }
 
+    /**
+     * Gets called when requires to render
+     * @param renderer renderer to render
+     */
     public void onRender(Renderer renderer) {
         renderer.pushState();
 
@@ -52,6 +62,9 @@ public class SlideBar {
         renderer.popState();
     }
 
+    /**
+     * Gets called when need to update information
+     */
     public void onTick() {
         Vector2 pos = PartyPhysicsWindow.getInstance().getMousePos();
         if (!PartyPhysicsWindow.getInstance().getMouseButton(1)) {
@@ -69,6 +82,12 @@ public class SlideBar {
         }
     }
 
+    /**
+     * Gets called when mouse is pressed
+     * @param x x-position of the mouse
+     * @param y y-position of the mouse
+     * @param button button
+     */
     public void onMousePress(double x, double y, int button) {
         if (button == 1) {
             if (getBounds().contains(x, y)) {
@@ -78,6 +97,12 @@ public class SlideBar {
         }
     }
 
+    /**
+     * Gets called when mouse is released
+     * @param x x-position of the mouse
+     * @param y y-position of the mouse
+     * @param button button
+     */
     public void onMouseRelease(double x, double y, int button) {
         if (button == 1) {
             if (inUse) {
@@ -87,14 +112,23 @@ public class SlideBar {
         }
     }
 
+    /**
+     * Gets called when mouse is over (plays mouse-over sound)
+     */
     private void onMouseOver() {
         SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-over-0.wav");
     }
 
+    /**
+     * @return the rectangle area of the slide bar component
+     */
     public Rectangle2D getBounds() {
         return bounds;
     }
 
+    /**
+     * @return true if mouse is over otherwise false
+     */
     public boolean isMouseOver() {
         return mouseOver;
     }

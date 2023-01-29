@@ -22,6 +22,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+/**
+ * Host stage
+ */
 public class HostStage extends MultiplayerStage {
 
     SoundSource bgm;
@@ -38,6 +41,9 @@ public class HostStage extends MultiplayerStage {
 
     private final HostingServer server;
 
+    /**
+     * This thread keeps getting the current computer's network addresses and updates the ipAddressList
+     */
     private final Thread ipAddressUpdateThread = new Thread(() -> {
         while (!ipAddressUpdateThreadShouldStop) {
             try {
@@ -79,11 +85,7 @@ public class HostStage extends MultiplayerStage {
 
         server.launch();
 
-//        server.getWorldSyncer().syncAddGround(-500, 2.5, 1000, 1);
-//        for (int i = 0; i < 10; i++) {
-//            server.getWorldSyncer().syncAddObject(new GameObjectTNT(Math.random() * 100 - 50, -100));
-//        }
-//
+        // Start and generate a world
         server.getSyncedWorld().onTick();
         server.getWorldSyncer().getGenerator().regenerate();
     }
@@ -104,15 +106,18 @@ public class HostStage extends MultiplayerStage {
     public void onRender(Renderer renderer) {
         super.onRender(renderer);
 
+        // Zoom-in effect
         {
             enterProgress += Math.min(0.05, getDeltaTime());
             enterProgress = Math.min(1, enterProgress);
 
             double x = 1 - enterProgress;
             renderer.translate(getWidth() / 2, getHeight() / 2);
-            renderer.scale(1 - x * x * x * x * x);
+            renderer.scale(1 - x * x * x * x * x); // mathematical curve
             renderer.translate(-getWidth() / 2, -getHeight() / 2);
         }
+
+        // Render world and everything
 
         renderer.setColor(210, 195, 171);
         renderer.clear();
@@ -130,9 +135,15 @@ public class HostStage extends MultiplayerStage {
         btnBack.setPos(50 + xOffset, 50);
         btnBack.onRender(renderer);
 
+        // Render UI (ip list and players, etc)
+
         renderUIComponents(renderer);
     }
 
+    /**
+     * Renders the UI components
+     * @param renderer renderer to render
+     */
     public void renderUIComponents(Renderer renderer) {
         String title = "Host";
 
@@ -297,6 +308,9 @@ public class HostStage extends MultiplayerStage {
         }
     }
 
+    /**
+     * Shows the log from the multiplayer services
+     */
     private void showLog() {
         String log;
         if (crashLog != null) {

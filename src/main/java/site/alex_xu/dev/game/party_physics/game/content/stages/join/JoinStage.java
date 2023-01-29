@@ -18,6 +18,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Joining stage class
+ */
 public class JoinStage extends MultiplayerStage {
 
     SoundSource bgm;
@@ -65,6 +68,8 @@ public class JoinStage extends MultiplayerStage {
     public void onRender(Renderer renderer) {
         super.onRender(renderer);
 
+        // Same zoom effect from menu stage
+
         {
             enterProgress += Math.min(0.05, getDeltaTime());
             enterProgress = Math.min(1, enterProgress);
@@ -97,6 +102,10 @@ public class JoinStage extends MultiplayerStage {
         renderUIComponents(renderer);
     }
 
+    /**
+     * Renders the UI components of the stage
+     * @param renderer renderer to render
+     */
     public void renderUIComponents(Renderer renderer) {
         String title = client.getHostName() == null ? "Connecting ... " : client.getHostName() + "'s Game";
 
@@ -186,6 +195,9 @@ public class JoinStage extends MultiplayerStage {
         }
     }
 
+    /**
+     * Shows the log from the multiplayer services
+     */
     private void showLog() {
         String log = client.getCrashLog();
         JOptionPane.showConfirmDialog(

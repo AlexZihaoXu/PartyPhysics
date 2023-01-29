@@ -8,6 +8,9 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+/**
+ * Player limb class
+ */
 public class GameObjectPlayerLimb extends GameObjectPlayerPart {
 
     static double r = 0.05;

@@ -8,6 +8,9 @@ import site.alex_xu.dev.game.party_physics.game.engine.networking.Package;
 import site.alex_xu.dev.game.party_physics.game.engine.physics.PhysicsSettings;
 import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
+/**
+ * Player body class
+ */
 public class GameObjectPlayerBody extends GameObjectPlayerPart {
 
     static final double w = 0.2, h = 0.82;

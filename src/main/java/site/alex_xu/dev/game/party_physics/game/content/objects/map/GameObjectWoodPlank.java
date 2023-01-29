@@ -10,6 +10,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * Wood plank object
+ */
 public class GameObjectWoodPlank extends GameObject {
 
     private final Color color = new Color(197, 161, 65);

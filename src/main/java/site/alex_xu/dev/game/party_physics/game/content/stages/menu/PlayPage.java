@@ -12,6 +12,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Play page class
+ * a class that binds all UI components of the play page
+ */
 class PlayPage {
     MenuStage stage;
     private Vector2 pos = new Vector2();
@@ -34,6 +38,10 @@ class PlayPage {
         this.stage = stage;
     }
 
+    /**
+     * Renders the entire play page
+     * @param renderer renderer to render
+     */
     public void onRender(Renderer renderer) {
         Vector2 pos = getPos().copy();
 
@@ -80,6 +88,13 @@ class PlayPage {
         }
     }
 
+    /**
+     * Renders a card based on the given information
+     * @param renderer renderer to render
+     * @param host true if this card is about host, false for join
+     * @param x x-position of the card
+     * @param y y-position of the card
+     */
     void renderCard(Renderer renderer, boolean host, double x, double y) {
         int cardWidth = 200;
         int cardHeight = 240;
@@ -200,6 +215,9 @@ class PlayPage {
         renderer.popState();
     }
 
+    /**
+     * Should be called everytime when the game requires a tick
+     */
     public void onTick() {
         Vector2 mouse = getStage().getMousePos();
 
@@ -215,7 +233,7 @@ class PlayPage {
         if (hostBound.contains(mouse.x, mouse.y)) {
             if (!mouseOverHost) {
                 mouseOverHost = true;
-                onMouseOver(true);
+                onMouseOver();
             }
         } else {
             mouseOverHost = false;
@@ -224,37 +242,64 @@ class PlayPage {
         if (joinBound.contains(mouse.x, mouse.y)) {
             if (!mouseOverJoin) {
                 mouseOverJoin = true;
-                onMouseOver(false);
+                onMouseOver();
             }
         } else {
             mouseOverJoin = false;
         }
     }
 
-    public void onMouseOver(boolean host) {
+    /**
+     * Gets called when mouse is over
+     */
+    public void onMouseOver() {
         SoundSystem.getInstance().getUISourceGroup().play("sounds/ui/mouse-over-0.wav");
     }
 
+    /**
+     * @return the stage that contains this play page
+     */
     public MenuStage getStage() {
         return stage;
     }
 
+    /**
+     * @return the position of the page
+     */
     public Vector2 getPos() {
         return pos;
     }
 
+    /**
+     * Sets the position of the page
+     * @param pos the new position
+     */
     public void setPos(Vector2 pos) {
         this.pos = pos;
     }
 
+    /**
+     * Sets the position of the page
+     * @param x x-position of the page
+     * @param y y-position of the page
+     */
     public void setPos(double x, double y) {
         this.pos.set(x, y);
     }
 
+    /**
+     * @return the delta time between current tick and last tick
+     */
     public double getDeltaTime() {
         return getStage().getDeltaTime();
     }
 
+    /**
+     * Should be called when mouse is pressed
+     * @param x x-position of mouse
+     * @param y y-position of mouse
+     * @param button button
+     */
     public void onMousePressed(double x, double y, int button) {
         if (button == 1 && switchingStage == null) {
             if (hostBound.contains(x, y)) {

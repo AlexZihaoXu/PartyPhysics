@@ -17,6 +17,10 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * TNT object class
+ * (explosive)
+ */
 public class GameObjectTNT extends GameObject {
 
     double size = 0.7;
@@ -39,6 +43,9 @@ public class GameObjectTNT extends GameObject {
         return new Color(236, 38, 74);
     }
 
+    /**
+     * Try to ignite this TNT
+     */
     public void ignite() {
         if (exploded) {
             return;
@@ -75,10 +82,16 @@ public class GameObjectTNT extends GameObject {
         }
     }
 
+    /**
+     * @return true if this TNT is already exploded
+     */
     public boolean isExploded() {
         return exploded;
     }
 
+    /**
+     * Spawn explosion particles
+     */
     private void spawnParticles() {
         GameWorld world = getWorld();
         double directionCount = Math.round(Math.random() * 3 + 2);

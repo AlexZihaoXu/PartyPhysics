@@ -11,8 +11,16 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+/**
+ * Camera
+ * Stores the position, zoom information about the viewport
+ */
 public class Camera {
 
+    /**
+     * Class shake
+     * Stores information about a shake effect
+     */
     public static class Shake {
         private double createdTime;
         private final double x;
@@ -31,11 +39,19 @@ public class Camera {
             createdTime = Clock.currentTime();
         }
 
+        /**
+         * @param now current time
+         * @return current offset of this shake
+         */
         public Vector2 getOffsets(double now) {
             double magnitude = getMagnitudeWhen(now);
             return new Vector2(x * magnitude, y * magnitude);
         }
 
+        /**
+         * @param now current time
+         * @return magnitude of current time
+         */
         public double getMagnitudeWhen(double now) {
             double z = (now - createdTime) * speed;
             if (gunShake)
@@ -46,6 +62,10 @@ public class Camera {
             return Math.sin(z) / (z - Math.PI);
         }
 
+        /**
+         * @param now current time
+         * @return true if the shake effect is finished
+         */
         public boolean isFinished(double now) {
             double z = (now - createdTime) * speed;
             if (gunShake)
@@ -66,14 +86,24 @@ public class Camera {
         return PartyPhysicsWindow.getInstance();
     }
 
+    /**
+     * @return width of the window
+     */
     public double getWidth() {
         return getWindow().getWidth();
     }
 
+    /**
+     * @return height of the window
+     */
     public double getHeight() {
         return getWindow().getHeight();
     }
 
+    /**
+     * @param world the world to render
+     * @param renderer renderer
+     */
     public void render(GameWorld world, Renderer renderer) {
         renderer.pushState();
         applyTransform(renderer);
@@ -82,6 +112,10 @@ public class Camera {
         renderPlayerNameTag(world, renderer);
     }
 
+    /**
+     * @param world the world to draw player tags
+     * @param renderer renderer
+     */
     public void renderPlayerNameTag(GameWorld world, Renderer renderer) {
         renderer.pushState();
 
@@ -116,10 +150,19 @@ public class Camera {
         renderer.popState();
     }
 
+    /**
+     * @param magnitude the magnitude of the shake
+     * @param direction the direction of the shake
+     * @param speed the speed of the shake
+     * @param gunShake the shape of the shake curve (exponent)
+     */
     public void addShake(double magnitude, double direction, double speed, boolean gunShake) {
         shakes.add(new Shake(magnitude, direction, speed, gunShake));
     }
 
+    /**
+     * @param renderer the renderer to apply transform
+     */
     public void applyTransform(Renderer renderer) {
         Vector2 shakeOffset = new Vector2();
         ArrayList<Shake> removed = new ArrayList<>();
@@ -142,6 +185,9 @@ public class Camera {
         renderer.translate(-pos.x, -pos.y);
     }
 
+    /**
+     * @return mouse's position in world coordinate
+     */
     public Vector2 getWorldMousePos() {
         Vector2 mouse = getWindow().getMousePos();
         return new Vector2(

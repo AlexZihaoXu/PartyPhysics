@@ -1,5 +1,8 @@
 package site.alex_xu.dev.game.party_physics.game.content;
 
+/**
+ * A class that stores settings of the games
+ */
 public class GameSettings {
     private static GameSettings INSTANCE = null;
 

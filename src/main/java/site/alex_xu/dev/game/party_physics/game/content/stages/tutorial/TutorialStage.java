@@ -13,6 +13,9 @@ import site.alex_xu.dev.game.party_physics.game.graphics.Renderer;
 
 import java.awt.*;
 
+/**
+ * Tutorial stage (unfinished)
+ */
 public class TutorialStage extends Stage {
     GameWorld world = new GameWorld();
     Camera camera = new Camera();
@@ -36,6 +39,8 @@ public class TutorialStage extends Stage {
         world.addPlayer(player);
 
         controller = new LocalPlayerController(player);
+
+        // TODO: finish tutorial
     }
 
 
